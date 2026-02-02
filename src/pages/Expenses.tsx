@@ -60,11 +60,11 @@ export default function Expenses() {
     getExpensesForPeriod,
     getBillingPeriodForDate,
     isFixedExpenseWithTemplate,
+    selectedPeriodId,
+    setSelectedPeriodId,
   } = useFinance();
 
-  const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(
-    data.billingPeriods[0]?.id || null
-  );
+  // Local state removed, using context instead
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -117,7 +117,7 @@ export default function Expenses() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.description || !formData.amount || !formData.categoryId) {
       return;
     }
@@ -176,7 +176,7 @@ export default function Expenses() {
 
   const handleUpdateExpense = (e: React.FormEvent, scope: 'current' | 'future' = 'current') => {
     e.preventDefault();
-    
+
     if (!editingExpense || !editFormData.description || !editFormData.amount || !editFormData.categoryId) {
       return;
     }
@@ -230,14 +230,14 @@ export default function Expenses() {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     if (over && active.id !== over.id) {
       const oldIndex = sortedExpenses.findIndex(e => e.id === active.id);
       const newIndex = sortedExpenses.findIndex(e => e.id === over.id);
-      
+
       const reorderedExpenses = arrayMove(sortedExpenses, oldIndex, newIndex);
       const orderedIds = reorderedExpenses.map(e => e.id);
-      
+
       await updateExpensesOrder(orderedIds);
     }
   };
@@ -407,7 +407,7 @@ export default function Expenses() {
                           const category = getCategoryById(expense.categoryId);
                           const subcategory = getSubcategoryById(expense.categoryId, expense.subcategoryId);
                           const isRecurring = isFixedExpenseWithTemplate(expense);
-                          
+
                           return (
                             <DraggableExpenseRow
                               key={expense.id}
@@ -542,7 +542,7 @@ export default function Expenses() {
         actionType={fixedActionDialog.actionType}
         onCurrentOnly={() => {
           if (!fixedActionDialog.expense) return;
-          
+
           if (fixedActionDialog.actionType === 'edit') {
             setEditScope('current');
             openEditDialog(fixedActionDialog.expense);
@@ -552,7 +552,7 @@ export default function Expenses() {
         }}
         onCurrentAndFuture={() => {
           if (!fixedActionDialog.expense) return;
-          
+
           if (fixedActionDialog.actionType === 'edit') {
             setEditScope('future');
             openEditDialog(fixedActionDialog.expense);

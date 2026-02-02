@@ -8,6 +8,8 @@ import { toast } from 'sonner';
 interface FinanceContextType {
   data: FinanceData;
   loading: boolean;
+  selectedPeriodId: string | null;
+  setSelectedPeriodId: (id: string | null) => void;
   // Categories
   addCategory: (category: Omit<Category, 'id' | 'subcategories'>) => Promise<void>;
   updateCategory: (id: string, category: Partial<Category>) => Promise<void>;
@@ -55,6 +57,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [data, setData] = useState<FinanceData>(defaultData);
   const [loading, setLoading] = useState(true);
+  const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
   const initializationAttempted = useRef(false);
 
   const fetchData = useCallback(async () => {
@@ -294,6 +297,24 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [user, loading, initializeCategoriesIfNeeded]);
 
+  // Auto-select current period
+  useEffect(() => {
+    // Only auto-select if we have periods and nothing is currently selected
+    // OR if the currently selected period ID doesn't exist in the data anymore (e.g. it was deleted)
+    const currentSelectionExists = selectedPeriodId && data.billingPeriods.some(p => p.id === selectedPeriodId);
+
+    if (data.billingPeriods.length > 0 && !currentSelectionExists) {
+      const now = new Date();
+      const currentPeriod = data.billingPeriods.find(p => {
+        const start = new Date(p.startDate);
+        const end = new Date(p.endDate);
+        return now >= start && now < end;
+      });
+
+      setSelectedPeriodId(currentPeriod ? currentPeriod.id : data.billingPeriods[0].id);
+    }
+  }, [data.billingPeriods, selectedPeriodId]);
+
   // Categories
   const addCategory = async (category: Omit<Category, 'id' | 'subcategories'>) => {
     if (!user) return;
@@ -372,7 +393,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   // Seed default categories - now just a wrapper that calls the internal function
   const seedDefaultCategories = async () => {
     if (!user) return;
-    
+
     const { count, error: countError } = await supabase
       .from('categories')
       .select('id', { count: 'exact', head: true })
@@ -546,8 +567,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         for (const period of futurePeriods) {
           const expenseInPeriod = data.expenses.find(
             e => e.fixedTemplateId === currentExpense.fixedTemplateId &&
-                 new Date(e.purchaseDate) >= new Date(period.startDate) &&
-                 new Date(e.purchaseDate) < new Date(period.endDate)
+              new Date(e.purchaseDate) >= new Date(period.startDate) &&
+              new Date(e.purchaseDate) < new Date(period.endDate)
           );
 
           if (expenseInPeriod) {
@@ -632,8 +653,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           for (const period of futurePeriods) {
             const expenseInPeriod = data.expenses.find(
               e => e.fixedTemplateId === currentExpense.fixedTemplateId &&
-                   new Date(e.purchaseDate) >= new Date(period.startDate) &&
-                   new Date(e.purchaseDate) < new Date(period.endDate)
+                new Date(e.purchaseDate) >= new Date(period.startDate) &&
+                new Date(e.purchaseDate) < new Date(period.endDate)
             );
 
             if (expenseInPeriod) {
@@ -822,7 +843,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const getExpensesForPeriod = (periodId: string) => {
     const period = data.billingPeriods.find(p => p.id === periodId);
     if (!period) return [];
-    
+
     return data.expenses.filter(expense => {
       const purchaseDate = new Date(expense.purchaseDate);
       const startDate = new Date(period.startDate);
@@ -865,7 +886,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     // Update each expense with its new display_order
-    const updates = orderedIds.map((id, index) => 
+    const updates = orderedIds.map((id, index) =>
       supabase
         .from('expenses')
         .update({ display_order: index })
@@ -874,7 +895,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     );
 
     await Promise.all(updates);
-    
+
     // Update local state optimistically
     setData(prev => ({
       ...prev,
@@ -889,6 +910,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     <FinanceContext.Provider value={{
       data,
       loading,
+      selectedPeriodId,
+      setSelectedPeriodId,
       addCategory,
       updateCategory,
       deleteCategory,

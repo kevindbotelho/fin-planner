@@ -7,10 +7,8 @@ import { BillingPeriodSelector } from '@/components/dashboard/BillingPeriodSelec
 import { ExpenseHierarchyTable } from '@/components/dashboard/ExpenseHierarchyTable';
 
 export default function Dashboard() {
-  const { data, getExpensesForPeriod, getIncomeForPeriod } = useFinance();
-  const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(
-    data.billingPeriods[0]?.id || null
-  );
+  const { data, getExpensesForPeriod, getIncomeForPeriod, selectedPeriodId, setSelectedPeriodId } = useFinance();
+  // Local state removed, using context instead
 
   const selectedPeriod = data.billingPeriods.find(p => p.id === selectedPeriodId);
   const periodExpenses = selectedPeriodId ? getExpensesForPeriod(selectedPeriodId) : [];
