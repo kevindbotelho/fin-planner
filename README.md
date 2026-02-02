@@ -1,73 +1,40 @@
-# Welcome to your Lovable project
+# Fin Planner
 
-## Project info
+> **Nota:** Este é um projeto *Open Source* desenvolvido com fins educacionais e para resolver uma necessidade pessoal de organização financeira.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 📖 A História do Projeto
 
-## How can I edit this code?
+O **Fin Planner** nasceu de uma dor real: a necessidade de ter clareza e controle sobre as finanças pessoais de forma simples e eficiente. O que começou como uma ideia rápida, tornou-se um laboratório vivo para experimentação técnica e engenharia de software moderna.
 
-There are several ways of editing your application.
+### 🚀 A Evolução
 
-**Use Lovable**
+Este projeto tem uma trajetória técnica interessante que reflete a busca por autonomia e aprendizado:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+1.  **O Início (Prototipação Rápida):** A primeira versão foi gerada utilizando a plataforma *Lovable*. Isso permitiu validar a ideia e ter uma interface visual funcional em tempo recorde.
+2.  **A Decisão de Migrar:** Para ter controle total sobre a infraestrutura e o código, decidi "ejetar" o projeto da plataforma <i>low-code</i>.
+3.  **A Nova Infraestrutura:**
+    *   Migrei o banco de dados e a autenticação da cloud proprietária para o **Supabase** (PostgreSQL).
+    *   Assumi o hosting e deployment utilizando a **Vercel**, garantindo CI/CD contínuo.
+4.  **Desenvolvimento Moderno:** Atualmente, o código é mantido e evoluído utilizando **Google Antigravity** como parceiro de *pair programming* via IA, permitindo implementações rápidas e robustas.
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🛠️ Filosofia de Desenvolvimento
 
-**Use your preferred IDE**
+Este software segue a filosofia de *"dogfooding"*. Eu sou o principal usuário. O projeto não está "pronto"; ele evolui organicamente à medida que eu o utilizo no dia a dia. Novas funcionalidades são implementadas quando sinto falta delas, e bugs são corrigidos assim que atrapalham minha própria gestão financeira.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 💻 Stack Tecnológica
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+O projeto utiliza uma stack moderna, focada em performance, tipagem estática e experiência de desenvolvimento:
 
-Follow these steps:
+*   **Frontend:** React, Vite, TypeScript
+*   **Estilização:** Tailwind CSS, shadcn/ui
+*   **Backend & Auth:** Supabase
+*   **AI Assistant:** Google Antigravity
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🎯 Objetivo
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Além de resolver minha organização financeira, o objetivo deste repositório é servir como portfólio e demonstração de capacidade técnica em:
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+*   Arquitetura de software escalável.
+*   Integração de serviços modernos (BaaS).
+*   Refatoração e migração de sistemas legados/gerados.
+*   Colaboração Humano-IA no desenvolvimento de software.
