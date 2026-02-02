@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
 
 interface ExpenseHierarchyTableProps {
   expenses: Expense[];
@@ -31,6 +32,7 @@ interface HierarchyData {
       subcategoryId: string;
       subcategoryName: string;
       total: number;
+      expenses: Expense[];
     }[];
   }[];
 }
@@ -38,12 +40,17 @@ interface HierarchyData {
 export function ExpenseHierarchyTable({ expenses, categories, totalIncome }: ExpenseHierarchyTableProps) {
   const [expandedTypes, setExpandedTypes] = useState<string[]>(['fixed', 'variable']);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [expandedSubcategories, setExpandedSubcategories] = useState<string[]>([]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    return format(new Date(dateString), 'dd/MM');
   };
 
   const hierarchyData = useMemo(() => {
@@ -79,10 +86,12 @@ export function ExpenseHierarchyTable({ expenses, categories, totalIncome }: Exp
           subcategoryId: expense.subcategoryId,
           subcategoryName: subcategory?.name || 'Sem subcategoria',
           total: 0,
+          expenses: [],
         };
         categoryData.subcategories.push(subcategoryData);
       }
       subcategoryData.total += expense.amount;
+      subcategoryData.expenses.push(expense);
     });
 
     // Sort by total descending
@@ -90,6 +99,10 @@ export function ExpenseHierarchyTable({ expenses, categories, totalIncome }: Exp
       type.categories.sort((a, b) => b.total - a.total);
       type.categories.forEach(cat => {
         cat.subcategories.sort((a, b) => b.total - a.total);
+        // Sort expenses by date descending
+        cat.subcategories.forEach(sub => {
+          sub.expenses.sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
+        });
       });
     });
 
@@ -105,6 +118,12 @@ export function ExpenseHierarchyTable({ expenses, categories, totalIncome }: Exp
   const toggleCategory = (categoryKey: string) => {
     setExpandedCategories(prev =>
       prev.includes(categoryKey) ? prev.filter(c => c !== categoryKey) : [...prev, categoryKey]
+    );
+  };
+
+  const toggleSubcategory = (subcategoryKey: string) => {
+    setExpandedSubcategories(prev =>
+      prev.includes(subcategoryKey) ? prev.filter(s => s !== subcategoryKey) : [...prev, subcategoryKey]
     );
   };
 
@@ -192,24 +211,59 @@ export function ExpenseHierarchyTable({ expenses, categories, totalIncome }: Exp
 
                         {/* Subcategory Rows (Level 3) */}
                         {expandedCategories.includes(categoryKey) &&
-                          categoryData.subcategories.map(subcategoryData => (
-                            <TableRow
-                              key={`${categoryKey}-${subcategoryData.subcategoryId}`}
-                              className="bg-muted/20"
-                            >
-                              <TableCell>
-                                <div className="pl-14 text-sm text-muted-foreground">
-                                  {subcategoryData.subcategoryName}
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right text-sm text-expense">
-                                {formatCurrency(subcategoryData.total)}
-                              </TableCell>
-                              <TableCell className="text-right text-sm text-muted-foreground">
-                                {totalExpenses > 0 ? ((subcategoryData.total / totalExpenses) * 100).toFixed(1) : 0}%
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                          categoryData.subcategories.map(subcategoryData => {
+                            const subcategoryKey = `${categoryKey}-${subcategoryData.subcategoryId}`;
+                            return (
+                              <>
+                                <TableRow
+                                  key={subcategoryKey}
+                                  className="cursor-pointer hover:bg-muted/20"
+                                  onClick={() => toggleSubcategory(subcategoryKey)}
+                                >
+                                  <TableCell>
+                                    <div className="flex items-center gap-2 pl-14">
+                                      {expandedSubcategories.includes(subcategoryKey) ? (
+                                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                      ) : (
+                                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                      )}
+                                      <span className="text-sm text-muted-foreground">
+                                        {subcategoryData.subcategoryName}
+                                      </span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-right text-sm text-expense">
+                                    {formatCurrency(subcategoryData.total)}
+                                  </TableCell>
+                                  <TableCell className="text-right text-sm text-muted-foreground">
+                                    {totalExpenses > 0 ? ((subcategoryData.total / totalExpenses) * 100).toFixed(1) : 0}%
+                                  </TableCell>
+                                </TableRow>
+
+                                {/* Expenses Rows (Level 4) */}
+                                {expandedSubcategories.includes(subcategoryKey) &&
+                                  subcategoryData.expenses.map(expense => (
+                                    <TableRow
+                                      key={expense.id}
+                                      className="hover:bg-muted/10"
+                                    >
+                                      <TableCell>
+                                        <div className="pl-[4.5rem] flex flex-col">
+                                          <span className="text-xs font-medium text-foreground/80">{expense.description}</span>
+                                          <span className="text-[10px] text-muted-foreground">{formatDate(expense.purchaseDate)}</span>
+                                        </div>
+                                      </TableCell>
+                                      <TableCell className="text-right text-xs text-expense">
+                                        {formatCurrency(expense.amount)}
+                                      </TableCell>
+                                      <TableCell className="text-right text-xs text-muted-foreground">
+                                        -
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                              </>
+                            );
+                          })}
                       </>
                     );
                   })}
