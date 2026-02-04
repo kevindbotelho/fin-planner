@@ -68,7 +68,10 @@ export default function Dashboard() {
           />
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <IncomeExpenseChart data={chartData} />
+            <div className="space-y-6">
+              <IncomeExpenseChart data={chartData} />
+              <FinancialGoalsWidget />
+            </div>
             <CategoryDonutChart
               expenses={periodExpenses}
               categories={data.categories}

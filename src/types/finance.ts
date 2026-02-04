@@ -65,4 +65,19 @@ export interface FinanceData {
   monthlyIncomes: MonthlyIncome[];
   fixedTemplates: FixedExpenseTemplate[];
   fixedExclusions: FixedExpenseExclusion[];
+  goals: CategoryGoal[];
+  goalOverrides: CategoryGoalOverride[];
+}
+
+export interface CategoryGoal {
+  id: string;
+  categoryId: string;
+  amount: number;
+}
+
+export interface CategoryGoalOverride {
+  id: string;
+  categoryId: string;
+  billingPeriodId: string;
+  amount: number;
 }

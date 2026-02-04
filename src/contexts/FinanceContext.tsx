@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { addDays, addMonths, format, lastDayOfMonth, parseISO } from 'date-fns';
-import { Category, Subcategory, Expense, BillingPeriod, MonthlyIncome, FinanceData, ExpenseType, FixedExpenseTemplate, FixedExpenseExclusion } from '@/types/finance';
+import { Category, Subcategory, Expense, BillingPeriod, MonthlyIncome, FinanceData, ExpenseType, FixedExpenseTemplate, FixedExpenseExclusion, CategoryGoal, CategoryGoalOverride } from '@/types/finance';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -30,6 +30,10 @@ interface FinanceContextType {
   deleteBillingPeriod: (id: string) => Promise<void>;
   // Monthly Income
   setMonthlyIncome: (billingPeriodId: string, salary: number, extra: number) => Promise<void>;
+  // Goals
+  setCategoryGoal: (categoryId: string, amount: number) => Promise<void>;
+  setCategoryGoalOverride: (categoryId: string, billingPeriodId: string, amount: number) => Promise<void>;
+  getGoalForCategory: (categoryId: string, billingPeriodId: string) => number;
   // Helpers
   getExpensesForPeriod: (periodId: string) => Expense[];
   getIncomeForPeriod: (periodId: string) => MonthlyIncome | undefined;
@@ -49,6 +53,8 @@ const defaultData: FinanceData = {
   monthlyIncomes: [],
   fixedTemplates: [],
   fixedExclusions: [],
+  goals: [],
+  goalOverrides: [],
 };
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
@@ -79,6 +85,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         incomesRes,
         templatesRes,
         exclusionsRes,
+        goalsRes,
+        overridesRes,
       ] = await Promise.all([
         supabase.from('categories').select('*').order('name'),
         supabase.from('subcategories').select('*').order('name'),
@@ -87,6 +95,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         supabase.from('monthly_incomes').select('*'),
         supabase.from('fixed_expense_templates').select('*').order('created_at', { ascending: false }),
         supabase.from('fixed_expense_exclusions').select('*'),
+        supabase.from('category_goals').select('*'),
+        supabase.from('category_goal_overrides').select('*'),
       ]);
 
       if (categoriesRes.error) throw categoriesRes.error;
@@ -96,6 +106,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       if (incomesRes.error) throw incomesRes.error;
       if (templatesRes.error) throw templatesRes.error;
       if (exclusionsRes.error) throw exclusionsRes.error;
+      if (goalsRes.error) throw goalsRes.error;
+      if (overridesRes.error) throw overridesRes.error;
 
       // Map subcategories to categories
       const categories: Category[] = (categoriesRes.data || []).map(cat => ({
@@ -156,6 +168,19 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         billingPeriodId: e.billing_period_id,
       }));
 
+      const goals: CategoryGoal[] = (goalsRes.data || []).map(g => ({
+        id: g.id,
+        categoryId: g.category_id,
+        amount: Number(g.amount),
+      }));
+
+      const goalOverrides: CategoryGoalOverride[] = (overridesRes.data || []).map(o => ({
+        id: o.id,
+        categoryId: o.category_id,
+        billingPeriodId: o.billing_period_id,
+        amount: Number(o.amount),
+      }));
+
       setData({
         categories,
         expenses,
@@ -163,6 +188,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         monthlyIncomes,
         fixedTemplates,
         fixedExclusions,
+        goals,
+        goalOverrides,
       });
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -906,6 +933,62 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  // Goals
+  const setCategoryGoal = async (categoryId: string, amount: number) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('category_goals')
+      .upsert({
+        user_id: user.id,
+        category_id: categoryId,
+        amount,
+      }, { onConflict: 'user_id, category_id' });
+
+    if (error) {
+      toast.error('Erro ao salvar meta');
+      throw error;
+    }
+
+    await fetchData();
+    toast.success('Meta padrão atualizada');
+  };
+
+  const setCategoryGoalOverride = async (categoryId: string, billingPeriodId: string, amount: number) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('category_goal_overrides')
+      .upsert({
+        user_id: user.id,
+        category_id: categoryId,
+        billing_period_id: billingPeriodId,
+        amount,
+      }, { onConflict: 'user_id, category_id, billing_period_id' });
+
+    if (error) {
+      toast.error('Erro ao salvar meta do mês');
+      throw error;
+    }
+
+    await fetchData();
+    toast.success('Meta do mês atualizada');
+  };
+
+  const getGoalForCategory = (categoryId: string, billingPeriodId: string): number => {
+    // 1. Try to find an override for this specific period
+    const override = data.goalOverrides.find(
+      o => o.categoryId === categoryId && o.billingPeriodId === billingPeriodId
+    );
+    if (override) return override.amount;
+
+    // 2. Fallback to default goal
+    const defaultGoal = data.goals.find(g => g.categoryId === categoryId);
+    if (defaultGoal) return defaultGoal.amount;
+
+    return 0;
+  };
+
   return (
     <FinanceContext.Provider value={{
       data,
@@ -935,6 +1018,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       getBillingPeriodById,
       refreshData: fetchData,
       isFixedExpenseWithTemplate,
+      setCategoryGoal,
+      setCategoryGoalOverride,
+      getGoalForCategory,
     }}>
       {children}
     </FinanceContext.Provider>
