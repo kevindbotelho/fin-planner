@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Plus, Filter, X } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -86,6 +88,12 @@ export default function Expenses() {
     subcategoryId: '',
     type: 'variable' as ExpenseType,
   });
+
+  // Filters
+  const [filterDate, setFilterDate] = useState('');
+  const [filterType, setFilterType] = useState<ExpenseType | 'all'>('all');
+  const [filterCategoryId, setFilterCategoryId] = useState<string>('all');
+  const [filterSubcategoryId, setFilterSubcategoryId] = useState<string>('all');
 
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [editFormData, setEditFormData] = useState({
@@ -228,6 +236,58 @@ export default function Expenses() {
     });
   }, [periodExpenses]);
 
+  // Filter expenses
+  const filteredExpenses = useMemo(() => {
+    return sortedExpenses.filter(expense => {
+      // Date filter
+      if (filterDate && expense.purchaseDate !== filterDate) return false;
+
+      // Type filter
+      if (filterType !== 'all' && expense.type !== filterType) return false;
+
+      // Category filter
+      if (filterCategoryId !== 'all' && expense.categoryId !== filterCategoryId) return false;
+
+      // Subcategory filter
+      if (filterSubcategoryId !== 'all' && expense.subcategoryId !== filterSubcategoryId) return false;
+
+      return true;
+    });
+  }, [sortedExpenses, filterDate, filterType, filterCategoryId, filterSubcategoryId]);
+
+  // Computed available subcategories for the filter
+  const availableSubcategories = useMemo(() => {
+    if (filterCategoryId === 'all') return [];
+
+    const category = data.categories.find(c => c.id === filterCategoryId);
+    if (!category) return [];
+
+    // Get IDs of subcategories that are actually used in the current list (sortedExpenses)
+    // We look at the Period expenses to see what is launched
+    const usedSubcategoryIds = new Set(
+      sortedExpenses
+        .filter(e => e.categoryId === filterCategoryId && e.subcategoryId)
+        .map(e => e.subcategoryId)
+    );
+
+    return category.subcategories.filter(sub => usedSubcategoryIds.has(sub.id));
+  }, [sortedExpenses, filterCategoryId, data.categories]);
+
+  // Reset subcategory filter when category changes
+  const handleCategoryFilterChange = (value: string) => {
+    setFilterCategoryId(value);
+    setFilterSubcategoryId('all');
+  };
+
+  const clearFilters = () => {
+    setFilterDate('');
+    setFilterType('all');
+    setFilterCategoryId('all');
+    setFilterSubcategoryId('all');
+  };
+
+  const hasActiveFilters = filterDate || filterType !== 'all' || filterCategoryId !== 'all' || filterSubcategoryId !== 'all';
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -242,7 +302,8 @@ export default function Expenses() {
     }
   };
 
-  const totalExpenses = periodExpenses.reduce((acc, exp) => acc + exp.amount, 0);
+  const displayedExpenses = filteredExpenses;
+  const totalExpenses = displayedExpenses.reduce((acc, exp) => acc + exp.amount, 0);
 
   // Store the current scope for fixed expense edit
   const [editScope, setEditScope] = useState<'current' | 'future'>('current');
@@ -367,17 +428,111 @@ export default function Expenses() {
         </Card>
 
         <Card className="border-0 shadow-sm lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">Despesas do Período</CardTitle>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Total</p>
-              <p className="text-xl font-bold text-expense">{formatCurrency(totalExpenses)}</p>
+          <CardHeader>
+            <div className="flex flex-row items-center justify-between mb-4">
+              <CardTitle className="text-lg">Despesas do Período</CardTitle>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">{hasActiveFilters ? 'Total Filtrado' : 'Total'}</p>
+                <p className="text-xl font-bold text-expense">{formatCurrency(totalExpenses)}</p>
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 p-4 bg-muted/30 rounded-lg border border-border/50">
+              <div className="space-y-1">
+                <Label htmlFor="filter-date" className="text-xs">Data</Label>
+                <Input
+                  id="filter-date"
+                  type="date"
+                  className="h-8 text-sm"
+                  value={filterDate}
+                  onChange={(e) => setFilterDate(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="filter-type" className="text-xs">Tipo</Label>
+                <Select
+                  value={filterType}
+                  onValueChange={(value: ExpenseType | 'all') => setFilterType(value)}
+                >
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="fixed">Fixa</SelectItem>
+                    <SelectItem value="variable">Variável</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="filter-category" className="text-xs">Categoria</Label>
+                <Select
+                  value={filterCategoryId}
+                  onValueChange={handleCategoryFilterChange}
+                >
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {data.categories.map(category => (
+                      <SelectItem key={category.id} value={category.id}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: category.color }}
+                          />
+                          {category.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="filter-subcategory" className="text-xs">Subcategoria</Label>
+                <Select
+                  value={filterSubcategoryId}
+                  onValueChange={setFilterSubcategoryId}
+                  disabled={filterCategoryId === 'all'}
+                >
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {availableSubcategories.map(sub => (
+                      <SelectItem key={sub.id} value={sub.id}>
+                        {sub.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {hasActiveFilters && (
+                <div className="sm:col-span-2 lg:col-span-4 flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="h-8 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="mr-2 h-3 w-3" />
+                    Limpar Filtros
+                  </Button>
+                </div>
+              )}
             </div>
           </CardHeader>
           <CardContent>
-            {sortedExpenses.length === 0 ? (
+            {displayedExpenses.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground">
-                Nenhuma despesa registrada neste período
+                {hasActiveFilters ? 'Nenhuma despesa encontrada com os filtros selecionados' : 'Nenhuma despesa registrada neste período'}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -400,10 +555,10 @@ export default function Expenses() {
                     </TableHeader>
                     <TableBody>
                       <SortableContext
-                        items={sortedExpenses.map(e => e.id)}
+                        items={displayedExpenses.map(e => e.id)}
                         strategy={verticalListSortingStrategy}
                       >
-                        {sortedExpenses.map(expense => {
+                        {displayedExpenses.map(expense => {
                           const category = getCategoryById(expense.categoryId);
                           const subcategory = getSubcategoryById(expense.categoryId, expense.subcategoryId);
                           const isRecurring = isFixedExpenseWithTemplate(expense);
