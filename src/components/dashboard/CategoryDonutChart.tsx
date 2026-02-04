@@ -21,6 +21,7 @@ interface CategoryTotal {
 
 export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartProps) {
   const [selectedCategory, setSelectedCategory] = useState<CategoryTotal | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<{ id: string; name: string } | null>(null);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -35,7 +36,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     .map(category => {
       const categoryExpenses = expenses.filter(e => e.categoryId === category.id);
       const total = categoryExpenses.reduce((acc, exp) => acc + exp.amount, 0);
-      
+
       const subcategoryTotals = category.subcategories.map(sub => {
         const subExpenses = categoryExpenses.filter(e => e.subcategoryId === sub.id);
         const subTotal = subExpenses.reduce((acc, exp) => acc + exp.amount, 0);
@@ -59,17 +60,45 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     .filter(c => c.value > 0)
     .sort((a, b) => b.value - a.value);
 
-  const chartData = selectedCategory 
-    ? selectedCategory.subcategories?.map((sub, index) => ({
+  // Calculate Subcategory Expenses (Level 3)
+  const subcategoryExpensesData = selectedCategory && selectedSubcategory
+    ? expenses
+      .filter(e => e.categoryId === selectedCategory.id && e.subcategoryId === selectedSubcategory.id)
+      .map((exp, index) => ({
+        name: exp.description,
+        value: exp.amount,
+        color: `hsl(${(index * 30) + 200}, 70%, 50%)`, // Different sub-palette
+        percentage: (exp.amount / (categoryTotals.find(c => c.id === selectedCategory.id)?.subcategories?.find(s => s.id === selectedSubcategory.id)?.value || 1)) * 100,
+      }))
+      .sort((a, b) => b.value - a.value)
+    : [];
+
+  // Determine current chart data based on hierarchy level
+  const chartData = selectedSubcategory
+    ? subcategoryExpensesData
+    : selectedCategory
+      ? selectedCategory.subcategories?.map((sub, index) => ({
         name: sub.name,
         value: sub.value,
         color: `hsl(${(index * 45) + 120}, 70%, 50%)`,
         percentage: sub.percentage,
       })) || []
-    : categoryTotals;
+      : categoryTotals;
 
   const handlePieClick = (data: any) => {
-    if (!selectedCategory) {
+    if (selectedSubcategory) {
+      // Currently displaying expenses, do nothing on click (or could show details)
+      return;
+    }
+
+    if (selectedCategory) {
+      // Currently displaying Subcategories, click drills down to Expenses
+      const subcategory = selectedCategory.subcategories?.find(s => s.name === data.name);
+      if (subcategory) {
+        setSelectedSubcategory({ id: subcategory.id, name: subcategory.name });
+      }
+    } else {
+      // Currently displaying Categories, click drills down to Subcategories
       const category = categoryTotals.find(c => c.name === data.name);
       if (category && category.subcategories && category.subcategories.length > 0) {
         setSelectedCategory(category);
@@ -77,21 +106,44 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     }
   };
 
+  const handleBack = () => {
+    if (selectedSubcategory) {
+      setSelectedSubcategory(null);
+    } else if (selectedCategory) {
+      setSelectedCategory(null);
+    }
+  };
+
+  const currentTitle = selectedSubcategory
+    ? selectedSubcategory.name
+    : selectedCategory
+      ? selectedCategory.name
+      : 'Despesas por Categoria';
+
   return (
     <Card className="border-0 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold">
-          {selectedCategory ? (
+          {(selectedCategory || selectedSubcategory) ? (
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setSelectedCategory(null)}
+                onClick={handleBack}
                 className="h-8 w-8 p-0"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span>{selectedCategory.name}</span>
+              <div className="flex items-center gap-1 text-sm sm:text-lg">
+                <span className="text-muted-foreground hidden sm:inline">{selectedCategory?.name}</span>
+                {selectedSubcategory && (
+                  <>
+                    <span className="text-muted-foreground hidden sm:inline"> {'>'} </span>
+                    <span>{selectedSubcategory.name}</span>
+                  </>
+                )}
+                {!selectedSubcategory && <span>{selectedCategory?.name}</span>}
+              </div>
             </div>
           ) : (
             'Despesas por Categoria'
@@ -112,7 +164,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                   paddingAngle={2}
                   dataKey="value"
                   onClick={handlePieClick}
-                  style={{ cursor: selectedCategory ? 'default' : 'pointer' }}
+                  style={{ cursor: selectedSubcategory ? 'default' : 'pointer' }}
                 >
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -133,25 +185,18 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
           <div className="flex-1 space-y-3">
             {chartData.map((item, index) => (
               <div
-                key={item.name}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                onClick={() => {
-                  if (!selectedCategory) {
-                    const category = categoryTotals.find(c => c.name === item.name);
-                    if (category && category.subcategories && category.subcategories.length > 0) {
-                      setSelectedCategory(category);
-                    }
-                  }
-                }}
+                key={`${item.name}-${index}`}
+                className={`flex items-center justify-between p-2 rounded-lg transition-colors ${!selectedSubcategory ? 'hover:bg-muted/50 cursor-pointer' : ''}`}
+                onClick={() => !selectedSubcategory && handlePieClick(item)}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className="h-3 w-3 rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="text-sm font-medium">{item.name}</span>
+                  <span className="text-sm font-medium line-clamp-1" title={item.name}>{item.name}</span>
                 </div>
-                <div className="text-right">
+                <div className="text-right whitespace-nowrap ml-2">
                   <p className="text-sm font-semibold">{formatCurrency(item.value)}</p>
                   <p className="text-xs text-muted-foreground">
                     {item.percentage.toFixed(1)}%
