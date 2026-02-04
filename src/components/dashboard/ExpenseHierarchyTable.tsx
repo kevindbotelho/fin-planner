@@ -173,13 +173,15 @@ export function ExpenseHierarchyTable({ expenses, categories, totalIncome }: Exp
       });
     });
 
-    // Filter out types based on the selected filter
-    if (filterType !== 'all') {
-      return result.filter(t => t.type === filterType);
+    // Filter out types that have no data after filtering
+    // This handles both explicit Type filter (other type becomes empty)
+    // and Category filter (if category only exists in one type)
+    if (hasActiveFilters) {
+      return result.filter(t => t.categories.length > 0);
     }
 
     return result;
-  }, [filteredExpenses, categories, filterType]);
+  }, [filteredExpenses, categories, hasActiveFilters]);
 
   const toggleType = (type: string) => {
     setExpandedTypes(prev =>
