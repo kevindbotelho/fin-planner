@@ -173,8 +173,13 @@ export function ExpenseHierarchyTable({ expenses, categories, totalIncome }: Exp
       });
     });
 
+    // Filter out types based on the selected filter
+    if (filterType !== 'all') {
+      return result.filter(t => t.type === filterType);
+    }
+
     return result;
-  }, [filteredExpenses, categories]);
+  }, [filteredExpenses, categories, filterType]);
 
   const toggleType = (type: string) => {
     setExpandedTypes(prev =>
