@@ -156,16 +156,16 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="h-[250px] flex-1">
+        <div className="flex flex-col gap-6">
+          <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={chartData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
+                  innerRadius={80}
+                  outerRadius={130}
                   paddingAngle={2}
                   dataKey="value"
                   onClick={handlePieClick}
@@ -187,7 +187,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
             </ResponsiveContainer>
           </div>
 
-          <div className="flex-1 space-y-3">
+          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
             {chartData.map((item: any, index) => (
               <div
                 key={`${item.name}-${index}`}
@@ -196,12 +196,11 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className="h-3 w-3 rounded-full"
+                    className="h-3 w-3 rounded-full shrink-0"
                     style={{ backgroundColor: item.color }}
                   />
-                  <div>
-                    <span className="text-sm font-medium line-clamp-1" title={item.name}>{item.name}</span>
-                    {/* Display Date ONLY if it exists (Level 3 - Expenses) */}
+                  <div className="min-w-0">
+                    <span className="text-sm font-medium line-clamp-1 break-all" title={item.name}>{item.name}</span>
                     {item.date && (
                       <p className="text-[10px] text-muted-foreground">
                         {formatDate(item.date)}
@@ -209,7 +208,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                     )}
                   </div>
                 </div>
-                <div className="text-right whitespace-nowrap ml-2">
+                <div className="text-right whitespace-nowrap ml-2 shrink-0">
                   <p className="text-sm font-semibold">{formatCurrency(item.value)}</p>
                   <p className="text-xs text-muted-foreground">
                     {item.percentage.toFixed(1)}%
