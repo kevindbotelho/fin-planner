@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
+import { Plus, X } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
