@@ -99,14 +99,14 @@ export function FinancialGoalsWidget() {
     const categoryForDialog = data.categories.find(c => c.id === selectedCategory);
 
     return (
-        <Card className="border-0 shadow-sm h-full flex flex-col">
+        <Card className="border-0 shadow-sm flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-lg font-semibold">Metas Financeiras</CardTitle>
                 <Button
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-primary"
-                    onClick={() => navigate('/settings?tab=goals')}
+                    onClick={() => navigate('/configuracoes?tab=goals')}
                 >
                     <Settings className="h-4 w-4" />
                 </Button>
@@ -115,7 +115,7 @@ export function FinancialGoalsWidget() {
                 {categoriesGoals.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
                         <p className="text-sm">Nenhuma meta definida.</p>
-                        <p className="text-xs mt-1 cursor-pointer hover:underline text-primary" onClick={() => navigate('/settings?tab=goals')}>
+                        <p className="text-xs mt-1 cursor-pointer hover:underline text-primary" onClick={() => navigate('/configuracoes?tab=goals')}>
                             Configure suas metas nas configurações.
                         </p>
                     </div>
