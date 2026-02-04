@@ -76,7 +76,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     setLoading(true);
 
     try {
-      // Fetch all data in parallel
+      // 1. Fetch Core Data (Vital for the app to work)
       const [
         categoriesRes,
         subcategoriesRes,
@@ -85,8 +85,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         incomesRes,
         templatesRes,
         exclusionsRes,
-        goalsRes,
-        overridesRes,
       ] = await Promise.all([
         supabase.from('categories').select('*').order('name'),
         supabase.from('subcategories').select('*').order('name'),
@@ -95,8 +93,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         supabase.from('monthly_incomes').select('*'),
         supabase.from('fixed_expense_templates').select('*').order('created_at', { ascending: false }),
         supabase.from('fixed_expense_exclusions').select('*'),
-        supabase.from('category_goals').select('*'),
-        supabase.from('category_goal_overrides').select('*'),
       ]);
 
       if (categoriesRes.error) throw categoriesRes.error;
@@ -106,8 +102,41 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       if (incomesRes.error) throw incomesRes.error;
       if (templatesRes.error) throw templatesRes.error;
       if (exclusionsRes.error) throw exclusionsRes.error;
-      if (goalsRes.error) throw goalsRes.error;
-      if (overridesRes.error) throw overridesRes.error;
+
+      // 2. Try to fetch Goals (New feature - Optional/Safe fail)
+      let goals: CategoryGoal[] = [];
+      let goalOverrides: CategoryGoalOverride[] = [];
+
+      try {
+        const [goalsRes, overridesRes] = await Promise.all([
+          supabase.from('category_goals').select('*'),
+          supabase.from('category_goal_overrides').select('*'),
+        ]);
+
+        if (goalsRes.error) {
+          console.warn('Could not fetch goals (Table might not exist yet):', goalsRes.error.message);
+        } else {
+          goals = (goalsRes.data || []).map(g => ({
+            id: g.id,
+            categoryId: g.category_id,
+            amount: Number(g.amount),
+          }));
+        }
+
+        if (overridesRes.error) {
+          console.warn('Could not fetch goal overrides:', overridesRes.error.message);
+        } else {
+          goalOverrides = (overridesRes.data || []).map(o => ({
+            id: o.id,
+            categoryId: o.category_id,
+            billingPeriodId: o.billing_period_id,
+            amount: Number(o.amount),
+          }));
+        }
+      } catch (goalsError) {
+        console.warn('Error fetching goals (Feature might be disabled):', goalsError);
+        // Do not crash the app, just use empty goals
+      }
 
       // Map subcategories to categories
       const categories: Category[] = (categoriesRes.data || []).map(cat => ({
@@ -166,19 +195,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         id: e.id,
         templateId: e.template_id,
         billingPeriodId: e.billing_period_id,
-      }));
-
-      const goals: CategoryGoal[] = (goalsRes.data || []).map(g => ({
-        id: g.id,
-        categoryId: g.category_id,
-        amount: Number(g.amount),
-      }));
-
-      const goalOverrides: CategoryGoalOverride[] = (overridesRes.data || []).map(o => ({
-        id: o.id,
-        categoryId: o.category_id,
-        billingPeriodId: o.billing_period_id,
-        amount: Number(o.amount),
       }));
 
       setData({
