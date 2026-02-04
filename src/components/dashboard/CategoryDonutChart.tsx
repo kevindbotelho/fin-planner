@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Category, Expense } from '@/types/finance';
+import { format } from 'date-fns';
 
 interface CategoryDonutChartProps {
   expenses: Expense[];
@@ -28,6 +29,10 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
       style: 'currency',
       currency: 'BRL',
     }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    return format(new Date(dateString), 'dd/MM/yyyy');
   };
 
   const totalExpenses = expenses.reduce((acc, exp) => acc + exp.amount, 0);
@@ -64,13 +69,19 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
   const subcategoryExpensesData = selectedCategory && selectedSubcategory
     ? expenses
       .filter(e => e.categoryId === selectedCategory.id && e.subcategoryId === selectedSubcategory.id)
+      .sort((a, b) => {
+        // Sort by Date Descending (Newest first)
+        const dateComparison = new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime();
+        if (dateComparison !== 0) return dateComparison;
+        return 0;
+      })
       .map((exp, index) => ({
         name: exp.description,
         value: exp.amount,
-        color: `hsl(${(index * 30) + 200}, 70%, 50%)`, // Different sub-palette
+        date: exp.purchaseDate, // Add date field
+        color: `hsl(${(index * 30) + 200}, 70%, 50%)`,
         percentage: (exp.amount / (categoryTotals.find(c => c.id === selectedCategory.id)?.subcategories?.find(s => s.id === selectedSubcategory.id)?.value || 1)) * 100,
       }))
-      .sort((a, b) => b.value - a.value)
     : [];
 
   // Determine current chart data based on hierarchy level
@@ -87,7 +98,6 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
 
   const handlePieClick = (data: any) => {
     if (selectedSubcategory) {
-      // Currently displaying expenses, do nothing on click (or could show details)
       return;
     }
 
@@ -114,12 +124,6 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     }
   };
 
-  const currentTitle = selectedSubcategory
-    ? selectedSubcategory.name
-    : selectedCategory
-      ? selectedCategory.name
-      : 'Despesas por Categoria';
-
   return (
     <Card className="border-0 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -135,14 +139,15 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <div className="flex items-center gap-1 text-sm sm:text-lg">
-                <span className="text-muted-foreground hidden sm:inline">{selectedCategory?.name}</span>
-                {selectedSubcategory && (
+                {selectedSubcategory ? (
                   <>
+                    <span className="text-muted-foreground hidden sm:inline">{selectedCategory?.name}</span>
                     <span className="text-muted-foreground hidden sm:inline"> {'>'} </span>
                     <span>{selectedSubcategory.name}</span>
                   </>
+                ) : (
+                  <span>{selectedCategory?.name}</span>
                 )}
-                {!selectedSubcategory && <span>{selectedCategory?.name}</span>}
               </div>
             </div>
           ) : (
@@ -183,7 +188,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
           </div>
 
           <div className="flex-1 space-y-3">
-            {chartData.map((item, index) => (
+            {chartData.map((item: any, index) => (
               <div
                 key={`${item.name}-${index}`}
                 className={`flex items-center justify-between p-2 rounded-lg transition-colors ${!selectedSubcategory ? 'hover:bg-muted/50 cursor-pointer' : ''}`}
@@ -194,7 +199,15 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                     className="h-3 w-3 rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="text-sm font-medium line-clamp-1" title={item.name}>{item.name}</span>
+                  <div>
+                    <span className="text-sm font-medium line-clamp-1" title={item.name}>{item.name}</span>
+                    {/* Display Date ONLY if it exists (Level 3 - Expenses) */}
+                    {item.date && (
+                      <p className="text-[10px] text-muted-foreground">
+                        {formatDate(item.date)}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="text-right whitespace-nowrap ml-2">
                   <p className="text-sm font-semibold">{formatCurrency(item.value)}</p>
