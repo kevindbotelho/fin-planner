@@ -5,6 +5,7 @@ import { IncomeExpenseChart } from '@/components/dashboard/IncomeExpenseChart';
 import { CategoryDonutChart } from '@/components/dashboard/CategoryDonutChart';
 import { BillingPeriodSelector } from '@/components/dashboard/BillingPeriodSelector';
 import { ExpenseHierarchyTable } from '@/components/dashboard/ExpenseHierarchyTable';
+import { FinancialGoalsWidget } from '@/components/dashboard/FinancialGoalsWidget';
 
 export default function Dashboard() {
   const { data, getExpensesForPeriod, getIncomeForPeriod, selectedPeriodId, setSelectedPeriodId } = useFinance();
