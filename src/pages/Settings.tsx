@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
-import { Plus, Trash2, ChevronDown, ChevronRight, Pencil, Check, X } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronRight, Pencil, Check, X, Save } from 'lucide-react';
 import { useFinance } from '@/contexts/FinanceContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,6 +54,9 @@ const YEARS = ['2026'];
 const DAYS = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
 
 export default function Settings() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentTab = searchParams.get('tab') || 'periods';
+
   const {
     data,
     addBillingPeriod,
@@ -67,7 +71,12 @@ export default function Settings() {
     updateSubcategory,
     deleteSubcategory,
     seedDefaultCategories,
+    setCategoryGoal,
   } = useFinance();
+
+  const onTabChange = (value: string) => {
+    setSearchParams({ tab: value });
+  };
 
   // Billing Period Form
   const [periodForm, setPeriodForm] = useState({
@@ -98,6 +107,9 @@ export default function Settings() {
   const [subcategoryForms, setSubcategoryForms] = useState<{ [key: string]: string }>({});
   const [openCategories, setOpenCategories] = useState<string[]>([]);
 
+  // Goals State
+  const [goalForms, setGoalForms] = useState<{ [key: string]: string }>({});
+
   // Edit Category State
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [editCategoryForm, setEditCategoryForm] = useState({ name: '', color: '' });
@@ -115,6 +127,23 @@ export default function Settings() {
     }).format(value);
   };
 
+  // Initialize goal forms
+  useEffect(() => {
+    const goals: { [key: string]: string } = {};
+    data.categories.forEach(cat => {
+      const goal = data.goals.find(g => g.categoryId === cat.id);
+      goals[cat.id] = goal ? goal.amount.toFixed(2) : '';
+    });
+    setGoalForms(goals);
+  }, [data.categories, data.goals]);
+
+  const handleSaveGoal = async (categoryId: string) => {
+    const amountStr = goalForms[categoryId];
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount)) return;
+    await setCategoryGoal(categoryId, amount);
+  };
+
   const getMonthName = (monthValue: string) => {
     return MONTHS.find(m => m.value === monthValue)?.label || monthValue;
   };
@@ -129,10 +158,10 @@ export default function Settings() {
 
     const monthName = getMonthName(periodForm.month);
     const startDate = `${periodForm.year}-${periodForm.startMonth}-${periodForm.startDay.padStart(2, '0')}`;
-    
+
     // Calculate end year (if end month < start month, it's next year)
-    const endYear = parseInt(periodForm.endMonth) < parseInt(periodForm.startMonth) 
-      ? (parseInt(periodForm.year) + 1).toString() 
+    const endYear = parseInt(periodForm.endMonth) < parseInt(periodForm.startMonth)
+      ? (parseInt(periodForm.year) + 1).toString()
       : periodForm.year;
     const endDate = `${endYear}-${periodForm.endMonth}-${periodForm.endDay.padStart(2, '0')}`;
 
@@ -162,10 +191,10 @@ export default function Settings() {
   const handleSaveEditPeriod = (periodId: string) => {
     const monthName = getMonthName(editPeriodForm.month);
     const startDate = `${editPeriodForm.year}-${editPeriodForm.startMonth}-${editPeriodForm.startDay.padStart(2, '0')}`;
-    
+
     // Calculate end year (if end month < start month, it's next year)
-    const endYear = parseInt(editPeriodForm.endMonth) < parseInt(editPeriodForm.startMonth) 
-      ? (parseInt(editPeriodForm.year) + 1).toString() 
+    const endYear = parseInt(editPeriodForm.endMonth) < parseInt(editPeriodForm.startMonth)
+      ? (parseInt(editPeriodForm.year) + 1).toString()
       : editPeriodForm.year;
     const endDate = `${endYear}-${editPeriodForm.endMonth}-${editPeriodForm.endDay.padStart(2, '0')}`;
 
@@ -251,11 +280,12 @@ export default function Settings() {
         <p className="text-muted-foreground">Gerencie períodos de fatura, receitas e categorias</p>
       </div>
 
-      <Tabs defaultValue="periods" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
+      <Tabs value={currentTab} onValueChange={onTabChange} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 lg:w-[500px]">
           <TabsTrigger value="periods">Períodos</TabsTrigger>
           <TabsTrigger value="income">Receitas</TabsTrigger>
           <TabsTrigger value="categories">Categorias</TabsTrigger>
+          <TabsTrigger value="goals">Metas</TabsTrigger>
         </TabsList>
 
         {/* Períodos de Fatura */}
@@ -569,7 +599,7 @@ export default function Settings() {
                   {sortedPeriods.map(period => {
                     const formValues = getIncomeFormValues(period.id);
                     const savedIncome = getIncomeForPeriod(period.id);
-                    
+
                     return (
                       <div key={period.id} className="rounded-lg border p-4">
                         <div className="mb-4">
@@ -847,6 +877,46 @@ export default function Settings() {
                     </div>
                   </Collapsible>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Metas */}
+        <TabsContent value="goals" className="space-y-6">
+          <Card className="border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg">Metas por Categoria</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Defina o valor máximo que deseja gastar mensalmente por categoria.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {data.categories.map(category => (
+                  <div key={category.id} className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-4 w-4 rounded-full" style={{ backgroundColor: category.color }} />
+                      <span className="font-medium">{category.name}</span>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <div className="w-40">
+                        <CurrencyInput
+                          value={goalForms[category.id]}
+                          onChange={(val) => setGoalForms(prev => ({ ...prev, [category.id]: val }))}
+                          placeholder="0,00"
+                        />
+                      </div>
+                      <Button size="sm" onClick={() => handleSaveGoal(category.id)}>
+                        <Save className="h-4 w-4 mr-2" />
+                        Salvar
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {data.categories.length === 0 && (
+                  <p className="text-center text-muted-foreground">Nenhuma categoria cadastrada</p>
+                )}
               </div>
             </CardContent>
           </Card>

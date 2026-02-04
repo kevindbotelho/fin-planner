@@ -1,8 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useFinance } from '@/contexts/FinanceContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 import {
     Dialog,
     DialogContent,
@@ -19,6 +21,7 @@ import { Settings, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function FinancialGoalsWidget() {
+    const navigate = useNavigate();
     const {
         data,
         selectedPeriodId,
@@ -50,8 +53,8 @@ export function FinancialGoalsWidget() {
         const spent = categoryExpenses.reduce((acc, exp) => acc + exp.amount, 0);
         const goal = getGoalForCategory(category.id, selectedPeriodId);
 
-        // Only show categories that have a goal > 0 OR have spending > 0
-        if (goal === 0 && spent === 0) return null;
+        // Hide categories without a defined goal
+        if (goal === 0) return null;
 
         const percentage = goal > 0 ? (spent / goal) * 100 : 0;
 
@@ -99,22 +102,29 @@ export function FinancialGoalsWidget() {
         <Card className="border-0 shadow-sm h-full flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-lg font-semibold">Metas Financeiras</CardTitle>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                    onClick={() => navigate('/settings?tab=goals')}
+                >
                     <Settings className="h-4 w-4" />
                 </Button>
             </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
+            <CardContent className="flex-1 overflow-y-auto max-h-[250px] pr-2 custom-scrollbar">
                 {categoriesGoals.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
-                        <p className="text-sm">Nenhuma meta definida ou gasto registrado.</p>
-                        <p className="text-xs mt-1">Clique nas configurações para definir metas.</p>
+                        <p className="text-sm">Nenhuma meta definida.</p>
+                        <p className="text-xs mt-1 cursor-pointer hover:underline text-primary" onClick={() => navigate('/settings?tab=goals')}>
+                            Configure suas metas nas configurações.
+                        </p>
                     </div>
                 ) : (
                     <div className="space-y-4">
                         {categoriesGoals.map((item) => (
                             <div
                                 key={item.id}
-                                className="space-y-1 cursor-pointer hover:bg-muted/30 p-2 rounded-lg transition-colors"
+                                className="space-y-1 cursor-pointer hover:bg-muted/30 p-2 rounded-lg transition-colors group"
                                 onClick={() => handleOpenDialog(item.id, item.goal)}
                             >
                                 <div className="flex items-center justify-between text-sm">
@@ -125,9 +135,18 @@ export function FinancialGoalsWidget() {
                                         />
                                         <span className="font-medium">{item.name}</span>
                                     </div>
-                                    <span className="text-muted-foreground">
-                                        {formatCurrency(item.spent)} <span className="text-xs">de</span> {formatCurrency(item.goal)}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-muted-foreground text-xs">
+                                            {formatCurrency(item.spent)} / {formatCurrency(item.goal)}
+                                        </span>
+                                        <span className={cn(
+                                            "text-xs font-bold w-10 text-right",
+                                            item.percentage > 100 ? "text-red-500" :
+                                                item.percentage > 75 ? "text-yellow-600" : "text-green-600"
+                                        )}>
+                                            {item.percentage.toFixed(0)}%
+                                        </span>
+                                    </div>
                                 </div>
                                 <Progress
                                     value={item.percentage > 100 ? 100 : item.percentage}
