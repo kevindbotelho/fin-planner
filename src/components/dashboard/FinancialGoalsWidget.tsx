@@ -156,7 +156,6 @@ export function FinancialGoalsWidget() {
                                 value={goalAmount}
                                 onChange={setGoalAmount}
                                 placeholder="0,00"
-                                autoFocus
                             />
                         </div>
 
