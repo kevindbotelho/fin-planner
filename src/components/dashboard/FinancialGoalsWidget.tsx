@@ -80,7 +80,8 @@ export function FinancialGoalsWidget() {
 
     const handleOpenDialog = (categoryId: string, currentPercentage: number) => {
         setSelectedCategory(categoryId);
-        setGoalAmount(currentPercentage.toString());
+        // If 0, show empty string to display placeholder
+        setGoalAmount(currentPercentage > 0 ? currentPercentage.toString() : '');
         setSaveMode('current'); // Default to current month override
         setDialogOpen(true);
     };

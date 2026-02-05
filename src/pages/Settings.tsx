@@ -129,7 +129,8 @@ export default function Settings() {
     const goals: { [key: string]: string } = {};
     data.categories.forEach(cat => {
       const goal = data.goals.find(g => g.categoryId === cat.id);
-      goals[cat.id] = goal ? goal.amount.toString() : '';
+      // Treat 0 as empty string to show placeholder
+      goals[cat.id] = (goal && goal.amount > 0) ? goal.amount.toString() : '';
     });
     setGoalForms(goals);
   }, [data.categories, data.goals]);
