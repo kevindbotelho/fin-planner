@@ -34,6 +34,7 @@ interface FinanceContextType {
   setCategoryGoal: (categoryId: string, amount: number) => Promise<void>;
   setCategoryGoalOverride: (categoryId: string, billingPeriodId: string, amount: number) => Promise<void>;
   getGoalForCategory: (categoryId: string, billingPeriodId: string) => number;
+  deleteCategoryGoalOverride: (categoryId: string, billingPeriodId: string) => Promise<void>;
   // Helpers
   getExpensesForPeriod: (periodId: string) => Expense[];
   getIncomeForPeriod: (periodId: string) => MonthlyIncome | undefined;
@@ -991,6 +992,24 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     toast.success('Meta do mês atualizada');
   };
 
+  const deleteCategoryGoalOverride = async (categoryId: string, billingPeriodId: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('category_goal_overrides')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('category_id', categoryId)
+      .eq('billing_period_id', billingPeriodId);
+
+    if (error) {
+      toast.error('Erro ao remover meta do mês');
+      throw error;
+    }
+
+    await fetchData();
+  };
+
   const getGoalForCategory = (categoryId: string, billingPeriodId: string): number => {
     // 1. Try to find an override for this specific period
     const override = data.goalOverrides.find(
@@ -1036,6 +1055,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       isFixedExpenseWithTemplate,
       setCategoryGoal,
       setCategoryGoalOverride,
+      deleteCategoryGoalOverride,
       getGoalForCategory,
     }}>
       {children}

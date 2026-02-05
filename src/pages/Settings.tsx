@@ -139,8 +139,8 @@ export default function Settings() {
 
   const handleSaveGoal = async (categoryId: string) => {
     const amountStr = goalForms[categoryId];
-    const amount = parseFloat(amountStr);
-    if (isNaN(amount)) return;
+    // Treat empty string or NaN as 0
+    const amount = amountStr === '' || isNaN(parseFloat(amountStr)) ? 0 : parseFloat(amountStr);
     await setCategoryGoal(categoryId, amount);
   };
 

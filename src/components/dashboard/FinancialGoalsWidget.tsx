@@ -29,6 +29,7 @@ export function FinancialGoalsWidget() {
         getGoalForCategory,
         setCategoryGoal,
         setCategoryGoalOverride,
+        deleteCategoryGoalOverride,
         getIncomeForPeriod
     } = useFinance();
 
@@ -88,13 +89,19 @@ export function FinancialGoalsWidget() {
         if (!selectedCategory || !selectedPeriodId) return;
 
         try {
-            const amount = parseFloat(goalAmount);
-            // Amount here is actually percentage (0-100)
+            // Treat empty string or NaN as 0
+            const amount = goalAmount === '' || isNaN(parseFloat(goalAmount)) ? 0 : parseFloat(goalAmount);
 
             if (saveMode === 'current') {
                 await setCategoryGoalOverride(selectedCategory, selectedPeriodId, amount);
             } else {
-                await setCategoryGoal(selectedCategory, amount);
+                // When setting default (all months), we want this to be the source of truth.
+                // So we update the default AND remove any specific override for this month
+                // that might be masking the new default.
+                await Promise.all([
+                    setCategoryGoal(selectedCategory, amount),
+                    deleteCategoryGoalOverride(selectedCategory, selectedPeriodId)
+                ]);
             }
 
             setDialogOpen(false);
