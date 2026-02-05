@@ -178,7 +178,8 @@ export function FinancialGoalsWidget() {
                                         indicatorClassName={item.statusColor}
                                     />
                                 </div>
-                            ))}
+                            );
+                        })}
                     </div>
                 )}
             </CardContent>
