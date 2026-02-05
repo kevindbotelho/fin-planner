@@ -16,8 +16,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { CurrencyInput } from '@/components/ui/currency-input';
-import { Settings, Check } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Settings, Check, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function FinancialGoalsWidget() {
@@ -134,41 +134,51 @@ export function FinancialGoalsWidget() {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {categoriesGoals.map((item) => (
-                            <div
-                                key={item.id}
-                                className="space-y-1 cursor-pointer hover:bg-muted/30 p-2 rounded-lg transition-colors group"
-                                onClick={() => handleOpenDialog(item.id, item.goalPercentage)}
-                            >
-                                <div className="flex items-center justify-between text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <div
-                                            className="h-3 w-3 rounded-full"
-                                            style={{ backgroundColor: item.color }}
-                                        />
-                                        <span className="font-medium">{item.name}</span>
-                                        <span className="text-xs text-muted-foreground">({item.goalPercentage.toFixed(0)}%)</span>
+                        {categoriesGoals.map((item) => {
+                            const isOverridden = data.goalOverrides.some(
+                                o => o.categoryId === item.id && o.billingPeriodId === selectedPeriodId
+                            );
+
+                            return (
+                                <div
+                                    key={item.id}
+                                    className="space-y-1 cursor-pointer hover:bg-muted/30 p-2 rounded-lg transition-colors group"
+                                    onClick={() => handleOpenDialog(item.id, item.goalPercentage)}
+                                >
+                                    <div className="flex items-center justify-between text-sm">
+                                        <div className="flex items-center gap-2">
+                                            <div
+                                                className="h-3 w-3 rounded-full"
+                                                style={{ backgroundColor: item.color }}
+                                            />
+                                            <span className="font-medium">{item.name}</span>
+                                            {isOverridden && (
+                                                <Badge variant="secondary" className="h-4 px-1 text-[9px] pointer-events-none">
+                                                    Mensal
+                                                </Badge>
+                                            )}
+                                            <span className="text-xs text-muted-foreground">({item.goalPercentage.toFixed(0)}%)</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground text-xs">
+                                                {formatCurrency(item.spent)} / {formatCurrency(item.goalValue)}
+                                            </span>
+                                            <span className={cn(
+                                                "text-xs font-bold w-10 text-right",
+                                                item.percentage > 100 ? "text-red-500" :
+                                                    item.percentage > 75 ? "text-yellow-600" : "text-green-600"
+                                            )}>
+                                                {item.percentage.toFixed(0)}%
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-muted-foreground text-xs">
-                                            {formatCurrency(item.spent)} / {formatCurrency(item.goalValue)}
-                                        </span>
-                                        <span className={cn(
-                                            "text-xs font-bold w-10 text-right",
-                                            item.percentage > 100 ? "text-red-500" :
-                                                item.percentage > 75 ? "text-yellow-600" : "text-green-600"
-                                        )}>
-                                            {item.percentage.toFixed(0)}%
-                                        </span>
-                                    </div>
+                                    <Progress
+                                        value={item.percentage > 100 ? 100 : item.percentage}
+                                        className="h-2"
+                                        indicatorClassName={item.statusColor}
+                                    />
                                 </div>
-                                <Progress
-                                    value={item.percentage > 100 ? 100 : item.percentage}
-                                    className="h-2"
-                                    indicatorClassName={item.statusColor}
-                                />
-                            </div>
-                        ))}
+                            ))}
                     </div>
                 )}
             </CardContent>
@@ -227,9 +237,33 @@ export function FinancialGoalsWidget() {
                         </RadioGroup>
                     </div>
 
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-                        <Button onClick={handleSave}>Salvar Meta</Button>
+                    <DialogFooter className="flex justify-between sm:justify-between">
+                        {selectedCategory && data.goalOverrides.some(o => o.categoryId === selectedCategory && o.billingPeriodId === selectedPeriodId) ? (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={async () => {
+                                    if (!selectedCategory || !selectedPeriodId) return;
+                                    try {
+                                        await deleteCategoryGoalOverride(selectedCategory, selectedPeriodId);
+                                        toast.success("Meta restaurada para o padrão");
+                                        setDialogOpen(false);
+                                    } catch (error) {
+                                        console.error(error);
+                                    }
+                                }}
+                                className="text-muted-foreground hover:text-foreground"
+                            >
+                                <RotateCcw className="w-4 h-4 mr-2" />
+                                Restaurar Padrão
+                            </Button>
+                        ) : (
+                            <div /> /* Spacer if no revert button */
+                        )}
+                        <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                            <Button onClick={handleSave}>Salvar Meta</Button>
+                        </div>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
