@@ -98,10 +98,8 @@ export function FinancialGoalsWidget() {
                 // When setting default (all months), we want this to be the source of truth.
                 // So we update the default AND remove any specific override for this month
                 // that might be masking the new default.
-                await Promise.all([
-                    setCategoryGoal(selectedCategory, amount),
-                    deleteCategoryGoalOverride(selectedCategory, selectedPeriodId)
-                ]);
+                await setCategoryGoal(selectedCategory, amount);
+                await deleteCategoryGoalOverride(selectedCategory, selectedPeriodId);
             }
 
             setDialogOpen(false);

@@ -32,6 +32,7 @@ interface FinanceContextType {
   setMonthlyIncome: (billingPeriodId: string, salary: number, extra: number) => Promise<void>;
   // Goals
   setCategoryGoal: (categoryId: string, amount: number) => Promise<void>;
+  setCategoryGoals: (goals: { categoryId: string; amount: number }[]) => Promise<void>;
   setCategoryGoalOverride: (categoryId: string, billingPeriodId: string, amount: number) => Promise<void>;
   getGoalForCategory: (categoryId: string, billingPeriodId: string) => number;
   deleteCategoryGoalOverride: (categoryId: string, billingPeriodId: string) => Promise<void>;
@@ -963,12 +964,36 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       }, { onConflict: 'user_id, category_id' });
 
     if (error) {
+      console.error('Error saving goal for category:', categoryId, error); // Added logging for "Empreendimento" bug
       toast.error('Erro ao salvar meta');
       throw error;
     }
 
     await fetchData();
     toast.success('Meta padrão atualizada');
+  };
+
+  const setCategoryGoals = async (goals: { categoryId: string; amount: number }[]) => {
+    if (!user) return;
+
+    const upsertData = goals.map(g => ({
+      user_id: user.id,
+      category_id: g.categoryId,
+      amount: g.amount,
+    }));
+
+    const { error } = await supabase
+      .from('category_goals')
+      .upsert(upsertData, { onConflict: 'user_id, category_id' });
+
+    if (error) {
+      console.error('Error batch saving goals:', error);
+      toast.error('Erro ao salvar metas');
+      throw error;
+    }
+
+    await fetchData();
+    toast.success('Metas atualizadas com sucesso');
   };
 
   const setCategoryGoalOverride = async (categoryId: string, billingPeriodId: string, amount: number) => {
@@ -1054,6 +1079,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       refreshData: fetchData,
       isFixedExpenseWithTemplate,
       setCategoryGoal,
+      setCategoryGoals,
       setCategoryGoalOverride,
       deleteCategoryGoalOverride,
       getGoalForCategory,

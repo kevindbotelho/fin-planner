@@ -70,8 +70,7 @@ export default function Settings() {
     addSubcategory,
     updateSubcategory,
     deleteSubcategory,
-    seedDefaultCategories,
-    setCategoryGoal,
+    setCategoryGoals,
   } = useFinance();
 
   const onTabChange = (value: string) => {
@@ -118,8 +117,6 @@ export default function Settings() {
   const [editingSubcategoryId, setEditingSubcategoryId] = useState<string | null>(null);
   const [editSubcategoryName, setEditSubcategoryName] = useState('');
 
-  // Removed auto-seed useEffect - seeding now handled in FinanceContext with user_settings flag
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -137,19 +134,22 @@ export default function Settings() {
     setGoalForms(goals);
   }, [data.categories, data.goals]);
 
-  const handleSaveGoal = async (categoryId: string) => {
-    const amountStr = goalForms[categoryId];
-    // Treat empty string or NaN as 0
-    const amount = amountStr === '' || isNaN(parseFloat(amountStr)) ? 0 : parseFloat(amountStr);
-    await setCategoryGoal(categoryId, amount);
+  const handleSaveAllGoals = async () => {
+    const goalsToSave = data.categories.map(category => {
+      const amountStr = goalForms[category.id];
+      // Treat empty string or NaN as 0
+      const amount = amountStr === '' || isNaN(parseFloat(amountStr)) ? 0 : parseFloat(amountStr);
+      return {
+        categoryId: category.id,
+        amount,
+      };
+    });
+
+    await setCategoryGoals(goalsToSave);
   };
 
   const getMonthName = (monthValue: string) => {
     return MONTHS.find(m => m.value === monthValue)?.label || monthValue;
-  };
-
-  const getDaysInMonth = (month: string, year: string) => {
-    return new Date(parseInt(year), parseInt(month), 0).getDate();
   };
 
   const handleAddPeriod = (e: React.FormEvent) => {
@@ -885,14 +885,20 @@ export default function Settings() {
         {/* Metas */}
         <TabsContent value="goals" className="space-y-6">
           <Card className="border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-lg">Metas por Categoria (%)</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Defina qual porcentagem da sua renda mensal deve ser destinada a cada categoria.
-              </p>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="space-y-1">
+                <CardTitle className="text-lg">Metas por Categoria (%)</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Defina qual porcentagem da sua renda mensal deve ser destinada a cada categoria.
+                </p>
+              </div>
+              <Button onClick={handleSaveAllGoals}>
+                <Save className="h-4 w-4 mr-2" />
+                Salvar Alterações
+              </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-4 pt-4">
                 {data.categories.map(category => (
                   <div key={category.id} className="flex items-center justify-between rounded-lg border p-4">
                     <div className="flex items-center gap-3">
@@ -909,18 +915,14 @@ export default function Settings() {
                           onChange={(e) => {
                             let val = parseFloat(e.target.value);
                             if (val > 100) val = 100;
-                            if (val < 0) val = 0;
-                            setGoalForms(prev => ({ ...prev, [category.id]: e.target.value }))
+                            // Allow empty string for better UX while typing
+                            setGoalForms(prev => ({ ...prev, [category.id]: e.target.value }));
                           }}
                           placeholder="0"
                           className="pr-6"
                         />
                         <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">%</span>
                       </div>
-                      <Button size="sm" onClick={() => handleSaveGoal(category.id)}>
-                        <Save className="h-4 w-4 mr-2" />
-                        Salvar
-                      </Button>
                     </div>
                   </div>
                 ))}
