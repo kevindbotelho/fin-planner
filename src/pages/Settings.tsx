@@ -919,6 +919,7 @@ export default function Settings() {
                             // Allow empty string for better UX while typing
                             setGoalForms(prev => ({ ...prev, [category.id]: e.target.value }));
                           }}
+                          onWheel={(e) => e.currentTarget.blur()}
                           placeholder="0"
                           className="pr-6"
                         />

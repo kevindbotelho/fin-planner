@@ -196,6 +196,7 @@ export function FinancialGoalsWidget() {
                                         if (val > 100) val = 100;
                                         setGoalAmount(e.target.value);
                                     }}
+                                    onWheel={(e) => e.currentTarget.blur()}
                                     placeholder="0"
                                     className="pr-6"
                                 />
