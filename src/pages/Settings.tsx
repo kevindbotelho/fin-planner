@@ -132,7 +132,7 @@ export default function Settings() {
     const goals: { [key: string]: string } = {};
     data.categories.forEach(cat => {
       const goal = data.goals.find(g => g.categoryId === cat.id);
-      goals[cat.id] = goal ? goal.amount.toFixed(2) : '';
+      goals[cat.id] = goal ? goal.amount.toString() : '';
     });
     setGoalForms(goals);
   }, [data.categories, data.goals]);
@@ -886,9 +886,9 @@ export default function Settings() {
         <TabsContent value="goals" className="space-y-6">
           <Card className="border-0 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-lg">Metas por Categoria</CardTitle>
+              <CardTitle className="text-lg">Metas por Categoria (%)</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Defina o valor máximo que deseja gastar mensalmente por categoria.
+                Defina qual porcentagem da sua renda mensal deve ser destinada a cada categoria.
               </p>
             </CardHeader>
             <CardContent>
@@ -900,12 +900,22 @@ export default function Settings() {
                       <span className="font-medium">{category.name}</span>
                     </div>
                     <div className="flex gap-2 items-center">
-                      <div className="w-40">
-                        <CurrencyInput
-                          value={goalForms[category.id]}
-                          onChange={(val) => setGoalForms(prev => ({ ...prev, [category.id]: val }))}
-                          placeholder="0,00"
+                      <div className="relative w-24">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={goalForms[category.id] || ''}
+                          onChange={(e) => {
+                            let val = parseFloat(e.target.value);
+                            if (val > 100) val = 100;
+                            if (val < 0) val = 0;
+                            setGoalForms(prev => ({ ...prev, [category.id]: e.target.value }))
+                          }}
+                          placeholder="0"
+                          className="pr-6"
                         />
+                        <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">%</span>
                       </div>
                       <Button size="sm" onClick={() => handleSaveGoal(category.id)}>
                         <Save className="h-4 w-4 mr-2" />
