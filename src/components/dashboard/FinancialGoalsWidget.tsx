@@ -28,7 +28,8 @@ export function FinancialGoalsWidget() {
         getExpensesForPeriod,
         getGoalForCategory,
         setCategoryGoal,
-        setCategoryGoalOverride
+        setCategoryGoalOverride,
+        getIncomeForPeriod
     } = useFinance();
 
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -46,17 +47,21 @@ export function FinancialGoalsWidget() {
     const currentPeriod = data.billingPeriods.find(p => p.id === selectedPeriodId);
     if (!currentPeriod || !selectedPeriodId) return null;
 
+    const incomeObj = getIncomeForPeriod(selectedPeriodId);
+    const totalIncome = incomeObj ? (incomeObj.salary + incomeObj.extra) : 0;
+
     // Calculate goals progress
     const categoriesGoals = data.categories.map(category => {
         const expenses = getExpensesForPeriod(selectedPeriodId);
         const categoryExpenses = expenses.filter(e => e.categoryId === category.id);
         const spent = categoryExpenses.reduce((acc, exp) => acc + exp.amount, 0);
-        const goal = getGoalForCategory(category.id, selectedPeriodId);
+        const goalPercentage = getGoalForCategory(category.id, selectedPeriodId);
 
         // Hide categories without a defined goal
-        if (goal === 0) return null;
+        if (goalPercentage === 0) return null;
 
-        const percentage = goal > 0 ? (spent / goal) * 100 : 0;
+        const goalValue = totalIncome * (goalPercentage / 100);
+        const percentage = goalValue > 0 ? (spent / goalValue) * 100 : 0;
 
         let statusColor = 'bg-green-500';
         if (percentage > 100) statusColor = 'bg-red-500';
@@ -65,15 +70,16 @@ export function FinancialGoalsWidget() {
         return {
             ...category,
             spent,
-            goal,
+            goalPercentage,
+            goalValue,
             percentage,
             statusColor
         };
     }).filter(Boolean) as any[]; // Type assertion for non-null
 
-    const handleOpenDialog = (categoryId: string, currentGoal: number) => {
+    const handleOpenDialog = (categoryId: string, currentPercentage: number) => {
         setSelectedCategory(categoryId);
-        setGoalAmount(currentGoal.toString());
+        setGoalAmount(currentPercentage.toString());
         setSaveMode('current'); // Default to current month override
         setDialogOpen(true);
     };
@@ -83,6 +89,7 @@ export function FinancialGoalsWidget() {
 
         try {
             const amount = parseFloat(goalAmount);
+            // Amount here is actually percentage (0-100)
 
             if (saveMode === 'current') {
                 await setCategoryGoalOverride(selectedCategory, selectedPeriodId, amount);
@@ -125,7 +132,7 @@ export function FinancialGoalsWidget() {
                             <div
                                 key={item.id}
                                 className="space-y-1 cursor-pointer hover:bg-muted/30 p-2 rounded-lg transition-colors group"
-                                onClick={() => handleOpenDialog(item.id, item.goal)}
+                                onClick={() => handleOpenDialog(item.id, item.goalPercentage)}
                             >
                                 <div className="flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-2">
@@ -134,10 +141,11 @@ export function FinancialGoalsWidget() {
                                             style={{ backgroundColor: item.color }}
                                         />
                                         <span className="font-medium">{item.name}</span>
+                                        <span className="text-xs text-muted-foreground">({item.goalPercentage.toFixed(0)}%)</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-muted-foreground text-xs">
-                                            {formatCurrency(item.spent)} / {formatCurrency(item.goal)}
+                                            {formatCurrency(item.spent)} / {formatCurrency(item.goalValue)}
                                         </span>
                                         <span className={cn(
                                             "text-xs font-bold w-10 text-right",
@@ -164,18 +172,29 @@ export function FinancialGoalsWidget() {
                     <DialogHeader>
                         <DialogTitle>Definir Meta - {categoryForDialog?.name}</DialogTitle>
                         <DialogDescription>
-                            Defina o limite de gastos para esta categoria.
+                            Defina a porcentagem da renda para esta categoria.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="amount">Valor da Meta</Label>
-                            <CurrencyInput
-                                value={goalAmount}
-                                onChange={setGoalAmount}
-                                placeholder="0,00"
-                            />
+                            <Label htmlFor="amount">Porcentagem (%)</Label>
+                            <div className="relative">
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={goalAmount}
+                                    onChange={(e) => {
+                                        let val = parseFloat(e.target.value);
+                                        if (val > 100) val = 100;
+                                        setGoalAmount(e.target.value);
+                                    }}
+                                    placeholder="0"
+                                    className="pr-6"
+                                />
+                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">%</span>
+                            </div>
                         </div>
 
                         <RadioGroup value={saveMode} onValueChange={(v) => setSaveMode(v as 'current' | 'default')}>
@@ -184,7 +203,7 @@ export function FinancialGoalsWidget() {
                                 <div className="flex-1">
                                     <Label htmlFor="r1" className="cursor-pointer font-medium">Apenas este mês</Label>
                                     <p className="text-xs text-muted-foreground">
-                                        ({currentPeriod?.name}) - Sobrescreve a meta padrão apenas para este período.
+                                        ({currentPeriod?.name}) - Meta temporária.
                                     </p>
                                 </div>
                             </div>
@@ -194,7 +213,7 @@ export function FinancialGoalsWidget() {
                                 <div className="flex-1">
                                     <Label htmlFor="r2" className="cursor-pointer font-medium">Todos os meses (Padrão)</Label>
                                     <p className="text-xs text-muted-foreground">
-                                        Define o novo valor padrão para todos os meses futuros.
+                                        Nova meta padrão.
                                     </p>
                                 </div>
                             </div>
