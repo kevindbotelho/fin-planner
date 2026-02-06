@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Sector } from 'recharts';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Category, Expense } from '@/types/finance';
@@ -97,6 +97,8 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
       })) || []
       : categoryTotals;
 
+  const activeIndex = hoveredItem ? chartData.indexOf(hoveredItem) : -1;
+
   const handlePieClick = (data: any) => {
     if (selectedSubcategory) {
       return;
@@ -132,6 +134,31 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
   const centerLabel = hoveredItem ? hoveredItem.name : 'Total';
   const centerValue = hoveredItem ? hoveredItem.value : chartTotal;
 
+  // Render Active Shape (Hover Effect)
+  const renderActiveShape = (props: any) => {
+    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload } = props;
+
+    // Use the component Source-of-Truth for color if possible, or fallback to fill
+    const color = payload.color || fill;
+
+    return (
+      <g>
+        <path d={props.d} fill={color} /> {/* Render standard sector first to be safe */}
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius} // Keep inner radius same
+          outerRadius={outerRadius + 10} // Expand outer radius by 10px
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={color}
+          className="transition-all duration-300 ease-out"
+          style={{ filter: 'brightness(1.1)' }} // Add brightness boost
+        />
+      </g>
+    );
+  };
+
   // Custom Label Render
   const renderCustomLabel = (props: any) => {
     const { cx, cy, midAngle, innerRadius, outerRadius, value, index, name, color, percentage } = props;
@@ -140,7 +167,8 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     if (percentage < 4) return null;
 
     const RADIAN = Math.PI / 180;
-    // Calculate positions
+    // Calculate positions - Use the standard outerRadius for label positioning logic
+    // even if the shape is expanded, to keep labels stable.
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -226,7 +254,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                   cx="50%"
                   cy="50%"
                   innerRadius={75}
-                  outerRadius={105} // Reduced radius to make room for labels
+                  outerRadius={105}
                   paddingAngle={2}
                   dataKey="value"
                   onClick={handlePieClick}
@@ -236,27 +264,20 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                   labelLine={false}
                   animationBegin={0}
                   animationDuration={400}
+                  activeIndex={activeIndex}
+                  activeShape={renderActiveShape}
                   style={{ cursor: selectedSubcategory ? 'default' : 'pointer', outline: 'none' }}
                 >
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={entry.color}
-                      strokeWidth={hoveredItem === entry ? 2 : 0}
+                      strokeWidth={0} // Clean borders
                       stroke="#fff"
-                      className="transition-all duration-300 ease-out"
-                      style={{
-                        filter: hoveredItem === entry ? 'brightness(1.1)' : 'none',
-                        transform: hoveredItem === entry ? 'scale(1.1)' : 'scale(1)',
-                        transformOrigin: 'center',
-                        zIndex: hoveredItem === entry ? 10 : 1
-                      }}
+                      style={{ outline: 'none' }}
                     />
                   ))}
                 </Pie>
-                {/* Removed Tooltip to rely on Center Info and Smart Labels, or keep as fallback? 
-                    Keep as fallback for small slices that don't get a label.
-                */}
                 {/* Removed Tooltip to rely on Center Info and Smart Labels */}
               </PieChart>
             </ResponsiveContainer>
