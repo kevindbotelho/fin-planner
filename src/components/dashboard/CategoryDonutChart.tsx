@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Sector } from 'recharts';
 import { ChevronLeft } from 'lucide-react';
@@ -86,18 +86,29 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     : [];
 
   // Determine current chart data based on hierarchy level
-  const chartData = selectedSubcategory
-    ? subcategoryExpensesData
-    : selectedCategory
-      ? selectedCategory.subcategories?.map((sub, index) => ({
-        name: sub.name,
-        value: sub.value,
-        color: `hsl(${(index * 45) + 120}, 70%, 50%)`,
-        percentage: sub.percentage,
-      })) || []
-      : categoryTotals;
+  const chartData = useMemo(() => {
+    return selectedSubcategory
+      ? subcategoryExpensesData
+      : selectedCategory
+        ? selectedCategory.subcategories?.map((sub, index) => ({
+          name: sub.name,
+          value: sub.value,
+          color: `hsl(${(index * 45) + 120}, 70%, 50%)`,
+          percentage: sub.percentage,
+        })) || []
+        : categoryTotals;
+  }, [selectedCategory, selectedSubcategory, categoryTotals, subcategoryExpensesData]);
 
   const activeIndex = hoveredItem ? chartData.findIndex(item => item.name === hoveredItem.name) : -1;
+
+  // Animation Lock Logic
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Helper to trigger animation lock
+  const triggerAnimationLock = () => {
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 450);
+  };
 
   const handlePieClick = (data: any) => {
     if (selectedSubcategory) {
@@ -108,12 +119,14 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
       // Currently displaying Subcategories, click drills down to Expenses
       const subcategory = selectedCategory.subcategories?.find(s => s.name === data.name);
       if (subcategory) {
+        triggerAnimationLock(); // Lock BEFORE state update
         setSelectedSubcategory({ id: subcategory.id, name: subcategory.name });
       }
     } else {
       // Currently displaying Categories, click drills down to Subcategories
       const category = categoryTotals.find(c => c.name === data.name);
       if (category && category.subcategories && category.subcategories.length > 0) {
+        triggerAnimationLock(); // Lock BEFORE state update
         setSelectedCategory(category);
       }
     }
@@ -121,6 +134,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
   };
 
   const handleBack = () => {
+    triggerAnimationLock(); // Lock BEFORE state update
     if (selectedSubcategory) {
       setSelectedSubcategory(null);
     } else if (selectedCategory) {
@@ -129,21 +143,9 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     setHoveredItem(null);
   };
 
-  // Animation Lock Logic
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  // Reset animation lock when hierarchy changes
+  // Trigger animation on mount/initial load
   useEffect(() => {
-    setIsAnimating(true);
-    const timer = setTimeout(() => setIsAnimating(false), 450); // Slightly longer than animationDuration (400ms)
-    return () => clearTimeout(timer);
-  }, [selectedCategory, selectedSubcategory]); // Trigger on navigation
-
-  // Trigger animation on mount/initial load as well - simplified by using the data dependency or just init
-  useEffect(() => {
-    setIsAnimating(true);
-    const timer = setTimeout(() => setIsAnimating(false), 450);
-    return () => clearTimeout(timer);
+    triggerAnimationLock();
   }, []);
 
   // Center Info Logic
