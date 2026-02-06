@@ -23,6 +23,7 @@ interface CategoryTotal {
 export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartProps) {
   const [selectedCategory, setSelectedCategory] = useState<CategoryTotal | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<{ id: string; name: string } | null>(null);
+  const [hoveredItem, setHoveredItem] = useState<any | null>(null);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -114,6 +115,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
         setSelectedCategory(category);
       }
     }
+    setHoveredItem(null); // Reset hover on click to avoid stuck state
   };
 
   const handleBack = () => {
@@ -122,6 +124,57 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     } else if (selectedCategory) {
       setSelectedCategory(null);
     }
+    setHoveredItem(null);
+  };
+
+  // Center Info Logic
+  const chartTotal = chartData.reduce((acc: number, item: any) => acc + item.value, 0);
+  const centerLabel = hoveredItem ? hoveredItem.name : 'Total';
+  const centerValue = hoveredItem ? hoveredItem.value : chartTotal;
+
+  // Custom Label Render
+  const renderCustomLabel = (props: any) => {
+    const { cx, cy, midAngle, innerRadius, outerRadius, value, index, name, color, percentage } = props;
+
+    // Only show label for > 4% to avoid clutter
+    if (percentage < 4) return null;
+
+    const RADIAN = Math.PI / 180;
+    // Calculate positions
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    const sin = Math.sin(-midAngle * RADIAN);
+    const cos = Math.cos(-midAngle * RADIAN);
+
+    // Start of line (on the donut)
+    const sx = cx + (outerRadius) * cos;
+    const sy = cy + (outerRadius) * sin;
+
+    // Elbow of line
+    const mx = cx + (outerRadius + 15) * cos;
+    const my = cy + (outerRadius + 15) * sin;
+
+    // End of line
+    const ex = mx + (cos >= 0 ? 1 : -1) * 15;
+    const ey = my;
+
+    const textAnchor = cos >= 0 ? 'start' : 'end';
+
+    return (
+      <g>
+        <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={color} fill="none" opacity={0.6} />
+        <circle cx={ex} cy={ey} r={2} fill={color} stroke="none" />
+        <text x={ex + (cos >= 0 ? 1 : -1) * 8} y={ey} dy={4} textAnchor={textAnchor} fill={color} fontSize={10} fontWeight="500">
+          {`${name}`}
+        </text>
+        {/* Optional: Show % in label too, or just keep it clean with name */}
+        <text x={ex + (cos >= 0 ? 1 : -1) * 8} y={ey} dy={14} textAnchor={textAnchor} fill="#999" fontSize={9}>
+          {`${percentage.toFixed(0)}%`}
+        </text>
+      </g>
+    );
   };
 
   return (
@@ -157,24 +210,52 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-6">
-          <div className="h-[300px] w-full">
+          <div className="h-[300px] w-full relative">
+            {/* Center Info Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="text-center bg-background/80 backdrop-blur-sm p-2 rounded-full shadow-sm border border-border/50">
+                <p className="text-xs text-muted-foreground font-medium max-w-[100px] truncate">{centerLabel}</p>
+                <p className="text-lg font-bold text-primary">{formatCurrency(centerValue)}</p>
+              </div>
+            </div>
+
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={chartData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={80}
-                  outerRadius={130}
+                  innerRadius={75}
+                  outerRadius={105} // Reduced radius to make room for labels
                   paddingAngle={2}
                   dataKey="value"
                   onClick={handlePieClick}
-                  style={{ cursor: selectedSubcategory ? 'default' : 'pointer' }}
+                  onMouseEnter={(_, index) => setHoveredItem(chartData[index])}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  label={renderCustomLabel}
+                  labelLine={false}
+                  animationBegin={0}
+                  animationDuration={400}
+                  style={{ cursor: selectedSubcategory ? 'default' : 'pointer', outline: 'none' }}
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.color}
+                      strokeWidth={hoveredItem === entry ? 2 : 0}
+                      stroke="#fff"
+                      className="transition-all duration-300 ease-out"
+                      style={{
+                        filter: hoveredItem === entry ? 'brightness(1.1)' : 'none',
+                        transform: hoveredItem === entry ? 'scale(1.02)' : 'scale(1)',
+                        transformOrigin: 'center'
+                      }}
+                    />
                   ))}
                 </Pie>
+                {/* Removed Tooltip to rely on Center Info and Smart Labels, or keep as fallback? 
+                    Keep as fallback for small slices that don't get a label.
+                */}
                 <Tooltip
                   formatter={(value: number) => formatCurrency(value)}
                   contentStyle={{
@@ -182,6 +263,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
                   }}
+                  itemStyle={{ color: 'hsl(var(--foreground))' }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -191,8 +273,10 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
             {chartData.map((item: any, index) => (
               <div
                 key={`${item.name}-${index}`}
-                className={`flex items-center justify-between p-2 rounded-lg transition-colors ${!selectedSubcategory ? 'hover:bg-muted/50 cursor-pointer' : ''}`}
+                className={`flex items-center justify-between p-2 rounded-lg transition-colors ${!selectedSubcategory ? 'hover:bg-muted/50 cursor-pointer' : ''} ${hoveredItem === item ? 'bg-muted/80 ring-1 ring-primary/20' : ''}`}
                 onClick={() => !selectedSubcategory && handlePieClick(item)}
+                onMouseEnter={() => setHoveredItem(item)}
+                onMouseLeave={() => setHoveredItem(null)}
               >
                 <div className="flex items-center gap-3">
                   <div
