@@ -142,8 +142,8 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     const color = payload.color || fill;
 
     return (
-      <g>
-        <path d={props.d} fill={color} /> {/* Render standard sector first to be safe */}
+      <g style={{ outline: 'none' }}>
+        <path d={props.d} fill={color} style={{ outline: 'none' }} /> {/* Render standard sector first to be safe */}
         <Sector
           cx={cx}
           cy={cy}
@@ -267,6 +267,8 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                   activeIndex={activeIndex}
                   activeShape={renderActiveShape}
                   style={{ cursor: selectedSubcategory ? 'default' : 'pointer', outline: 'none' }}
+                  isAnimationActive={true} // Add this to ensure transitions work but might need check
+                  tabIndex={-1} // Prevent focus
                 >
                   {chartData.map((entry, index) => (
                     <Cell
