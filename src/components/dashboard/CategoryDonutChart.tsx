@@ -238,6 +238,16 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-6">
+          {/* Global style override for chart focus outlines */}
+          <style>{`
+            .recharts-sector:focus,
+            .recharts-layer:focus,
+            .recharts-pie-sector:focus,
+            path:focus {
+              outline: none !important;
+            }
+          `}</style>
+
           <div className="h-[300px] w-full relative">
             {/* Center Info Overlay */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
