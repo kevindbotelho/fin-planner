@@ -107,7 +107,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
   // Helper to trigger animation lock
   const triggerAnimationLock = () => {
     setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 450);
+    setTimeout(() => setIsAnimating(false), 1000);
   };
 
   const handlePieClick = (data: any) => {
@@ -292,7 +292,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                   label={renderCustomLabel}
                   labelLine={false}
                   animationBegin={0}
-                  animationDuration={400}
+                  animationDuration={800}
                   activeIndex={activeIndex}
                   activeShape={renderActiveShape}
                   style={{ cursor: selectedSubcategory ? 'default' : 'pointer', outline: 'none' }}
