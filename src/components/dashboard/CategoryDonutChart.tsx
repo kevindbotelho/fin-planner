@@ -77,9 +77,10 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
         return 0;
       })
       .map((exp, index) => ({
+        id: exp.id, // Add unique ID
         name: exp.description,
         value: exp.amount,
-        date: exp.purchaseDate, // Add date field
+        date: exp.purchaseDate,
         color: `hsl(${(index * 30) + 200}, 70%, 50%)`,
         percentage: (exp.amount / (categoryTotals.find(c => c.id === selectedCategory.id)?.subcategories?.find(s => s.id === selectedSubcategory.id)?.value || 1)) * 100,
       }))
@@ -91,6 +92,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
       ? subcategoryExpensesData
       : selectedCategory
         ? selectedCategory.subcategories?.map((sub, index) => ({
+          id: sub.id, // Ensure ID is passed
           name: sub.name,
           value: sub.value,
           color: `hsl(${(index * 45) + 120}, 70%, 50%)`,
@@ -99,7 +101,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
         : categoryTotals;
   }, [selectedCategory, selectedSubcategory, categoryTotals, subcategoryExpensesData]);
 
-  const activeIndex = hoveredItem ? chartData.findIndex(item => item.name === hoveredItem.name) : -1;
+  const activeIndex = hoveredItem ? chartData.findIndex(item => item.id === hoveredItem.id) : -1;
 
   // Animation Lock Logic
   const [isAnimating, setIsAnimating] = useState(false);
@@ -107,7 +109,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
   // Helper to trigger animation lock
   const triggerAnimationLock = () => {
     setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 1000);
+    setTimeout(() => setIsAnimating(false), 1500);
   };
 
   const handlePieClick = (data: any) => {
@@ -292,7 +294,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                   label={renderCustomLabel}
                   labelLine={false}
                   animationBegin={0}
-                  animationDuration={800}
+                  animationDuration={1200}
                   activeIndex={activeIndex}
                   activeShape={renderActiveShape}
                   style={{ cursor: selectedSubcategory ? 'default' : 'pointer', outline: 'none' }}
