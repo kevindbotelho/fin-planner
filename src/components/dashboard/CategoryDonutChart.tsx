@@ -97,7 +97,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
       })) || []
       : categoryTotals;
 
-  const activeIndex = hoveredItem ? chartData.indexOf(hoveredItem) : -1;
+  const activeIndex = hoveredItem ? chartData.findIndex(item => item.name === hoveredItem.name) : -1;
 
   const handlePieClick = (data: any) => {
     if (selectedSubcategory) {
