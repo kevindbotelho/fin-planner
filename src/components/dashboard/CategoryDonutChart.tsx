@@ -277,6 +277,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
+                  key={selectedSubcategory ? 'sub' : selectedCategory ? 'cat-' + selectedCategory.id : 'root'}
                   data={chartData}
                   cx="50%"
                   cy="50%"
