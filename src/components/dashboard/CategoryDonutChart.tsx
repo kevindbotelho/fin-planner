@@ -152,8 +152,8 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
           startAngle={startAngle}
           endAngle={endAngle}
           fill={color}
-          className="transition-all duration-300 ease-out"
-          style={{ filter: 'brightness(1.1)' }} // Add brightness boost
+          className="transition-all duration-300 ease-out focus:outline-none"
+          style={{ filter: 'brightness(1.1)', outline: 'none' }} // Add brightness boost and remove outline
         />
       </g>
     );
