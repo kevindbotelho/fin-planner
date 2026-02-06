@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Sector } from 'recharts';
 import { ChevronLeft } from 'lucide-react';
@@ -128,6 +128,23 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     }
     setHoveredItem(null);
   };
+
+  // Animation Lock Logic
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Reset animation lock when hierarchy changes
+  useEffect(() => {
+    setIsAnimating(true);
+    const timer = setTimeout(() => setIsAnimating(false), 450); // Slightly longer than animationDuration (400ms)
+    return () => clearTimeout(timer);
+  }, [selectedCategory, selectedSubcategory]); // Trigger on navigation
+
+  // Trigger animation on mount/initial load as well - simplified by using the data dependency or just init
+  useEffect(() => {
+    setIsAnimating(true);
+    const timer = setTimeout(() => setIsAnimating(false), 450);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Center Info Logic
   const chartTotal = chartData.reduce((acc: number, item: any) => acc + item.value, 0);
@@ -268,7 +285,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                   paddingAngle={2}
                   dataKey="value"
                   onClick={handlePieClick}
-                  onMouseEnter={(_, index) => setHoveredItem(chartData[index])}
+                  onMouseEnter={(_, index) => !isAnimating && setHoveredItem(chartData[index])}
                   onMouseLeave={() => setHoveredItem(null)}
                   label={renderCustomLabel}
                   labelLine={false}
@@ -301,7 +318,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                 key={`${item.name}-${index}`}
                 className={`flex items-center justify-between p-2 rounded-lg transition-colors ${!selectedSubcategory ? 'hover:bg-muted/50 cursor-pointer' : ''} ${hoveredItem === item ? 'bg-muted/80 ring-1 ring-primary/20' : ''}`}
                 onClick={() => !selectedSubcategory && handlePieClick(item)}
-                onMouseEnter={() => setHoveredItem(item)}
+                onMouseEnter={() => !isAnimating && setHoveredItem(item)}
                 onMouseLeave={() => setHoveredItem(null)}
               >
                 <div className="flex items-center gap-3">
