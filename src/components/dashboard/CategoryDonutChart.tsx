@@ -166,11 +166,11 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
       <g>
         <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={color} fill="none" opacity={0.6} />
         <circle cx={ex} cy={ey} r={2} fill={color} stroke="none" />
-        <text x={ex + (cos >= 0 ? 1 : -1) * 8} y={ey} dy={4} textAnchor={textAnchor} fill={color} fontSize={10} fontWeight="500">
+        <text x={ex + (cos >= 0 ? 1 : -1) * 8} y={ey} dy={4} textAnchor={textAnchor} fill={color} fontSize={12} fontWeight="600">
           {`${name}`}
         </text>
         {/* Optional: Show % in label too, or just keep it clean with name */}
-        <text x={ex + (cos >= 0 ? 1 : -1) * 8} y={ey} dy={14} textAnchor={textAnchor} fill="#999" fontSize={9}>
+        <text x={ex + (cos >= 0 ? 1 : -1) * 8} y={ey} dy={16} textAnchor={textAnchor} fill="#999" fontSize={10}>
           {`${percentage.toFixed(0)}%`}
         </text>
       </g>
@@ -213,7 +213,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
           <div className="h-[300px] w-full relative">
             {/* Center Info Overlay */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="text-center bg-background/80 backdrop-blur-sm p-2 rounded-full shadow-sm border border-border/50">
+              <div className="text-center">
                 <p className="text-xs text-muted-foreground font-medium max-w-[100px] truncate">{centerLabel}</p>
                 <p className="text-lg font-bold text-primary">{formatCurrency(centerValue)}</p>
               </div>
@@ -247,8 +247,9 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                       className="transition-all duration-300 ease-out"
                       style={{
                         filter: hoveredItem === entry ? 'brightness(1.1)' : 'none',
-                        transform: hoveredItem === entry ? 'scale(1.02)' : 'scale(1)',
-                        transformOrigin: 'center'
+                        transform: hoveredItem === entry ? 'scale(1.1)' : 'scale(1)',
+                        transformOrigin: 'center',
+                        zIndex: hoveredItem === entry ? 10 : 1
                       }}
                     />
                   ))}
@@ -256,15 +257,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                 {/* Removed Tooltip to rely on Center Info and Smart Labels, or keep as fallback? 
                     Keep as fallback for small slices that don't get a label.
                 */}
-                <Tooltip
-                  formatter={(value: number) => formatCurrency(value)}
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                  }}
-                  itemStyle={{ color: 'hsl(var(--foreground))' }}
-                />
+                {/* Removed Tooltip to rely on Center Info and Smart Labels */}
               </PieChart>
             </ResponsiveContainer>
           </div>
