@@ -147,10 +147,7 @@ export function FinancialGoalsWidget() {
                                 >
                                     <div className="flex items-center justify-between text-sm">
                                         <div className="flex items-center gap-2">
-                                            <div
-                                                className="h-3 w-3 rounded-full"
-                                                style={{ backgroundColor: item.color }}
-                                            />
+
                                             <span className="font-medium">{item.name}</span>
                                             {isOverridden && (
                                                 <Badge variant="secondary" className="h-4 px-1 text-[9px] pointer-events-none">
