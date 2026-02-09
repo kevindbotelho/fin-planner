@@ -480,7 +480,7 @@ export default function Expenses() {
               setFormData(prev => ({ ...prev, subcategoryId: id }));
             }
           }}
-        />>
+        />
 
         <Card className="border-0 shadow-sm lg:col-span-2">
           <CardHeader>
