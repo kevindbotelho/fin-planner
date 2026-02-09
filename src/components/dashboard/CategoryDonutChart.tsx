@@ -321,9 +321,10 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
               <div
                 key={`${item.name}-${index}`}
                 className={`flex items-center justify-between p-2 rounded-lg transition-colors ${!selectedSubcategory ? 'hover:bg-muted/50 cursor-pointer' : ''} ${hoveredItem === item ? 'bg-muted/80 ring-1 ring-primary/20' : ''}`}
-                onClick={() => !selectedSubcategory && handlePieClick(item)}
+                onClick={() => !isAnimating && !selectedSubcategory && handlePieClick(item)}
                 onMouseEnter={() => !isAnimating && setHoveredItem(item)}
                 onMouseLeave={() => setHoveredItem(null)}
+                style={{ pointerEvents: isAnimating ? 'none' : 'auto' }}
               >
                 <div className="flex items-center gap-3">
                   <div
