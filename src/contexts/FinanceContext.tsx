@@ -11,12 +11,12 @@ interface FinanceContextType {
   selectedPeriodId: string | null;
   setSelectedPeriodId: (id: string | null) => void;
   // Categories
-  addCategory: (category: Omit<Category, 'id' | 'subcategories'>) => Promise<void>;
+  addCategory: (category: Omit<Category, 'id' | 'subcategories'>) => Promise<Category | null>;
   updateCategory: (id: string, category: Partial<Category>) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   seedDefaultCategories: () => Promise<void>;
   // Subcategories
-  addSubcategory: (categoryId: string, name: string) => Promise<void>;
+  addSubcategory: (categoryId: string, name: string) => Promise<Subcategory | null>;
   updateSubcategory: (subcategoryId: string, name: string) => Promise<void>;
   deleteSubcategory: (categoryId: string, subcategoryId: string) => Promise<void>;
   // Expenses
@@ -362,18 +362,28 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   // Categories
   const addCategory = async (category: Omit<Category, 'id' | 'subcategories'>) => {
-    if (!user) return;
+    if (!user) return null;
 
-    const { error } = await supabase
+    const { data: newCategory, error } = await supabase
       .from('categories')
       .insert({
         user_id: user.id,
         name: category.name,
         color: category.color,
-      });
+      })
+      .select()
+      .single();
 
     if (error) throw error;
     await fetchData();
+
+    // Return the formatted category object so caller can use it
+    return newCategory ? {
+      id: newCategory.id,
+      name: newCategory.name,
+      color: newCategory.color,
+      subcategories: []
+    } as Category : null;
   };
 
   const updateCategory = async (id: string, updates: Partial<Category>) => {
@@ -401,18 +411,26 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   // Subcategories
   const addSubcategory = async (categoryId: string, name: string) => {
-    if (!user) return;
+    if (!user) return null;
 
-    const { error } = await supabase
+    const { data: newSubcategory, error } = await supabase
       .from('subcategories')
       .insert({
         user_id: user.id,
         category_id: categoryId,
         name,
-      });
+      })
+      .select()
+      .single();
 
     if (error) throw error;
     await fetchData();
+
+    return newSubcategory ? {
+      id: newSubcategory.id,
+      name: newSubcategory.name,
+      categoryId: newSubcategory.category_id,
+    } as Subcategory : null;
   };
 
   const updateSubcategory = async (subcategoryId: string, name: string) => {

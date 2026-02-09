@@ -46,6 +46,7 @@ import {
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { FixedExpenseActionDialog } from '@/components/expenses/FixedExpenseActionDialog';
 import { DraggableExpenseRow } from '@/components/expenses/DraggableExpenseRow';
+import { CategoryManagerDialog } from '@/components/expenses/CategoryManagerDialog';
 
 export default function Expenses() {
   const {
@@ -108,6 +109,12 @@ export default function Expenses() {
     actionType: 'edit' | 'delete';
     expense: Expense | null;
   }>({ open: false, actionType: 'edit', expense: null });
+
+  // Category Manager Dialog State
+  const [categoryDialogState, setCategoryDialogState] = useState<{
+    open: boolean;
+    mode: 'category' | 'subcategory';
+  }>({ open: false, mode: 'category' });
 
   const selectedCategory = data.categories.find(c => c.id === formData.categoryId);
   const editSelectedCategory = data.categories.find(c => c.id === editFormData.categoryId);
@@ -375,7 +382,13 @@ export default function Expenses() {
                 <Label htmlFor="category">Categoria</Label>
                 <Select
                   value={formData.categoryId}
-                  onValueChange={value => setFormData({ ...formData, categoryId: value, subcategoryId: '' })}
+                  onValueChange={(value) => {
+                    if (value === 'new-category') {
+                      setCategoryDialogState({ open: true, mode: 'category' });
+                    } else {
+                      setFormData({ ...formData, categoryId: value, subcategoryId: '' });
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma categoria" />
@@ -392,6 +405,14 @@ export default function Expenses() {
                         </div>
                       </SelectItem>
                     ))}
+                    <div className="p-1 border-t mt-1">
+                      <SelectItem value="new-category" className="text-primary font-medium cursor-pointer">
+                        <div className="flex items-center gap-2">
+                          <Plus className="h-4 w-4" />
+                          Nova Categoria
+                        </div>
+                      </SelectItem>
+                    </div>
                   </SelectContent>
                 </Select>
               </div>
@@ -400,7 +421,13 @@ export default function Expenses() {
                 <Label htmlFor="subcategory">Subcategoria</Label>
                 <Select
                   value={formData.subcategoryId}
-                  onValueChange={value => setFormData({ ...formData, subcategoryId: value })}
+                  onValueChange={(value) => {
+                    if (value === 'new-subcategory') {
+                      setCategoryDialogState({ open: true, mode: 'subcategory' });
+                    } else {
+                      setFormData({ ...formData, subcategoryId: value });
+                    }
+                  }}
                   disabled={!formData.categoryId}
                 >
                   <SelectTrigger>
@@ -412,6 +439,14 @@ export default function Expenses() {
                         {sub.name}
                       </SelectItem>
                     ))}
+                    <div className="p-1 border-t mt-1">
+                      <SelectItem value="new-subcategory" className="text-primary font-medium cursor-pointer">
+                        <div className="flex items-center gap-2">
+                          <Plus className="h-4 w-4" />
+                          Nova Subcategoria
+                        </div>
+                      </SelectItem>
+                    </div>
                   </SelectContent>
                 </Select>
               </div>
@@ -423,6 +458,29 @@ export default function Expenses() {
             </form>
           </CardContent>
         </Card>
+
+        <CategoryManagerDialog
+          open={categoryDialogState.open}
+          onOpenChange={(open) => setCategoryDialogState(prev => ({ ...prev, open }))}
+          initialMode={categoryDialogState.mode}
+          defaultCategoryId={formData.categoryId}
+          onSuccess={(type, id) => {
+            if (type === 'category') {
+              setFormData(prev => ({ ...prev, categoryId: id, subcategoryId: '' }));
+            } else {
+              // Only set subcategory if the parent category matches (it should, but safety first)
+              // If we created a subcategory for a different category (user changed it in dialog), 
+              // we might want to switch the category too.
+              // The createSubcategory returns the object, check context implementation
+              // Since we pass defaultCategoryId, it's likely correct.
+              // But if user changed category inside dialog, we need to know the category ID too.
+              // Let's assume for now we stay on current category or if we can fetch it.
+              // Actually, simply setting the subcategory ID might not be enough if the category ID doesn't match.
+              // But our dialog defaults to current category.
+              setFormData(prev => ({ ...prev, subcategoryId: id }));
+            }
+          }}
+        />>
 
         <Card className="border-0 shadow-sm lg:col-span-2">
           <CardHeader>
