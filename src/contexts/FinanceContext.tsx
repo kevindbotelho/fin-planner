@@ -5,6 +5,20 @@ import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Helper to sort expenses (matches logic in Expenses.tsx)
+const sortExpenses = (expenses: Expense[]) => {
+  return [...expenses].sort((a, b) => {
+    // If both have displayOrder set (non-zero), use that
+    if (a.displayOrder !== 0 || b.displayOrder !== 0) {
+      return a.displayOrder - b.displayOrder;
+    }
+    // Otherwise sort by date (newest first), then by createdAt
+    const dateComparison = new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime();
+    if (dateComparison !== 0) return dateComparison;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+};
+
 interface FinanceContextType {
   data: FinanceData;
   loading: boolean;
@@ -517,6 +531,65 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const addExpense = async (expense: Omit<Expense, 'id' | 'createdAt' | 'displayOrder'>) => {
     if (!user) return;
 
+    // Helper to calculate insertion order and update existing items
+    const getInsertionOrder = async (periodId: string, purchaseDate: string): Promise<number> => {
+      // Get existing expenses for this period
+      const period = data.billingPeriods.find(p => p.id === periodId);
+      if (!period) return 0;
+
+      const periodExpenses = data.expenses.filter(expense => {
+        const pDate = new Date(expense.purchaseDate);
+        const sDate = new Date(period.startDate);
+        const eDate = new Date(period.endDate);
+        return pDate >= sDate && pDate < eDate;
+      });
+
+      // Check if manual ordering is active (any item has displayOrder != 0)
+      const hasManualOrder = periodExpenses.some(e => e.displayOrder !== 0);
+
+      // If no manual order, return 0 (default behavior)
+      if (!hasManualOrder) return 0;
+
+      // Sort existing items to find correct position
+      const sorted = sortExpenses(periodExpenses);
+
+      // Find insertion index
+      // We want to insert where NewDate > ItemDate (since standard sort is Descending)
+      // OR NewDate == ItemDate (Newer created goes top)
+      const newDateTs = new Date(purchaseDate).getTime();
+      let insertIndex = sorted.length;
+
+      for (let i = 0; i < sorted.length; i++) {
+        const itemDateTs = new Date(sorted[i].purchaseDate).getTime();
+        // If new item is newer or same date, it goes before (above) current item
+        if (newDateTs >= itemDateTs) {
+          insertIndex = i;
+          break;
+        }
+      }
+
+      // Shift items from insertIndex onwards
+      const updates = [];
+      for (let i = insertIndex; i < sorted.length; i++) {
+        // Only update if order implies a change (usually it does implicitly as we shift)
+        // We set their order to i + 1 (since new item takes i)
+        // But we must use their visual position 'i' mapping to 'i+1'
+        updates.push(
+          supabase
+            .from('expenses')
+            .update({ display_order: i + 1 })
+            .eq('id', sorted[i].id)
+            .eq('user_id', user.id)
+        );
+      }
+
+      if (updates.length > 0) {
+        await Promise.all(updates);
+      }
+
+      return insertIndex;
+    };
+
     // If it's a fixed expense, create a template first
     if (expense.type === 'fixed') {
       // Create the template
@@ -551,6 +624,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       // Create expenses for all applicable periods
       for (const period of periods) {
         const purchaseDate = getFixedPurchaseDateForPeriod(period, desiredDayOfMonth);
+        const displayOrder = await getInsertionOrder(period.id, purchaseDate);
 
         await supabase.from('expenses').insert({
           user_id: user.id,
@@ -561,6 +635,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           subcategory_id: expense.subcategoryId || null,
           type: 'fixed',
           fixed_template_id: templateData.id,
+          display_order: displayOrder,
         });
       }
 
@@ -570,6 +645,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
 
     // Regular variable expense
+    const period = getBillingPeriodForDate(expense.purchaseDate);
+    let displayOrder = 0;
+
+    if (period) {
+      displayOrder = await getInsertionOrder(period.id, expense.purchaseDate);
+    }
+
     const { error } = await supabase.from('expenses').insert({
       user_id: user.id,
       description: expense.description,
@@ -578,6 +660,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       category_id: expense.categoryId,
       subcategory_id: expense.subcategoryId || null,
       type: expense.type || 'variable',
+      display_order: displayOrder,
     });
 
     if (error) throw error;
