@@ -37,6 +37,7 @@ export interface FixedExpenseTemplate {
   endDate: string | null;
   isActive: boolean;
   createdAt: string;
+  originalTitle?: string | null;
 }
 
 export interface FixedExpenseExclusion {

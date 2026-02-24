@@ -39,6 +39,7 @@ interface FinanceContextType {
   deleteExpense: (id: string, scope?: 'current' | 'future') => Promise<void>;
   updateExpensesOrder: (orderedIds: string[]) => Promise<void>;
   addBulkExpenses: (expenses: Omit<Expense, 'id' | 'createdAt' | 'displayOrder'>[]) => Promise<void>;
+  linkExpenseToFixed: (expenseId: string, templateId: string, csvTitle: string, exactDate: string, exactAmount: number) => Promise<void>;
   // Billing Periods
   addBillingPeriod: (period: Omit<BillingPeriod, 'id'>) => Promise<void>;
   updateBillingPeriod: (id: string, period: Partial<BillingPeriod>) => Promise<void>;
@@ -207,6 +208,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         endDate: t.end_date,
         isActive: t.is_active,
         createdAt: t.created_at,
+        originalTitle: t.original_title || undefined,
       }));
 
       const fixedExclusions: FixedExpenseExclusion[] = (exclusionsRes.data || []).map(e => ({
@@ -802,6 +804,41 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     toast.success(`${expensesToInsert.length} despesas importadas com sucesso!`);
   };
 
+  const linkExpenseToFixed = async (expenseId: string, templateId: string, csvTitle: string, exactDate: string, exactAmount: number) => {
+    if (!user) return;
+
+    // 1. Update the instance (expense) to matching exact CSV details
+    const { error: expenseError } = await supabase
+      .from('expenses')
+      .update({
+        original_title: csvTitle,
+        purchase_date: exactDate,
+        amount: exactAmount
+      })
+      .eq('id', expenseId)
+      .eq('user_id', user.id);
+
+    if (expenseError) {
+      toast.error('Erro ao atualizar a despesa');
+      throw expenseError;
+    }
+
+    // 2. Update the parent template so it learns for next month
+    const { error: templateError } = await supabase
+      .from('fixed_expense_templates')
+      .update({ original_title: csvTitle })
+      .eq('id', templateId)
+      .eq('user_id', user.id);
+
+    if (templateError) {
+      toast.error('Erro ao atualizar o template da despesa fixa');
+      throw templateError;
+    }
+
+    await fetchData();
+    toast.success('Despesa vinculada com sucesso!');
+  };
+
   const updateExpense = async (id: string, updates: Partial<Expense>, scope: 'current' | 'future' = 'current') => {
     if (!user) return;
 
@@ -1299,6 +1336,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       deleteSubcategory,
       addExpense,
       addBulkExpenses,
+      linkExpenseToFixed,
       updateExpense,
       deleteExpense,
       updateExpensesOrder,

@@ -1,4 +1,5 @@
 import { Expense } from "@/types/finance";
+import { differenceInDays, parseISO } from "date-fns";
 
 export interface ParsedCsvRow {
     date: string;
@@ -64,11 +65,6 @@ export const parseNubankCsv = (csvContent: string): ParsedCsvRow[] => {
                 continue;
             }
 
-            // Only import negative amounts as expenses (assuming Nubank exports expenses as positive or negative, let's treat based on context)
-            // Usually Nubank credit card bill exports expenses as positive numbers in the amount column, and payments as negative.
-            // We will parse them all, UI can let the user ignore payments.
-            // To be safe and standard with the app logic: We just read the absolute value for expenses if it's a credit card.
-
             parsedData.push({
                 date,
                 title,
@@ -83,43 +79,52 @@ export const parseNubankCsv = (csvContent: string): ParsedCsvRow[] => {
 
 /**
  * Reconciles parsed CSV rows against existing database expenses to find duplicates.
- * Matching rules: Exact Match on Date AND Amount AND (original_title OR title)
+ * Matching rules: 
+ * 1. Exact Match on Date AND Amount AND (original_title OR title)
+ * 2. Fuzzy Match on Amount AND original_title AND (Date within +/- 5 days) -> Handles floating recurring fixed expenses
  */
 export const reconcileExpenses = (
     parsedRows: ParsedCsvRow[],
     existingExpenses: Expense[]
 ): ReconciledCsvRow[] => {
 
-    // Create a map/set of existing expenses for O(1) loopups
-    // Since we could have multiple identical expenses on the same day, 
-    // we count occurrences of the signature.
-    const existingSignatures = new Map<string, number>();
-
-    existingExpenses.forEach(exp => {
-        // Signature using originalTitle (if it came from a previous CSV)
-        if (exp.originalTitle) {
-            const sigOriginal = `${exp.purchaseDate}|${exp.amount}|${exp.originalTitle}`;
-            existingSignatures.set(sigOriginal, (existingSignatures.get(sigOriginal) || 0) + 1);
-        }
-
-        // Always include the signature with the current user-facing title 
-        // This catches manual entries that match exactly, or older entries before we had originalTitle
-        const sigCurrent = `${exp.purchaseDate}|${exp.amount}|${exp.description}`;
-        existingSignatures.set(sigCurrent, (existingSignatures.get(sigCurrent) || 0) + 1);
-    });
+    // Clone array to consume matches and handle identical transactions independently
+    const availableExpenses = [...existingExpenses];
 
     return parsedRows.map(row => {
-        const signature = `${row.date}|${row.amount}|${row.title}`;
         let isDuplicate = false;
+        let matchIndex = -1;
 
-        // Check if this exact signature exists in our DB pool
-        const matchCount = existingSignatures.get(signature) || 0;
+        // 1. Try to find EXACT match first
+        matchIndex = availableExpenses.findIndex(exp => {
+            const isExactDate = exp.purchaseDate === row.date;
+            const isExactAmount = exp.amount === row.amount;
+            const isExactOriginalTitle = exp.originalTitle === row.title;
+            const isExactTitle = exp.description === row.title;
 
-        // Handle Edge case 1: Multiple identical coffee purchases
-        // If we have remaining matches in our pool, we consider it a duplicate and consume one match
-        if (matchCount > 0) {
+            return isExactDate && isExactAmount && (isExactOriginalTitle || (!exp.originalTitle && isExactTitle));
+        });
+
+        // 2. If no exact match, try FUZZY match (crucial for fixed expenses that float by days)
+        if (matchIndex === -1) {
+            matchIndex = availableExpenses.findIndex(exp => {
+                const isExactAmount = exp.amount === row.amount;
+                const isExactOriginalTitle = exp.originalTitle === row.title;
+
+                // Only fuzzy match if the originalTitle is strictly set (meaning it was verified before via csv import / vinculation)
+                if (isExactAmount && isExactOriginalTitle) {
+                    const daysDiff = Math.abs(differenceInDays(parseISO(row.date), parseISO(exp.purchaseDate)));
+                    return daysDiff <= 5;
+                }
+                return false;
+            });
+        }
+
+        // 3. Mark and consume
+        if (matchIndex !== -1) {
             isDuplicate = true;
-            existingSignatures.set(signature, matchCount - 1);
+            // Consume this existing expense so it can't be matched again
+            availableExpenses.splice(matchIndex, 1);
         }
 
         return {
