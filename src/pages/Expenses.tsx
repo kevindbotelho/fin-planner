@@ -47,6 +47,7 @@ import { CurrencyInput } from '@/components/ui/currency-input';
 import { FixedExpenseActionDialog } from '@/components/expenses/FixedExpenseActionDialog';
 import { DraggableExpenseRow } from '@/components/expenses/DraggableExpenseRow';
 import { CategoryManagerDialog } from '@/components/expenses/CategoryManagerDialog';
+import { ImportCsvButton } from '@/components/expenses/csv/ImportCsvButton';
 
 export default function Expenses() {
   const {
@@ -319,11 +320,14 @@ export default function Expenses() {
           <h1 className="text-2xl font-bold text-foreground">Despesas</h1>
           <p className="text-muted-foreground">Registre e gerencie suas despesas</p>
         </div>
-        <BillingPeriodSelector
-          periods={data.billingPeriods}
-          selectedPeriodId={selectedPeriodId}
-          onSelect={setSelectedPeriodId}
-        />
+        <div className="flex items-center gap-2">
+          <ImportCsvButton />
+          <BillingPeriodSelector
+            periods={data.billingPeriods}
+            selectedPeriodId={selectedPeriodId}
+            onSelect={setSelectedPeriodId}
+          />
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

@@ -38,6 +38,7 @@ interface FinanceContextType {
   updateExpense: (id: string, expense: Partial<Expense>, scope?: 'current' | 'future') => Promise<void>;
   deleteExpense: (id: string, scope?: 'current' | 'future') => Promise<void>;
   updateExpensesOrder: (orderedIds: string[]) => Promise<void>;
+  addBulkExpenses: (expenses: Omit<Expense, 'id' | 'createdAt' | 'displayOrder'>[]) => Promise<void>;
   // Billing Periods
   addBillingPeriod: (period: Omit<BillingPeriod, 'id'>) => Promise<void>;
   updateBillingPeriod: (id: string, period: Partial<BillingPeriod>) => Promise<void>;
@@ -193,6 +194,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         createdAt: e.created_at,
         fixedTemplateId: e.fixed_template_id || undefined,
         displayOrder: e.display_order ?? 0,
+        originalTitle: e.original_title || undefined,
       }));
 
       const fixedTemplates: FixedExpenseTemplate[] = (templatesRes.data || []).map(t => ({
@@ -666,6 +668,138 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
     await fetchData();
     toast.success('Despesa criada com sucesso');
+  };
+
+  const addBulkExpenses = async (expensesToInsert: Omit<Expense, 'id' | 'createdAt' | 'displayOrder'>[]) => {
+    if (!user || expensesToInsert.length === 0) return;
+
+    // Helper to calculate insertion order and update existing items
+    const getInsertionOrderAndUpdates = (periodId: string, itemDates: string[]) => {
+      const period = data.billingPeriods.find(p => p.id === periodId);
+      if (!period) return { startingIndex: 0, updates: [] };
+
+      const periodExpenses = data.expenses.filter(expense => {
+        const pDate = new Date(expense.purchaseDate);
+        const sDate = new Date(period.startDate);
+        const eDate = new Date(period.endDate);
+        return pDate >= sDate && pDate < eDate;
+      });
+
+      const hasManualOrder = periodExpenses.some(e => e.displayOrder !== 0);
+      if (!hasManualOrder) return { startingIndex: 0, updates: [] };
+
+      const sorted = sortExpenses(periodExpenses);
+
+      // For bulk, we find where the OLDEST item in the bunch should go
+      // to shift everything below it down by the NUMBER of items we're inserting
+      // (Assuming items are already sorted before this function is called, or we just use the oldest date)
+      // Actually, since all items going into this period will be inserted sequentially,
+      // we just need the insertion index for the OLDEST item from the batch that belongs to this period.
+      // Easiest is to just shift everything based on the NEWEST item?
+      // No, let's keep it simple: group by date, find index for each date, shift by 1.
+      // But to be efficient, let's just find the index for the NEWEST item in the bulk, 
+      // shift everything from that index down by N (the number of items belonging to this period).
+      const timestamps = itemDates.map(date => new Date(date).getTime());
+      const maxDateTs = Math.max(...timestamps);
+
+      let insertIndex = sorted.length;
+      for (let i = 0; i < sorted.length; i++) {
+        const itemDateTs = new Date(sorted[i].purchaseDate).getTime();
+        if (maxDateTs >= itemDateTs) {
+          insertIndex = i;
+          break;
+        }
+      }
+
+      const updates: any[] = [];
+      const shiftAmount = itemDates.length;
+      for (let i = insertIndex; i < sorted.length; i++) {
+        updates.push(
+          supabase
+            .from('expenses')
+            .update({ display_order: i + shiftAmount })
+            .eq('id', sorted[i].id)
+            .eq('user_id', user.id)
+        );
+      }
+
+      return { startingIndex: insertIndex, updates };
+    };
+
+    // Group expenses by period to handle display_order calculation
+    const expensesByPeriod = new Map<string, Omit<Expense, 'id' | 'createdAt' | 'displayOrder'>[]>();
+    const expensesWithNoPeriod: Omit<Expense, 'id' | 'createdAt' | 'displayOrder'>[] = [];
+
+    expensesToInsert.forEach(expense => {
+      const period = getBillingPeriodForDate(expense.purchaseDate);
+      if (period) {
+        if (!expensesByPeriod.has(period.id)) {
+          expensesByPeriod.set(period.id, []);
+        }
+        expensesByPeriod.get(period.id)!.push(expense);
+      } else {
+        expensesWithNoPeriod.push(expense);
+      }
+    });
+
+    const displayOrderUpdates: any[] = [];
+    const finalInserts: any[] = [];
+
+    // Process periods
+    for (const [periodId, periodExpenses] of expensesByPeriod.entries()) {
+      const dates = periodExpenses.map(e => e.purchaseDate);
+      const { startingIndex, updates } = getInsertionOrderAndUpdates(periodId, dates);
+      displayOrderUpdates.push(...updates);
+
+      // IMPORTANT: Assign sequential display orders to the inserted items to keep them in order
+      periodExpenses.forEach((expense, idx) => {
+        finalInserts.push({
+          user_id: user.id,
+          description: expense.description,
+          amount: expense.amount,
+          purchase_date: expense.purchaseDate,
+          category_id: expense.categoryId,
+          subcategory_id: expense.subcategoryId || null,
+          type: expense.type || 'variable',
+          display_order: startingIndex + idx,
+          // Note: Here we need to map original_title from the expense argument.
+          // Since our Expense interface doesn't have original_title yet, we need to add it to the interface or cast it.
+          // We will update the Expense type shortly.
+          original_title: (expense as any).original_title || null
+        });
+      });
+    }
+
+    // Process those without a period (fallback)
+    expensesWithNoPeriod.forEach((expense) => {
+      finalInserts.push({
+        user_id: user.id,
+        description: expense.description,
+        amount: expense.amount,
+        purchase_date: expense.purchaseDate,
+        category_id: expense.categoryId,
+        subcategory_id: expense.subcategoryId || null,
+        type: expense.type || 'variable',
+        display_order: 0,
+        original_title: (expense as any).original_title || null
+      });
+    });
+
+    // Run updates for existing items' order
+    if (displayOrderUpdates.length > 0) {
+      await Promise.all(displayOrderUpdates);
+    }
+
+    // Insert new items
+    const { error } = await supabase.from('expenses').insert(finalInserts);
+
+    if (error) {
+      toast.error('Erro ao importar despesas');
+      throw error;
+    }
+
+    await fetchData();
+    toast.success(`${expensesToInsert.length} despesas importadas com sucesso!`);
   };
 
   const updateExpense = async (id: string, updates: Partial<Expense>, scope: 'current' | 'future' = 'current') => {
@@ -1164,6 +1298,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       updateSubcategory,
       deleteSubcategory,
       addExpense,
+      addBulkExpenses,
       updateExpense,
       deleteExpense,
       updateExpensesOrder,

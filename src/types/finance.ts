@@ -24,6 +24,7 @@ export interface Expense {
   createdAt: string; // data de criação do registro
   fixedTemplateId?: string; // referência ao template de despesa fixa
   displayOrder: number; // ordem de exibição manual
+  originalTitle?: string | null; // título original do csv para conciliação
 }
 
 export interface FixedExpenseTemplate {
