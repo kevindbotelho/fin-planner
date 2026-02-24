@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { FilePlus2, CheckCircle2, HelpCircle } from "lucide-react";
 
 interface CsvImportPreviewProps {
@@ -201,7 +202,16 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[160px]">
                                                 <div className="flex items-center gap-1">
                                                     Ação
-                                                    <HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" title="Apenas para Despesas Fixas: vincula o lançamento do banco à despesa que o sistema projetou pro mês." />
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top" className="max-w-[200px] text-xs">
+                                                                <p>Apenas para Despesas Fixas: vincula o lançamento do banco à despesa que o sistema projetou pro mês.</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
                                                 </div>
                                             </th>
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[200px]">Categoria / Vínculo</th>
