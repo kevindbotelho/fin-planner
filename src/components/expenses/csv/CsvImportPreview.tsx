@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FilePlus2, CheckCircle2 } from "lucide-react";
+import { FilePlus2, CheckCircle2, HelpCircle } from "lucide-react";
 
 interface CsvImportPreviewProps {
     isOpen: boolean;
@@ -198,7 +198,12 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[100px]">Data</th>
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground max-w-[200px]">Descrição (Banco)</th>
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[120px]">Valor</th>
-                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[160px]">Ação</th>
+                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[160px]">
+                                                <div className="flex items-center gap-1">
+                                                    Ação
+                                                    <HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" title="Apenas para Despesas Fixas: vincula o lançamento do banco à despesa que o sistema projetou pro mês." />
+                                                </div>
+                                            </th>
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[200px]">Categoria / Vínculo</th>
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[180px]">Subcategoria</th>
                                         </tr>
@@ -228,26 +233,31 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                         </td>
                                                         <td className="p-4 align-middle">{format(new Date(`${row.date}T12:00:00`), "dd/MM", { locale: ptBR })}</td>
                                                         <td className="p-4 align-middle font-medium truncate max-w-[200px]" title={row.title}>{row.title}</td>
-                                                        <td className="p-4 align-middle font-semibold text-rose-500">
+                                                        <td className={`p-4 align-middle font-semibold ${row.amount < 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                                                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(row.amount)}
                                                         </td>
                                                         <td className="p-4 align-middle">
                                                             {isDuplicate ? (
-                                                                <Badge variant="secondary" className="bg-amber-100 text-amber-800">Já Existe</Badge>
+                                                                <Badge variant="secondary" className="bg-amber-100 text-amber-800" title={row.duplicateReason}>Já Existe</Badge>
                                                             ) : (
-                                                                <Select
-                                                                    value={row.actionType}
-                                                                    onValueChange={(val: 'new' | 'link') => handleActionTypeChange(index, val)}
-                                                                    disabled={isIgnored}
-                                                                >
-                                                                    <SelectTrigger className="h-8">
-                                                                        <SelectValue />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="new">Nova Desp. Variável</SelectItem>
-                                                                        <SelectItem value="link">Vincular a Desp. Fixa</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
+                                                                <div className="flex flex-col gap-1">
+                                                                    <Select
+                                                                        value={row.actionType}
+                                                                        onValueChange={(val: 'new' | 'link') => handleActionTypeChange(index, val)}
+                                                                        disabled={isIgnored}
+                                                                    >
+                                                                        <SelectTrigger className="h-8">
+                                                                            <SelectValue />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="new">Nova</SelectItem>
+                                                                            <SelectItem value="link">Vincular</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    {row.isNegative && (
+                                                                        <span className="text-[10px] text-muted-foreground leading-tight px-1 font-medium">Entrada/Estorno</span>
+                                                                    )}
+                                                                </div>
                                                             )}
                                                         </td>
                                                         <td className="p-4 align-middle">
@@ -296,11 +306,11 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                                     value={row.subcategoryId || "none"}
                                                                     onValueChange={(val) => handleSubcategoryChange(index, val === "none" ? "" : val)}
                                                                 >
-                                                                    <SelectTrigger className="h-8 w-full">
-                                                                        <SelectValue placeholder="Subcategoria..." />
+                                                                    <SelectTrigger className="h-8 w-full [&>span]:text-left">
+                                                                        <SelectValue placeholder="Nenhuma subcategoria..." />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
-                                                                        <SelectItem value="none" className="text-muted-foreground italic">Sem subcategoria</SelectItem>
+                                                                        <SelectItem value="none" className="text-muted-foreground italic text-left">Nenhuma subcategoria</SelectItem>
                                                                         {selectedCat.subcategories.map(sub => (
                                                                             <SelectItem key={sub.id} value={sub.id}>{sub.name}</SelectItem>
                                                                         ))}

@@ -10,6 +10,7 @@ export interface ParsedCsvRow {
 
 export interface ReconciledCsvRow extends ParsedCsvRow {
     isDuplicate: boolean;
+    isNegative: boolean;
     ignored: boolean;
     categoryId?: string;
     subcategoryId?: string;
@@ -68,7 +69,7 @@ export const parseNubankCsv = (csvContent: string): ParsedCsvRow[] => {
             parsedData.push({
                 date,
                 title,
-                amount: Math.abs(amount), // Ensuring amount is positive as stored in DB for expenses
+                amount: amount, // Keeping the exact sign from CSV (negatives for incomes/refunds)
                 originalLineNumber: i + 1,
             });
         }
@@ -127,11 +128,18 @@ export const reconcileExpenses = (
             availableExpenses.splice(matchIndex, 1);
         }
 
+        const isNegative = row.amount < 0;
+
+        let reason = undefined;
+        if (isDuplicate) reason = "Identificado como já lançado";
+        else if (isNegative) reason = "Valor de entrada/estorno (Negativo)";
+
         return {
             ...row,
             isDuplicate,
-            ignored: isDuplicate, // By default, ignore duplicates so they aren't imported
-            duplicateReason: isDuplicate ? "Identificado como já lançado" : undefined
+            isNegative,
+            ignored: isDuplicate || isNegative, // By default, ignore duplicates and negative values
+            duplicateReason: reason
         };
     });
 };
