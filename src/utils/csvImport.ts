@@ -92,7 +92,29 @@ export const reconcileExpenses = (
     // Clone array to consume matches and handle identical transactions independently
     const availableExpenses = [...existingExpenses];
 
-    return parsedRows.map(row => {
+    // First pass: identify matching positive and negative transactions on the same day
+    const rowsWithPairStatus = parsedRows.map(row => ({ ...row, isMatchedPair: false }));
+
+    for (let i = 0; i < rowsWithPairStatus.length; i++) {
+        const current = rowsWithPairStatus[i];
+        if (current.isMatchedPair) continue;
+
+        // Try to find the exact opposite amount on the same day
+        const matchIndex = rowsWithPairStatus.findIndex((other, index) =>
+            index !== i &&
+            !other.isMatchedPair &&
+            other.date === current.date &&
+            Math.abs(other.amount) === Math.abs(current.amount) &&
+            other.amount === -current.amount
+        );
+
+        if (matchIndex !== -1) {
+            rowsWithPairStatus[i].isMatchedPair = true;
+            rowsWithPairStatus[matchIndex].isMatchedPair = true;
+        }
+    }
+
+    return rowsWithPairStatus.map(row => {
         let isDuplicate = false;
         let matchIndex = -1;
 
@@ -107,7 +129,7 @@ export const reconcileExpenses = (
         });
 
         // 2. If no exact match, try FUZZY match (crucial for fixed expenses that float by days)
-        if (matchIndex === -1) {
+        if (matchIndex === -1 && !row.isMatchedPair) {
             matchIndex = availableExpenses.findIndex(exp => {
                 const isExactAmount = exp.amount === row.amount;
                 const isExactOriginalTitle = exp.originalTitle === row.title;
@@ -121,8 +143,8 @@ export const reconcileExpenses = (
             });
         }
 
-        // 3. Mark and consume
-        if (matchIndex !== -1) {
+        // 3. Mark and consume (only if not a matched pair that is skipping the import)
+        if (matchIndex !== -1 && !row.isMatchedPair) {
             isDuplicate = true;
             // Consume this existing expense so it can't be matched again
             availableExpenses.splice(matchIndex, 1);
@@ -131,14 +153,15 @@ export const reconcileExpenses = (
         const isNegative = row.amount < 0;
 
         let reason = undefined;
-        if (isDuplicate) reason = "Identificado como já lançado";
+        if (row.isMatchedPair) reason = "Compra e estorno identificados";
+        else if (isDuplicate) reason = "Identificado como já lançado";
         else if (isNegative) reason = "Valor de entrada/estorno (Negativo)";
 
         return {
             ...row,
             isDuplicate,
             isNegative,
-            ignored: isDuplicate || isNegative, // By default, ignore duplicates and negative values
+            ignored: isDuplicate || isNegative || row.isMatchedPair, // Ignore matched pairs automatically
             duplicateReason: reason
         };
     });

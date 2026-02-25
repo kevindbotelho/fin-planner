@@ -23,6 +23,7 @@ export interface ExtendedReconciledCsvRow extends ReconciledCsvRow {
     actionType: 'new' | 'link';
     linkedExpenseId?: string;
     linkedTemplateId?: string;
+    isMatchedPair?: boolean;
 }
 
 export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPreviewProps) {
