@@ -121,7 +121,7 @@ export const reconcileExpenses = (
         // 1. Try to find EXACT match first
         matchIndex = availableExpenses.findIndex(exp => {
             const isExactDate = exp.purchaseDate === row.date;
-            const isExactAmount = exp.amount === row.amount;
+            const isExactAmount = exp.amount === Math.abs(row.amount);
             const isExactOriginalTitle = exp.originalTitle === row.title;
             const isExactTitle = exp.description === row.title;
 
@@ -131,7 +131,7 @@ export const reconcileExpenses = (
         // 2. If no exact match, try FUZZY match (crucial for fixed expenses that float by days)
         if (matchIndex === -1 && !row.isMatchedPair) {
             matchIndex = availableExpenses.findIndex(exp => {
-                const isExactAmount = exp.amount === row.amount;
+                const isExactAmount = exp.amount === Math.abs(row.amount);
                 const isExactOriginalTitle = exp.originalTitle === row.title;
 
                 // Only fuzzy match if the originalTitle is strictly set (meaning it was verified before via csv import / vinculation)

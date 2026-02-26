@@ -20,7 +20,7 @@ interface CsvImportPreviewProps {
 }
 
 export interface ExtendedReconciledCsvRow extends ReconciledCsvRow {
-    actionType: 'new' | 'link';
+    actionType: 'new' | 'fixed' | 'link';
     linkedExpenseId?: string;
     linkedTemplateId?: string;
     isMatchedPair?: boolean;
@@ -68,16 +68,16 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
         });
     };
 
-    const handleActionTypeChange = (index: number, type: 'new' | 'link') => {
+    const handleActionTypeChange = (index: number, type: 'new' | 'fixed' | 'link') => {
         setReconciledData(prev => {
             const newData = [...prev];
             newData[index] = { ...newData[index], actionType: type };
-            if (type === 'new') {
-                newData[index].linkedExpenseId = undefined;
-                newData[index].linkedTemplateId = undefined;
-            } else {
+            if (type === 'link') {
                 newData[index].categoryId = undefined;
                 newData[index].subcategoryId = undefined;
+            } else {
+                newData[index].linkedExpenseId = undefined;
+                newData[index].linkedTemplateId = undefined;
             }
             return newData;
         });
@@ -113,7 +113,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
         const toProcess = reconciledData.filter(row => !row.ignored);
 
         // Validation for 'new'
-        const newExpenses = toProcess.filter(r => r.actionType === 'new');
+        const newExpenses = toProcess.filter(r => r.actionType === 'new' || r.actionType === 'fixed');
         const missingCategories = newExpenses.filter(row => !row.categoryId);
         if (missingCategories.length > 0) {
             toast.error(`Selecione uma categoria para as ${missingCategories.length} novas despesas.`);
@@ -137,15 +137,16 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
         try {
             const promises: Promise<void>[] = [];
 
-            // 1. Add bulk new expenses
-            if (newExpenses.length > 0) {
-                promises.push(addBulkExpenses(newExpenses.map(row => ({
+            // 1. Add bulk new expenses (variable + fixed)
+            const createExpenses = toProcess.filter(r => r.actionType === 'new' || r.actionType === 'fixed');
+            if (createExpenses.length > 0) {
+                promises.push(addBulkExpenses(createExpenses.map(row => ({
                     description: row.title,
-                    amount: row.amount,
+                    amount: Math.abs(row.amount),
                     purchaseDate: row.date,
                     categoryId: row.categoryId!,
                     subcategoryId: row.subcategoryId,
-                    type: 'variable',
+                    type: row.actionType === 'fixed' ? 'fixed' : 'variable',
                     originalTitle: row.title,
                 }))));
             }
@@ -254,7 +255,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                                 <div className="flex flex-col gap-1">
                                                                     <Select
                                                                         value={row.actionType}
-                                                                        onValueChange={(val: 'new' | 'link') => handleActionTypeChange(index, val)}
+                                                                        onValueChange={(val: 'new' | 'fixed' | 'link') => handleActionTypeChange(index, val)}
                                                                         disabled={isIgnored}
                                                                     >
                                                                         <SelectTrigger className="h-8">
@@ -262,6 +263,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                                         </SelectTrigger>
                                                                         <SelectContent>
                                                                             <SelectItem value="new">Nova</SelectItem>
+                                                                            <SelectItem value="fixed">Fixa</SelectItem>
                                                                             <SelectItem value="link">Vincular</SelectItem>
                                                                         </SelectContent>
                                                                     </Select>
@@ -272,7 +274,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                             )}
                                                         </td>
                                                         <td className="p-4 align-middle">
-                                                            {!isIgnored && !isDuplicate && row.actionType === 'new' && (
+                                                            {!isIgnored && !isDuplicate && (row.actionType === 'new' || row.actionType === 'fixed') && (
                                                                 <Select
                                                                     value={row.categoryId || ""}
                                                                     onValueChange={(val) => handleCategoryChange(index, val)}
@@ -312,7 +314,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                             )}
                                                         </td>
                                                         <td className="p-4 align-middle">
-                                                            {!isIgnored && !isDuplicate && row.actionType === 'new' && selectedCat && selectedCat.subcategories.length > 0 && (
+                                                            {!isIgnored && !isDuplicate && (row.actionType === 'new' || row.actionType === 'fixed') && selectedCat && selectedCat.subcategories.length > 0 && (
                                                                 <Select
                                                                     value={row.subcategoryId || "none"}
                                                                     onValueChange={(val) => handleSubcategoryChange(index, val === "none" ? "" : val)}
