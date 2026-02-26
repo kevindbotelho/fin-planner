@@ -28,7 +28,7 @@ export interface ExtendedReconciledCsvRow extends ReconciledCsvRow {
 }
 
 export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPreviewProps) {
-    const { data: financeData, addBulkExpenses, linkExpenseToFixed } = useFinance();
+    const { data: financeData, addBulkExpenses, linkExpenseToFixed, getBillingPeriodForDate } = useFinance();
     const [reconciledData, setReconciledData] = useState<ExtendedReconciledCsvRow[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [hasReconciled, setHasReconciled] = useState(false);
@@ -246,6 +246,14 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
 
                                                 const selectedCat = financeData.categories.find(c => c.id === row.categoryId);
 
+                                                // Only show linkable expenses that belong to the SAME billing period as this CSV row
+                                                const rowPeriod = getBillingPeriodForDate(row.date);
+                                                const validLinkableExpenses = linkableFixedExpenses.filter(exp => {
+                                                    if (!rowPeriod) return true; // If somehow row has no period, show all (fallback)
+                                                    const expPeriod = getBillingPeriodForDate(exp.purchaseDate);
+                                                    return expPeriod?.id === rowPeriod.id;
+                                                });
+
                                                 return (
                                                     <tr key={`csv-row-${index}`} className={`border-b transition-colors hover:bg-muted/50 ${isIgnored ? 'opacity-50 bg-muted/30' : ''}`}>
                                                         <td className="p-4 align-middle">
@@ -327,7 +335,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                                         <SelectValue placeholder="Selecione..." />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
-                                                                        {linkableFixedExpenses.map(exp => {
+                                                                        {validLinkableExpenses.map(exp => {
                                                                             const template = financeData.fixedTemplates.find(t => t.id === exp.fixedTemplateId);
                                                                             return (
                                                                                 <SelectItem key={exp.id} value={exp.id}>
@@ -335,7 +343,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                                                 </SelectItem>
                                                                             )
                                                                         })}
-                                                                        {linkableFixedExpenses.length === 0 && (
+                                                                        {validLinkableExpenses.length === 0 && (
                                                                             <SelectItem value="none" disabled>Nenhuma despesa pendente</SelectItem>
                                                                         )}
                                                                     </SelectContent>
