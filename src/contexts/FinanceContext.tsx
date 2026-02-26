@@ -929,6 +929,66 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     if (updates.subcategoryId !== undefined) updateData.subcategory_id = updates.subcategoryId || null;
     if (updates.type !== undefined) updateData.type = updates.type;
 
+    // Handle Variable -> Fixed conversion
+    if (currentExpense.type === 'variable' && updates.type === 'fixed') {
+      const finalDescription = updates.description ?? currentExpense.description;
+      const finalAmount = updates.amount ?? currentExpense.amount;
+      const finalCategoryId = updates.categoryId ?? currentExpense.categoryId;
+      const finalSubcategoryId = updates.subcategoryId !== undefined ? updates.subcategoryId : currentExpense.subcategoryId;
+      const finalPurchaseDate = updates.purchaseDate ?? currentExpense.purchaseDate;
+
+      // 1. Create the template for the new fixed expense
+      const { data: templateData, error: templateError } = await supabase
+        .from('fixed_expense_templates')
+        .insert({
+          user_id: user.id,
+          description: finalDescription,
+          amount: finalAmount,
+          category_id: finalCategoryId,
+          subcategory_id: finalSubcategoryId || null,
+          start_date: finalPurchaseDate,
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (templateError) {
+        toast.error('Erro ao converter para despesa fixa');
+        throw templateError;
+      }
+
+      // Link the current expense to the newly created template
+      updateData.fixed_template_id = templateData.id;
+
+      // 2. Generate future expenses for subsequent billing periods
+      const tempExpenseForPeriod = { ...currentExpense, purchaseDate: finalPurchaseDate } as Expense;
+      const currentPeriod = getPeriodForExpense(tempExpenseForPeriod);
+
+      const futurePeriods = data.billingPeriods.filter(period => {
+        const periodStart = new Date(period.startDate);
+        const expenseStart = currentPeriod ? new Date(currentPeriod.startDate) : new Date(finalPurchaseDate);
+        return periodStart > expenseStart;
+      });
+
+      const desiredDayOfMonth = getDayOfMonthFromISODate(finalPurchaseDate);
+
+      for (const period of futurePeriods) {
+        const futurePurchaseDate = getFixedPurchaseDateForPeriod(period, desiredDayOfMonth);
+
+        await supabase.from('expenses').insert({
+          user_id: user.id,
+          description: finalDescription,
+          amount: finalAmount,
+          purchase_date: futurePurchaseDate,
+          category_id: finalCategoryId,
+          subcategory_id: finalSubcategoryId || null,
+          type: 'fixed',
+          fixed_template_id: templateData.id,
+          display_order: 0,
+        });
+      }
+    }
+
     const { error } = await supabase
       .from('expenses')
       .update(updateData)
