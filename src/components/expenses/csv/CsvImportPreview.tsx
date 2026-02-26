@@ -41,7 +41,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
 
     React.useEffect(() => {
         if (isOpen && parsedData.length > 0) {
-            const reconciled = reconcileExpenses(parsedData, financeData.expenses);
+            const reconciled = reconcileExpenses(parsedData, financeData.expenses, financeData.fixedTemplates);
             setReconciledData(reconciled.map(r => ({
                 ...r,
                 actionType: 'new' as const,

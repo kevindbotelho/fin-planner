@@ -1,4 +1,4 @@
-import { Expense } from "@/types/finance";
+import { Expense, FixedExpenseTemplate } from "@/types/finance";
 import { differenceInDays, parseISO } from "date-fns";
 
 export interface ParsedCsvRow {
@@ -86,7 +86,8 @@ export const parseNubankCsv = (csvContent: string): ParsedCsvRow[] => {
  */
 export const reconcileExpenses = (
     parsedRows: ParsedCsvRow[],
-    existingExpenses: Expense[]
+    existingExpenses: Expense[],
+    fixedTemplates: FixedExpenseTemplate[] = []
 ): ReconciledCsvRow[] => {
 
     // Clone array to consume matches and handle identical transactions independently
@@ -136,6 +137,26 @@ export const reconcileExpenses = (
 
                 // Only fuzzy match if the originalTitle is strictly set (meaning it was verified before via csv import / vinculation)
                 if (isExactAmount && isExactOriginalTitle) {
+                    const daysDiff = Math.abs(differenceInDays(parseISO(row.date), parseISO(exp.purchaseDate)));
+                    return daysDiff <= 5;
+                }
+                return false;
+            });
+        }
+
+        // 3. If still no match, try TEMPLATE match: the expense was projected from a template
+        //    that already learned this CSV title via a previous vinculation.
+        if (matchIndex === -1 && !row.isMatchedPair) {
+            matchIndex = availableExpenses.findIndex(exp => {
+                if (!exp.fixedTemplateId || exp.originalTitle) return false; // Only match unverified projected expenses
+                const isExactAmount = exp.amount === Math.abs(row.amount);
+                if (!isExactAmount) return false;
+
+                // Check if the parent template's originalTitle matches the CSV title
+                const template = fixedTemplates.find(t => t.id === exp.fixedTemplateId);
+                if (!template?.originalTitle) return false;
+
+                if (template.originalTitle === row.title) {
                     const daysDiff = Math.abs(differenceInDays(parseISO(row.date), parseISO(exp.purchaseDate)));
                     return daysDiff <= 5;
                 }
