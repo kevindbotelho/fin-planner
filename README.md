@@ -1,40 +1,73 @@
-# Fin Planner
+# Fin Planner 💰
 
-> **Nota:** Este é um projeto *Open Source* desenvolvido com fins educacionais e para resolver uma necessidade pessoal de organização financeira.
+O **Fin Planner** é uma solução moderna e intuitiva para gestão financeira pessoal. O que começou como um projeto para organização própria evoluiu para uma ferramenta robusta que combina simplicidade com funcionalidades avançadas.
 
-## 📖 A História do Projeto
+> [!NOTE]
+> O Fin Planner é **totalmente gratuito** para uso pessoal. Sinta-se à vontade para hospedar sua própria instância!
 
-O **Fin Planner** nasceu de uma dor real: a necessidade de ter clareza e controle sobre as finanças pessoais de forma simples e eficiente. O que começou como uma ideia rápida, tornou-se um laboratório vivo para experimentação técnica e engenharia de software moderna.
+---
 
-### 🚀 A Evolução
+## 📸 Showcase
 
-Este projeto tem uma trajetória técnica interessante que reflete a busca por autonomia e aprendizado:
+### 📊 Dashboard Inteligente
+Tenha uma visão 360º de suas finanças com gráficos interativos de Receita vs Despesas e distribuição por categoria.
+![Dashboard](docs/screenshots/dashboard.png)
 
-1.  **O Início (Prototipação Rápida):** A primeira versão foi gerada utilizando a plataforma *Lovable*. Isso permitiu validar a ideia e ter uma interface visual funcional em tempo recorde.
-2.  **A Decisão de Migrar:** Para ter controle total sobre a infraestrutura e o código, decidi "ejetar" o projeto da plataforma <i>low-code</i>.
-3.  **A Nova Infraestrutura:**
-    *   Migrei o banco de dados e a autenticação da cloud proprietária para o **Supabase** (PostgreSQL).
-    *   Assumi o hosting e deployment utilizando a **Vercel**, garantindo CI/CD contínuo.
-4.  **Desenvolvimento Moderno:** Atualmente, o código é mantido e evoluído utilizando **Google Antigravity** como parceiro de *pair programming* via IA, permitindo implementações rápidas e robustas.
+### 💸 Gestão de Despesas
+Controle detalhado de gastos com suporte a despesas fixas e variáveis.
+![Despesas](docs/screenshots/despesas.png)
 
-### 🛠️ Filosofia de Desenvolvimento
+---
 
-Este software segue a filosofia de *"dogfooding"*. Eu sou o principal usuário. O projeto não está "pronto"; ele evolui organicamente à medida que eu o utilizo no dia a dia. Novas funcionalidades são implementadas quando sinto falta delas, e bugs são corrigidos assim que atrapalham minha própria gestão financeira.
+## ✨ Funcionalidades Principais
 
-## 💻 Stack Tecnológica
+*   **🛡️ Uso Gratuito:** Sem assinaturas ou taxas. Controle total dos seus dados.
+*   **🏦 Importação Nubank (CSV):** Importe suas faturas diretamente do Nubank. 
+    *   *Inteligência Anti-Duplicata:* O sistema identifica automaticamente despesas já importadas anteriormente para evitar registros repetidos.
+*   **🔄 Sincronização Inteligente:** Sincronize despesas inseridas manualmente com transações automáticas importadas via CSV.
+*   **📅 Planejamento por Período:** Crie orçamentos (Metas) por categoria e acompanhe seu progresso mensal.
+*   **🎨 Customização Total:** Crie suas próprias categorias e subcategorias para organizar suas finanças do seu jeito.
 
-O projeto utiliza uma stack moderna, focada em performance, tipagem estática e experiência de desenvolvimento:
+---
 
-*   **Frontend:** React, Vite, TypeScript
-*   **Estilização:** Tailwind CSS, shadcn/ui
-*   **Backend & Auth:** Supabase
-*   **AI Assistant:** Google Antigravity
+## 🛠️ Stack Tecnológica
 
-## 🎯 Objetivo
+O projeto utiliza o que há de mais moderno no ecossistema web:
 
-Além de resolver minha organização financeira, o objetivo deste repositório é servir como portfólio e demonstração de capacidade técnica em:
+*   **Frontend:** [React](https://reactjs.org/) + [Vite](https://vitejs.dev/) + [TypeScript](https://www.typescriptlang.org/)
+*   **UI/UX:** [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
+*   **Backend & Autenticação:** [Supabase](https://supabase.com/) (PostgreSQL)
+*   **Deployment:** [Vercel](https://vercel.com/)
 
-*   Arquitetura de software escalável.
-*   Integração de serviços modernos (BaaS).
-*   Refatoração e migração de sistemas legados/gerados.
-*   Colaboração Humano-IA no desenvolvimento de software.
+---
+
+## 🚀 Como Executar Localmente
+
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/kevindbotelho/fin-planner.git
+   cd fin-planner
+   ```
+
+2. **Instale as dependências:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure as variáveis de ambiente:**
+   Crie um arquivo `.env` baseado no `.env.example` com suas credenciais do Supabase.
+
+4. **Inicie o servidor de desenvolvimento:**
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 🤝 Contribuições
+
+Este é um projeto *Open Source*. Sinta-se à vontade para abrir Issues ou enviar Pull Requests.
+
+---
+
+Desenvolvido por [Kevin Botelho](https://github.com/kevindbotelho) 🚀
