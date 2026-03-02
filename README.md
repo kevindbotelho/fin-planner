@@ -72,4 +72,4 @@ Controle detalhado de gastos com suporte a despesas fixas e variáveis.
 
 ## 🤝 Créditos
 
-Desenvolvido por [Kevin Botelho](https://github.com/kevindbotelho) 🚀 em parceria com as capacidades agentic do Antigravity.
+Desenvolvido por [Kevin Botelho](https://github.com/kevindbotelho) 🚀 através do Antigravity.
