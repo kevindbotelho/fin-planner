@@ -14,12 +14,14 @@ Embora tenha sido desenhado para o meu uso pessoal, o código está disponível 
 ### 📊 Dashboard Inteligente
 Tenha uma visão 360º de suas finanças com gráficos interativos de Receita vs Despesas e distribuição por categoria.
 
-![Dashboard](https://link-da-sua-imagem-aqui.png)
+![Dashboard](https://github.com/user-attachments/assets/b1dba003-cbb4-4456-9a27-456c22510d79)
 
 ### 💸 Gestão de Despesas
 Controle detalhado de gastos com suporte a despesas fixas e variáveis.
 
-![Lista de Despesas](https://link-da-sua-imagem-aqui.png)
+![Lista de Despesas](https://github.com/user-attachments/assets/ec8fafb5-855f-4bca-a703-6835420d223c)
+
+![Import CSV Nubank](https://github.com/user-attachments/assets/3cda7647-6234-438c-b6f5-41f9371a1aba)
 
 ---
 
