@@ -11,30 +11,34 @@ Embora tenha sido desenhado para o meu uso pessoal, o código está disponível 
 
 ## 📸 Showcase
 
+> [!IMPORTANT]
+> **Placeholder para Imagens:** Espaço reservado para inclusão das screenshots personalizadas.
+
 ### 📊 Dashboard Inteligente
 Tenha uma visão 360º de suas finanças com gráficos interativos de Receita vs Despesas e distribuição por categoria.
-![Dashboard](docs/screenshots/dashboard.png)
+<!-- Suba sua imagem do dashboard aqui -->
+<!-- ![Dashboard](caminho_para_sua_imagem) -->
 
 ### 💸 Gestão de Despesas
 Controle detalhado de gastos com suporte a despesas fixas e variáveis.
-![Despesas](docs/screenshots/despesas.png)
+<!-- Suba sua imagem de despesas aqui -->
+<!-- ![Despesas](caminho_para_sua_imagem) -->
 
 ---
 
 ## ✨ Funcionalidades Principais
 
 *   **🛡️ Uso Gratuito:** Sem assinaturas ou taxas. Controle total dos seus dados ao hospedar sua instância.
-*   **🏦 Importação Nubank (CSV):** Importe suas faturas diretamente do Nubank. 
-    *   *Inteligência Anti-Duplicata:* O sistema identifica automaticamente despesas já importadas anteriormente para evitar registros repetidos.
-*   **🔄 Sincronização Inteligente:** Sincronize despesas inseridas manualmente com transações automáticas importadas via CSV.
-*   **📅 Planejamento por Período:** Crie orçamentos (Metas) por categoria e acompanhe seu progresso mensal.
-*   **🎨 Customização Total:** Crie suas próprias categorias e subcategorias para organizar suas finanças do seu jeito.
+*   **🏦 Importação Inteligente (Nubank CSV):** Importe suas faturas diretamente do Nubank de forma simples.
+    *   **Como funciona:** Basta exportar o arquivo `.csv` do app do Nubank e fazer o upload no Fin Planner.
+    *   **🤖 Inteligência Anti-Duplicata:** O sistema processa cada linha do arquivo e verifica se aquela transação já existe no banco de dados, garantindo que você não tenha gastos repetidos ao importar a mesma fatura mais de uma vez.
+*   **🔄 Sincronização Híbrida:** Combine gastos que você inseriu manualmente no dia a dia com as transações automáticas importadas via banco. O sistema permite um controle unificado.
+*   **📅 Planejamento por Período:** Defina orçamentos e metas por categoria para manter a disciplina financeira.
+*   **🎨 Customização Total:** Crie suas próprias categorias e subcategorias.
 
 ---
 
 ## 🛠️ Stack Tecnológica
-
-O projeto utiliza o que há de mais moderno no ecossistema web:
 
 *   **Frontend:** [React](https://reactjs.org/) + [Vite](https://vitejs.dev/) + [TypeScript](https://www.typescriptlang.org/)
 *   **UI/UX:** [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
