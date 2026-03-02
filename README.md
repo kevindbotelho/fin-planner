@@ -11,18 +11,15 @@ Embora tenha sido desenhado para o meu uso pessoal, o código está disponível 
 
 ## 📸 Showcase
 
-> [!IMPORTANT]
-> **Placeholder para Imagens:** Espaço reservado para inclusão das screenshots personalizadas.
-
 ### 📊 Dashboard Inteligente
 Tenha uma visão 360º de suas finanças com gráficos interativos de Receita vs Despesas e distribuição por categoria.
-<!-- Suba sua imagem do dashboard aqui -->
-<!-- ![Dashboard](caminho_para_sua_imagem) -->
+
+![Dashboard](https://link-da-sua-imagem-aqui.png)
 
 ### 💸 Gestão de Despesas
 Controle detalhado de gastos com suporte a despesas fixas e variáveis.
-<!-- Suba sua imagem de despesas aqui -->
-<!-- ![Despesas](caminho_para_sua_imagem) -->
+
+![Lista de Despesas](https://link-da-sua-imagem-aqui.png)
 
 ---
 
