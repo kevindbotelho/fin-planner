@@ -4,12 +4,12 @@ import { SummaryCards } from '@/components/dashboard/SummaryCards';
 import { IncomeExpenseChart } from '@/components/dashboard/IncomeExpenseChart';
 import { CategoryDonutChart } from '@/components/dashboard/CategoryDonutChart';
 import { BillingPeriodSelector } from '@/components/dashboard/BillingPeriodSelector';
-import { ExpenseHierarchyTable } from '@/components/dashboard/ExpenseHierarchyTable';
+import { DashboardExpenseTable } from '@/components/dashboard/DashboardExpenseTable';
 import { FinancialGoalsWidget } from '@/components/dashboard/FinancialGoalsWidget';
+import { BankSummaryWidget } from '@/components/dashboard/BankSummaryWidget';
 
 export default function Dashboard() {
   const { data, getExpensesForPeriod, getIncomeForPeriod, selectedPeriodId, setSelectedPeriodId } = useFinance();
-  // Local state removed, using context instead
 
   const selectedPeriod = data.billingPeriods.find(p => p.id === selectedPeriodId);
   const periodExpenses = selectedPeriodId ? getExpensesForPeriod(selectedPeriodId) : [];
@@ -19,7 +19,6 @@ export default function Dashboard() {
   const totalIncome = (periodIncome?.salary || 0) + (periodIncome?.extra || 0);
   const balance = totalIncome - totalExpenses;
 
-  // Dados para o gráfico de linha (últimos períodos)
   const chartData = useMemo(() => {
     const sortedPeriods = [...data.billingPeriods]
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
@@ -68,18 +67,21 @@ export default function Dashboard() {
             balance={balance}
           />
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="space-y-6 lg:col-span-2">
               <IncomeExpenseChart data={chartData} />
               <FinancialGoalsWidget />
             </div>
-            <CategoryDonutChart
-              expenses={periodExpenses}
-              categories={data.categories}
-            />
+            <div className="space-y-6">
+              <BankSummaryWidget expenses={periodExpenses} />
+              <CategoryDonutChart
+                expenses={periodExpenses}
+                categories={data.categories}
+              />
+            </div>
           </div>
 
-          <ExpenseHierarchyTable
+          <DashboardExpenseTable
             expenses={periodExpenses}
             categories={data.categories}
             totalIncome={totalIncome}

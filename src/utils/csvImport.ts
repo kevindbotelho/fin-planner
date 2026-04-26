@@ -6,6 +6,7 @@ export interface ParsedCsvRow {
     title: string;
     amount: number;
     originalLineNumber: number;
+    bankOrigin?: 'Nubank' | 'Inter' | null;
 }
 
 export interface ReconciledCsvRow extends ParsedCsvRow {
@@ -71,12 +72,69 @@ export const parseNubankCsv = (csvContent: string): ParsedCsvRow[] => {
                 title,
                 amount: amount, // Keeping the exact sign from CSV (negatives for incomes/refunds)
                 originalLineNumber: i + 1,
+                bankOrigin: 'Nubank',
             });
         }
     }
 
     return parsedData;
 };
+
+/**
+ * Parses a generic Banco Inter CSV file into an array of objects.
+ * Expects formats like: "Data Lançamento";"Histórico";"Valor"
+ */
+export const parseInterCsv = (csvContent: string): ParsedCsvRow[] => {
+    const lines = csvContent.split('\n');
+    const parsedData: ParsedCsvRow[] = [];
+    
+    let startIdx = 0;
+    if (lines[0] && (lines[0].toLowerCase().includes('data') || lines[0].toLowerCase().includes('lançamento') || lines[0].toLowerCase().includes('lancamento'))) {
+        startIdx = 1;
+    }
+
+    for (let i = startIdx; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const separator = line.includes(';') ? ';' : ',';
+        const regex = new RegExp(`${separator}(?=(?:(?:[^"]*"){2})*[^"]*$)`);
+        const parts = line.split(regex).map(p => p.replace(/"/g, '').trim());
+        
+        if (parts.length >= 3) {
+            let dateStr = parts[0];
+            let title = parts[1];
+            let amountStr = parts[parts.length - 1];
+
+            // Parse DD/MM/YYYY
+            let date = dateStr;
+            const brDateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            const brMatch = dateStr.match(brDateRegex);
+            if (brMatch) {
+                date = `${brMatch[3]}-${brMatch[2]}-${brMatch[1]}`;
+            }
+
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(date)) continue;
+            if (!title) title = 'Importação S/ Titulo';
+
+            let cleanAmountStr = amountStr.replace(/\./g, '').replace(',', '.').replace(/[^0-9.-]/g, '');
+            let amount = parseFloat(cleanAmountStr);
+            if (isNaN(amount)) continue;
+
+            parsedData.push({
+                date,
+                title,
+                amount,
+                originalLineNumber: i + 1,
+                bankOrigin: 'Inter',
+            });
+        }
+    }
+    
+    return parsedData;
+};
+
 
 /**
  * Reconciles parsed CSV rows against existing database expenses to find duplicates.

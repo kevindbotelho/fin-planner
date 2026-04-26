@@ -159,6 +159,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                     subcategoryId: row.subcategoryId,
                     type: row.expenseType,
                     originalTitle: row.title,
+                    bankOrigin: row.bankOrigin,
                 }))));
             }
 
@@ -210,6 +211,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                         <tr className="border-b">
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[50px]">Imp.</th>
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[100px]">Data</th>
+                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[80px]">Banco</th>
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground max-w-[200px]">Descrição (Banco)</th>
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[120px]">Valor</th>
                                             <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[160px]">
@@ -264,6 +266,15 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                             />
                                                         </td>
                                                         <td className="p-4 align-middle">{format(new Date(`${row.date}T12:00:00`), "dd/MM", { locale: ptBR })}</td>
+                                                        <td className="p-4 align-middle">
+                                                            {row.bankOrigin ? (
+                                                                <Badge variant="outline" className={row.bankOrigin === 'Nubank' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-orange-100 text-orange-700 border-orange-200'}>
+                                                                    {row.bankOrigin}
+                                                                </Badge>
+                                                            ) : (
+                                                                <span className="text-muted-foreground text-xs">—</span>
+                                                            )}
+                                                        </td>
                                                         <td className="p-4 align-middle font-medium truncate max-w-[200px]" title={row.title}>{row.title}</td>
                                                         <td className={`p-4 align-middle font-semibold ${row.amount < 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                                                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(row.amount)}

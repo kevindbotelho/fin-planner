@@ -196,6 +196,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         fixedTemplateId: e.fixed_template_id || undefined,
         displayOrder: e.display_order ?? 0,
         originalTitle: e.original_title || undefined,
+        bankOrigin: e.bank_origin || undefined,
       }));
 
       const fixedTemplates: FixedExpenseTemplate[] = (templatesRes.data || []).map(t => ({
@@ -640,6 +641,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           type: 'fixed',
           fixed_template_id: templateData.id,
           display_order: displayOrder,
+          bank_origin: expense.bankOrigin || null,
         });
       }
 
@@ -665,6 +667,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       subcategory_id: expense.subcategoryId || null,
       type: expense.type || 'variable',
       display_order: displayOrder,
+      bank_origin: expense.bankOrigin || null,
     });
 
     if (error) throw error;
@@ -764,10 +767,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           subcategory_id: expense.subcategoryId || null,
           type: expense.type || 'variable',
           display_order: startingIndex + idx,
-          // Note: Here we need to map original_title from the expense argument.
-          // Since our Expense interface doesn't have original_title yet, we need to add it to the interface or cast it.
-          // We will update the Expense type shortly.
-          original_title: (expense as any).original_title || null
+          original_title: expense.originalTitle || null,
+          bank_origin: expense.bankOrigin || null,
         });
       });
     }
@@ -783,7 +784,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         subcategory_id: expense.subcategoryId || null,
         type: expense.type || 'variable',
         display_order: 0,
-        original_title: (expense as any).original_title || null
+        original_title: expense.originalTitle || null,
+        bank_origin: expense.bankOrigin || null,
       });
     });
 
@@ -928,6 +930,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     if (updates.categoryId !== undefined) updateData.category_id = updates.categoryId;
     if (updates.subcategoryId !== undefined) updateData.subcategory_id = updates.subcategoryId || null;
     if (updates.type !== undefined) updateData.type = updates.type;
+    if (updates.bankOrigin !== undefined) updateData.bank_origin = updates.bankOrigin || null;
 
     // Handle Variable -> Fixed conversion
     if (currentExpense.type === 'variable' && updates.type === 'fixed') {

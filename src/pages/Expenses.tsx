@@ -606,6 +606,7 @@ export default function Expenses() {
                         <TableHead className="w-8"></TableHead>
                         <TableHead>Data</TableHead>
                         <TableHead>Descrição</TableHead>
+                        <TableHead>Banco</TableHead>
                         <TableHead>Tipo</TableHead>
                         <TableHead>Categoria</TableHead>
                         <TableHead className="text-right">Valor</TableHead>

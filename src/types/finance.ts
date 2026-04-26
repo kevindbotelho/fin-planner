@@ -25,6 +25,7 @@ export interface Expense {
   fixedTemplateId?: string; // referência ao template de despesa fixa
   displayOrder: number; // ordem de exibição manual
   originalTitle?: string | null; // título original do csv para conciliação
+  bankOrigin?: 'Nubank' | 'Inter' | null; // origem do banco
 }
 
 export interface FixedExpenseTemplate {

@@ -87,6 +87,15 @@ export function DraggableExpenseRow({
         </div>
       </TableCell>
       <TableCell>
+        {expense.bankOrigin ? (
+            <Badge variant="outline" className={expense.bankOrigin === 'Nubank' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-orange-100 text-orange-700 border-orange-200'}>
+                {expense.bankOrigin}
+            </Badge>
+        ) : (
+            <span className="text-muted-foreground text-xs">—</span>
+        )}
+      </TableCell>
+      <TableCell>
         <Badge variant={expense.type === 'fixed' ? 'default' : 'secondary'}>
           {expense.type === 'fixed' ? 'Fixa' : 'Variável'}
         </Badge>
