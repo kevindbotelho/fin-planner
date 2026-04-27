@@ -908,6 +908,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
                   : getFixedPurchaseDateForPeriod(period, desiredDayOfMonth);
             }
 
+            if (updates.bankOrigin !== undefined) {
+              updatePayload.bank_origin = updates.bankOrigin === 'None' ? null : updates.bankOrigin;
+            }
+
             await supabase
               .from('expenses')
               .update(updatePayload)
@@ -988,6 +992,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           type: 'fixed',
           fixed_template_id: templateData.id,
           display_order: 0,
+          bank_origin: updates.bankOrigin ?? currentExpense.bankOrigin ?? null,
         });
       }
     }
@@ -1141,6 +1146,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         };
         const purchaseDate = getFixedPurchaseDateForPeriod(periodAsBillingPeriod, desiredDayOfMonth);
 
+        // Achar a última despesa associada a este template para herdar o banco
+        const lastExpense = data.expenses
+          .filter(e => e.fixedTemplateId === template.id)
+          .sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime())[0];
+
         await supabase.from('expenses').insert({
           user_id: user.id,
           description: template.description,
@@ -1150,6 +1160,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           subcategory_id: template.subcategory_id || null,
           type: 'fixed',
           fixed_template_id: template.id,
+          bank_origin: lastExpense ? lastExpense.bankOrigin || null : null,
         });
       }
     }
