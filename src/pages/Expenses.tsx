@@ -86,6 +86,7 @@ export default function Expenses() {
     categoryId: '',
     subcategoryId: '',
     type: 'variable' as ExpenseType,
+    bankOrigin: 'None' as 'Nubank' | 'Inter' | 'None',
   });
 
   // Filters
@@ -102,6 +103,7 @@ export default function Expenses() {
     categoryId: '',
     subcategoryId: '',
     type: 'variable' as ExpenseType,
+    bankOrigin: 'None' as 'Nubank' | 'Inter' | 'None',
   });
 
   // Fixed expense action dialog state
@@ -148,6 +150,7 @@ export default function Expenses() {
       categoryId: formData.categoryId,
       subcategoryId: formData.subcategoryId,
       type: formData.type,
+      bankOrigin: formData.bankOrigin === 'None' ? undefined : formData.bankOrigin,
     });
 
     setFormData({
@@ -157,6 +160,7 @@ export default function Expenses() {
       categoryId: '',
       subcategoryId: '',
       type: 'variable',
+      bankOrigin: 'None',
     });
   };
 
@@ -184,6 +188,7 @@ export default function Expenses() {
       categoryId: expense.categoryId,
       subcategoryId: expense.subcategoryId,
       type: expense.type || 'variable',
+      bankOrigin: expense.bankOrigin || 'None',
     });
   };
 
@@ -207,6 +212,7 @@ export default function Expenses() {
       categoryId: editFormData.categoryId,
       subcategoryId: editFormData.subcategoryId,
       type: editFormData.type,
+      bankOrigin: editFormData.bankOrigin === 'None' ? undefined : editFormData.bankOrigin,
     }, scope);
 
     setEditingExpense(null);
@@ -417,6 +423,23 @@ export default function Expenses() {
                         </div>
                       </SelectItem>
                     </div>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bankOrigin">Banco</Label>
+                <Select
+                  value={formData.bankOrigin}
+                  onValueChange={(value: 'Nubank' | 'Inter' | 'None') => setFormData({ ...formData, bankOrigin: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um banco" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="None">Nenhum</SelectItem>
+                    <SelectItem value="Nubank">Nubank</SelectItem>
+                    <SelectItem value="Inter">Inter</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -719,6 +742,23 @@ export default function Expenses() {
                       </div>
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-bankOrigin">Banco</Label>
+              <Select
+                value={editFormData.bankOrigin}
+                onValueChange={(value: 'Nubank' | 'Inter' | 'None') => setEditFormData({ ...editFormData, bankOrigin: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um banco" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="None">Nenhum</SelectItem>
+                  <SelectItem value="Nubank">Nubank</SelectItem>
+                  <SelectItem value="Inter">Inter</SelectItem>
                 </SelectContent>
               </Select>
             </div>

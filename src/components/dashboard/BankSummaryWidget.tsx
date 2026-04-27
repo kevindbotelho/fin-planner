@@ -47,14 +47,14 @@ export function BankSummaryWidget({ expenses }: BankSummaryWidgetProps) {
   if (expenses.length === 0) return null;
 
   return (
-    <Card className="border-0 shadow-sm col-span-full xl:col-span-1">
+    <Card className="border-0 shadow-sm flex flex-col h-full col-span-full xl:col-span-1">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <Building2 className="h-5 w-5 text-muted-foreground" />
           Despesas por Banco
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         <div className="space-y-4 mt-2">
           {bankStats.nubankTotal > 0 && (
             <div className="flex items-center justify-between">

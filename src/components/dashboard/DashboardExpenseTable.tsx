@@ -30,7 +30,7 @@ interface DashboardExpenseTableProps {
 
 export function DashboardExpenseTable({ expenses, categories, totalIncome }: DashboardExpenseTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterDate, setFilterDate] = useState('');
+  const [filterSubcategory, setFilterSubcategory] = useState<string>('all');
   const [filterBank, setFilterBank] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
@@ -52,8 +52,8 @@ export function DashboardExpenseTable({ expenses, categories, totalIncome }: Das
     if (searchTerm) {
       result = result.filter(e => e.description.toLowerCase().includes(searchTerm.toLowerCase()));
     }
-    if (filterDate) {
-      result = result.filter(e => e.purchaseDate === filterDate);
+    if (filterSubcategory !== 'all') {
+      result = result.filter(e => e.subcategoryId === filterSubcategory);
     }
     if (filterBank !== 'all') {
       if (filterBank === 'None') {
@@ -71,18 +71,31 @@ export function DashboardExpenseTable({ expenses, categories, totalIncome }: Das
     // Sort by date descending
     result.sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
     return result;
-  }, [expenses, searchTerm, filterDate, filterBank, filterCategory, filterType]);
+  }, [expenses, searchTerm, filterSubcategory, filterBank, filterCategory, filterType]);
 
-  const hasActiveFilters = searchTerm || filterDate || filterBank !== 'all' || filterCategory !== 'all' || filterType !== 'all';
+  const hasActiveFilters = searchTerm || filterSubcategory !== 'all' || filterBank !== 'all' || filterCategory !== 'all' || filterType !== 'all';
   const clearFilters = () => {
     setSearchTerm('');
-    setFilterDate('');
+    setFilterSubcategory('all');
     setFilterBank('all');
     setFilterCategory('all');
     setFilterType('all');
   };
 
   const totalExpenses = expenses.reduce((acc, exp) => acc + exp.amount, 0);
+
+  const availableSubcategories = useMemo(() => {
+    if (filterCategory === 'all') return [];
+    const category = categories.find(c => c.id === filterCategory);
+    if (!category) return [];
+    
+    const usedSubcategoryIds = new Set(
+      expenses
+        .filter(e => e.categoryId === filterCategory && e.subcategoryId)
+        .map(e => e.subcategoryId)
+    );
+    return category.subcategories.filter(sub => usedSubcategoryIds.has(sub.id));
+  }, [expenses, filterCategory, categories]);
 
   if (expenses.length === 0) {
     return null;
@@ -134,7 +147,13 @@ export function DashboardExpenseTable({ expenses, categories, totalIncome }: Das
             </div>
 
             <div className="space-y-1 w-[150px]">
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
+              <Select 
+                value={filterCategory} 
+                onValueChange={(val) => {
+                  setFilterCategory(val);
+                  setFilterSubcategory('all');
+                }}
+              >
                 <SelectTrigger className="h-8 text-sm">
                   <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
@@ -150,12 +169,23 @@ export function DashboardExpenseTable({ expenses, categories, totalIncome }: Das
             </div>
             
             <div className="space-y-1 w-[130px]">
-              <Input
-                type="date"
-                className="h-8 text-sm"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-              />
+              <Select 
+                value={filterSubcategory} 
+                onValueChange={setFilterSubcategory}
+                disabled={filterCategory === 'all'}
+              >
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="Subcategoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas Sub.</SelectItem>
+                  {availableSubcategories.map(sub => (
+                    <SelectItem key={sub.id} value={sub.id}>
+                      {sub.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {hasActiveFilters && (
