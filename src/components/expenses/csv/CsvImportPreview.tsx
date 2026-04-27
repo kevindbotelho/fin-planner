@@ -33,10 +33,10 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
     const [isProcessing, setIsProcessing] = useState(false);
     const [hasReconciled, setHasReconciled] = useState(false);
 
-    // We only want to show Fixed Expenses of the Current Period that don't have originalTitle (unverified)
-    // Grab all expenses that were generated from templates but don't have originalTitle
+    // Show ALL fixed expenses for the current period — including those already linked (originalTitle set)
+    // This allows re-linking when the card changes (e.g. Crunchyroll moved from Nubank to Inter)
     const linkableFixedExpenses = financeData.expenses
-        .filter(e => e.fixedTemplateId != null && !e.originalTitle)
+        .filter(e => e.fixedTemplateId != null)
         .sort((a, b) => new Date(a.purchaseDate).getTime() - new Date(b.purchaseDate).getTime());
 
     React.useEffect(() => {
@@ -348,9 +348,14 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                                     <SelectContent>
                                                                         {validLinkableExpenses.map(exp => {
                                                                             const template = financeData.fixedTemplates.find(t => t.id === exp.fixedTemplateId);
+                                                                            const alreadyLinked = !!exp.originalTitle;
                                                                             return (
                                                                                 <SelectItem key={exp.id} value={exp.id}>
-                                                                                    {template?.description || exp.description} ({format(parseISO(exp.purchaseDate), 'dd/MM')})
+                                                                                    {template?.description || exp.description}
+                                                                                    {' '}({format(parseISO(exp.purchaseDate), 'dd/MM')})
+                                                                                    {alreadyLinked && (
+                                                                                        <span className="ml-1 text-[10px] text-amber-600 font-medium">[re-vincular]</span>
+                                                                                    )}
                                                                                 </SelectItem>
                                                                             )
                                                                         })}

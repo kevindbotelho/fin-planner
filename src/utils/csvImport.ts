@@ -199,11 +199,53 @@ export const beautifyTransactionTitle = (title: string): string => {
 };
 
 /**
- * Normalizes a transaction title for fuzzy comparison.
- * Uses the beautified version as base to ensure consistency.
+ * Normalizes a transaction title PURELY FOR COMPARISON purposes.
+ * Does NOT remove bank prefixes (e.g. "IFD", "PAG") — these are kept so that
+ * "IFD*39989529..." (old format with asterisk) and "IFD 39989529..." (new format)
+ * both normalize to "ifd 39989529..." and correctly match each other.
+ *
+ * Rules applied:
+ *  1. Replace asterisks with a space (asterisk = separator, not content)
+ *  2. Remove trailing geographic city/country suffixes added by banks
+ *  3. Lowercase + collapse whitespace
  */
 export const normalizeTransactionTitle = (title: string): string => {
-    return beautifyTransactionTitle(title).toLowerCase();
+    let normalized = title.trim();
+
+    // 1. Replace asterisks with space (NOT removing the prefix before it)
+    normalized = normalized.replace(/\*/g, ' ');
+
+    // 2. Remove trailing geographic suffixes (same list as beautify)
+    const cityPattern = [
+        's[aã]o paulo?',
+        'rio de janeiro',
+        'belo horizont[e]?',
+        'curitiba',
+        'fortaleza',
+        'manaus',
+        'salvador',
+        'recife',
+        'porto alegre',
+        'florian[oó]polis',
+        'goi[aâ]nia',
+        'natal',
+        'macei[oó]',
+        'campinas',
+        'bel[eé]m',
+    ].join('|');
+    const countryPattern = 'br(?:a(?:sil|zil)?)?|s\.?p\.?';
+
+    normalized = normalized.replace(
+        new RegExp(`\\s+(?:${cityPattern})(?:\\s+(?:${countryPattern}))?\\s*$`, 'i'),
+        ''
+    );
+    normalized = normalized.replace(
+        new RegExp(`\\s+(?:${countryPattern})\\s*$`, 'i'),
+        ''
+    );
+
+    // 3. Lowercase + collapse whitespace
+    return normalized.replace(/\s+/g, ' ').trim().toLowerCase();
 };
 
 
