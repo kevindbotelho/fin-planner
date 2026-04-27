@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ParsedCsvRow, reconcileExpenses, ReconciledCsvRow } from "@/utils/csvImport";
+import { ParsedCsvRow, reconcileExpenses, ReconciledCsvRow, beautifyTransactionTitle } from "@/utils/csvImport";
 import { useFinance } from "@/contexts/FinanceContext";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
@@ -152,7 +152,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
             const createExpenses = toProcess.filter(r => r.actionType === 'new');
             if (createExpenses.length > 0) {
                 promises.push(addBulkExpenses(createExpenses.map(row => ({
-                    description: row.title,
+                    description: beautifyTransactionTitle(row.title),
                     amount: Math.abs(row.amount),
                     purchaseDate: row.date,
                     categoryId: row.categoryId!,
@@ -275,7 +275,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                                 <span className="text-muted-foreground text-xs">—</span>
                                                             )}
                                                         </td>
-                                                        <td className="p-4 align-middle font-medium truncate max-w-[200px]" title={row.title}>{row.title}</td>
+                                                        <td className="p-4 align-middle font-medium truncate max-w-[200px]" title={row.title}>{beautifyTransactionTitle(row.title)}</td>
                                                         <td className={`p-4 align-middle font-semibold ${row.amount < 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                                                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(row.amount)}
                                                         </td>

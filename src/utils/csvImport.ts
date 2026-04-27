@@ -69,7 +69,7 @@ export const parseNubankCsv = (csvContent: string): ParsedCsvRow[] => {
 
             parsedData.push({
                 date,
-                title: beautifyTransactionTitle(title),
+                title,
                 amount: amount, // Keeping the exact sign from CSV (negatives for incomes/refunds)
                 originalLineNumber: i + 1,
                 bankOrigin: 'Nubank',
@@ -124,7 +124,7 @@ export const parseInterCsv = (csvContent: string): ParsedCsvRow[] => {
 
             parsedData.push({
                 date,
-                title: beautifyTransactionTitle(title),
+                title,
                 amount,
                 originalLineNumber: i + 1,
                 bankOrigin: 'Inter',
