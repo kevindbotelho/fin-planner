@@ -69,7 +69,7 @@ export const parseNubankCsv = (csvContent: string): ParsedCsvRow[] => {
 
             parsedData.push({
                 date,
-                title,
+                title: beautifyTransactionTitle(title),
                 amount: amount, // Keeping the exact sign from CSV (negatives for incomes/refunds)
                 originalLineNumber: i + 1,
                 bankOrigin: 'Nubank',
@@ -124,7 +124,7 @@ export const parseInterCsv = (csvContent: string): ParsedCsvRow[] => {
 
             parsedData.push({
                 date,
-                title,
+                title: beautifyTransactionTitle(title),
                 amount,
                 originalLineNumber: i + 1,
                 bankOrigin: 'Inter',
@@ -137,10 +137,51 @@ export const parseInterCsv = (csvContent: string): ParsedCsvRow[] => {
 
 
 /**
+ * Cleans and beautifies a transaction title for display and storage.
+ * - Handles specific cases like 99 and Uber
+ * - Removes bank noise like "PAG*", "DL *", "IOF-"
+ * - Removes geographic suffixes
+ * - Fixes casing and spacing
+ */
+export const beautifyTransactionTitle = (title: string): string => {
+    let clean = title.trim();
+
+    // 1. Specific brand mapping (Case insensitive match)
+    const upper = clean.toUpperCase();
+    if (upper.includes('99APP') || (upper.includes('99') && upper.includes('APP'))) return '99 App';
+    if (upper.includes('UBERRIDES') || upper.includes('UBER RIDES')) return 'UberRides';
+    if (upper.includes('UBER') && upper.includes('EATS')) return 'Uber Eats';
+
+    // 2. Remove common bank prefixes/separators
+    clean = clean.replace(/^(PAG\*|DL\s*\*|IOF-|AVELAR\*|MARKETPLACE\*)/i, '');
+    clean = clean.replace(/\*/g, ' ');
+
+    // 3. Remove geographic suffixes (same logic as normalization)
+    clean = clean.replace(
+        /\s+(?:(?:s[aã]o paulo|rio de janeiro|belo horizonte|curitiba|fortaleza|manaus|salvador|recife|porto alegre)\s+)?(?:br(?:a(?:sil|zil)?)?|s\.?p\.?)\s*$/i,
+        ''
+    );
+
+    // 4. Final Polish: collapse spaces and trim
+    return clean.replace(/\s+/g, ' ').trim();
+};
+
+/**
+ * Normalizes a transaction title for fuzzy comparison.
+ * Uses the beautified version as base to ensure consistency.
+ */
+export const normalizeTransactionTitle = (title: string): string => {
+    return beautifyTransactionTitle(title).toLowerCase();
+};
+
+
+/**
  * Reconciles parsed CSV rows against existing database expenses to find duplicates.
- * Matching rules: 
+ * Matching rules:
  * 1. Exact Match on Date AND Amount AND (original_title OR title)
- * 2. Fuzzy Match on Amount AND original_title AND (Date within +/- 5 days) -> Handles floating recurring fixed expenses
+ * 2. Fuzzy Match on Amount AND original_title AND (Date within +/- 5 days) → Handles floating recurring fixed expenses
+ * 3. Template Match: expense projected from a template that already learned this CSV title
+ * 4. Normalized Name Match: same Date AND Amount, names match after removing geo suffixes & asterisks
  */
 export const reconcileExpenses = (
     parsedRows: ParsedCsvRow[],
@@ -219,6 +260,25 @@ export const reconcileExpenses = (
                     return daysDiff <= 5;
                 }
                 return false;
+            });
+        }
+
+        // 4. NORMALIZED NAME MATCH: same date + same amount + names match after normalization.
+        //    Catches cases where the bank changes the transaction name between exports,
+        //    e.g. "99APP *99App" → "99APP 99App São Paulo BRA"
+        //         "DL *UberRides" → "DL UberRides Sao Paulo BRA"
+        if (matchIndex === -1 && !row.isMatchedPair) {
+            const normalizedRowTitle = normalizeTransactionTitle(row.title);
+            matchIndex = availableExpenses.findIndex(exp => {
+                const isExactDate   = exp.purchaseDate === row.date;
+                const isExactAmount = exp.amount === Math.abs(row.amount);
+                if (!isExactDate || !isExactAmount) return false;
+
+                // Compare against originalTitle first (the real CSV name), fall back to description
+                const storedTitle = exp.originalTitle || exp.description;
+                if (!storedTitle) return false;
+
+                return normalizeTransactionTitle(storedTitle) === normalizedRowTitle;
             });
         }
 
