@@ -1146,9 +1146,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         };
         const purchaseDate = getFixedPurchaseDateForPeriod(periodAsBillingPeriod, desiredDayOfMonth);
 
-        // Achar a última despesa associada a este template para herdar o banco
+        // Achar a última despesa associada a este template ANTERIOR ao período atual para herdar o banco
         const lastExpense = data.expenses
-          .filter(e => e.fixedTemplateId === template.id)
+          .filter(e => e.fixedTemplateId === template.id && new Date(e.purchaseDate) < new Date(periodAsBillingPeriod.startDate))
           .sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime())[0];
 
         await supabase.from('expenses').insert({
@@ -1185,12 +1185,32 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteBillingPeriod = async (id: string) => {
+    if (!user) return;
+    
+    const period = data.billingPeriods.find(p => p.id === id);
+    if (period) {
+      // Deletar as despesas que recaem neste período
+      await supabase
+        .from('expenses')
+        .delete()
+        .gte('purchase_date', period.startDate)
+        .lt('purchase_date', period.endDate)
+        .eq('user_id', user.id);
+    }
+
+    // Deletar as receitas do mês
+    await supabase
+      .from('monthly_incomes')
+      .delete()
+      .eq('billing_period_id', id)
+      .eq('user_id', user.id);
+
     // Delete related exclusions first
     await supabase
       .from('fixed_expense_exclusions')
       .delete()
       .eq('billing_period_id', id)
-      .eq('user_id', user?.id);
+      .eq('user_id', user.id);
 
     const { error } = await supabase
       .from('billing_periods')
