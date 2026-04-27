@@ -112,7 +112,7 @@ export function FinancialGoalsWidget() {
     const categoryForDialog = data.categories.find(c => c.id === selectedCategory);
 
     return (
-        <Card className="border-0 shadow-sm flex flex-col">
+        <Card className="border-0 shadow-sm flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-lg font-semibold">Metas Financeiras</CardTitle>
                 <Button
@@ -124,7 +124,7 @@ export function FinancialGoalsWidget() {
                     <Settings className="h-4 w-4" />
                 </Button>
             </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto max-h-[250px] pr-2 custom-scrollbar">
+            <CardContent className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                 {categoriesGoals.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
                         <p className="text-sm">Nenhuma meta definida.</p>

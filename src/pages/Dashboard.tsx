@@ -68,16 +68,18 @@ export default function Dashboard() {
           />
 
           <div className="grid gap-6 lg:grid-cols-3">
-            <div className="space-y-6 lg:col-span-2">
+            <div className="flex flex-col space-y-6 lg:col-span-2">
               <IncomeExpenseChart data={chartData} />
-              <FinancialGoalsWidget />
+              <div className="flex-1 min-h-[300px] h-full flex flex-col">
+                <FinancialGoalsWidget />
+              </div>
             </div>
-            <div className="space-y-6">
-              <BankSummaryWidget expenses={periodExpenses} />
+            <div className="flex flex-col space-y-6">
               <CategoryDonutChart
                 expenses={periodExpenses}
                 categories={data.categories}
               />
+              <BankSummaryWidget expenses={periodExpenses} />
             </div>
           </div>
 

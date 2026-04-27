@@ -91,10 +91,13 @@ export function DashboardExpenseTable({ expenses, categories, totalIncome }: Das
   return (
     <Card className="border-0 shadow-sm">
       <CardHeader>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <CardTitle className="text-lg">Últimas Despesas</CardTitle>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <div className="relative flex-1 sm:w-64">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Últimas Despesas</CardTitle>
+          </div>
+
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="space-y-1 flex-1 min-w-[150px]">
               <Input
                 placeholder="Buscar despesa..."
                 value={searchTerm}
@@ -102,38 +105,14 @@ export function DashboardExpenseTable({ expenses, categories, totalIncome }: Das
                 className="h-8 text-sm"
               />
             </div>
-            <Button
-              variant={showFilters || hasActiveFilters ? "secondary" : "outline"}
-              size="sm"
-              className="h-8 px-2"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Extended Filters */}
-        {showFilters && (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-4 mt-4 border-t">
-            <div className="space-y-1">
-              <Label className="text-xs">Data</Label>
-              <Input
-                type="date"
-                className="h-8 text-sm"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs">Banco</Label>
+            
+            <div className="space-y-1 w-[130px]">
               <Select value={filterBank} onValueChange={setFilterBank}>
                 <SelectTrigger className="h-8 text-sm">
-                  <SelectValue placeholder="Todos" />
+                  <SelectValue placeholder="Banco" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="all">Todos Bancos</SelectItem>
                   <SelectItem value="Nubank">Nubank</SelectItem>
                   <SelectItem value="Inter">Inter</SelectItem>
                   <SelectItem value="None">Sem Banco</SelectItem>
@@ -141,28 +120,26 @@ export function DashboardExpenseTable({ expenses, categories, totalIncome }: Das
               </Select>
             </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs">Tipo</Label>
+            <div className="space-y-1 w-[130px]">
               <Select value={filterType} onValueChange={setFilterType}>
                 <SelectTrigger className="h-8 text-sm">
-                  <SelectValue placeholder="Todos" />
+                  <SelectValue placeholder="Tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="all">Todos Tipos</SelectItem>
                   <SelectItem value="fixed">Fixa</SelectItem>
                   <SelectItem value="variable">Variável</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs">Categoria</Label>
+            <div className="space-y-1 w-[150px]">
               <Select value={filterCategory} onValueChange={setFilterCategory}>
                 <SelectTrigger className="h-8 text-sm">
-                  <SelectValue placeholder="Todas" />
+                  <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="all">Todas Cat.</SelectItem>
                   {categories.map(category => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
@@ -171,22 +148,28 @@ export function DashboardExpenseTable({ expenses, categories, totalIncome }: Das
                 </SelectContent>
               </Select>
             </div>
+            
+            <div className="space-y-1 w-[130px]">
+              <Input
+                type="date"
+                className="h-8 text-sm"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+              />
+            </div>
 
             {hasActiveFilters && (
-              <div className="sm:col-span-2 lg:col-span-4 flex justify-end">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearFilters}
-                  className="h-8 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="mr-2 h-3 w-3" />
-                  Limpar Filtros
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="h-8 px-2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             )}
           </div>
-        )}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">
