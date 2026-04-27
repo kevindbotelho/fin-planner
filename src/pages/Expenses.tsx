@@ -428,23 +428,6 @@ export default function Expenses() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bankOrigin">Banco</Label>
-                <Select
-                  value={formData.bankOrigin}
-                  onValueChange={(value: 'Nubank' | 'Inter' | 'None') => setFormData({ ...formData, bankOrigin: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um banco" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="None">Nenhum</SelectItem>
-                    <SelectItem value="Nubank">Nubank</SelectItem>
-                    <SelectItem value="Inter">Inter</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="subcategory">Subcategoria</Label>
                 <Select
                   value={formData.subcategoryId}
@@ -470,10 +453,27 @@ export default function Expenses() {
                       <SelectItem value="new-subcategory" className="text-primary font-medium cursor-pointer">
                         <div className="flex items-center gap-2">
                           <Plus className="h-4 w-4" />
-                          Nova Subcategoria
+                           Nova Subcategoria
                         </div>
                       </SelectItem>
                     </div>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bankOrigin">Banco</Label>
+                <Select
+                  value={formData.bankOrigin}
+                  onValueChange={(value: 'Nubank' | 'Inter' | 'None') => setFormData({ ...formData, bankOrigin: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um banco" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="None">Nenhum</SelectItem>
+                    <SelectItem value="Nubank">Nubank</SelectItem>
+                    <SelectItem value="Inter">Inter</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -747,23 +747,6 @@ export default function Expenses() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-bankOrigin">Banco</Label>
-              <Select
-                value={editFormData.bankOrigin}
-                onValueChange={(value: 'Nubank' | 'Inter' | 'None') => setEditFormData({ ...editFormData, bankOrigin: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um banco" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="None">Nenhum</SelectItem>
-                  <SelectItem value="Nubank">Nubank</SelectItem>
-                  <SelectItem value="Inter">Inter</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="edit-subcategory">Subcategoria</Label>
               <Select
                 value={editFormData.subcategoryId}
@@ -779,6 +762,23 @@ export default function Expenses() {
                       {sub.name}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-bankOrigin">Banco</Label>
+              <Select
+                value={editFormData.bankOrigin}
+                onValueChange={(value: 'Nubank' | 'Inter' | 'None') => setEditFormData({ ...editFormData, bankOrigin: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um banco" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="None">Nenhum</SelectItem>
+                  <SelectItem value="Nubank">Nubank</SelectItem>
+                  <SelectItem value="Inter">Inter</SelectItem>
                 </SelectContent>
               </Select>
             </div>
