@@ -138,31 +138,63 @@ export const parseInterCsv = (csvContent: string): ParsedCsvRow[] => {
 
 /**
  * Cleans and beautifies a transaction title for display and storage.
- * - Handles specific cases like 99 and Uber
- * - Removes bank noise like "PAG*", "DL *", "IOF-"
- * - Removes geographic suffixes
- * - Fixes casing and spacing
+ * - Handles specific known brands (99 App, Uber)
+ * - Removes generic bank prefixes like "IFD*", "PAG*", "DL *" (any 2–5 uppercase letters + asterisk)
+ * - Removes geographic city suffixes appended by banks, including truncated versions
+ *   e.g. "BELO HORIZONT" (without the final E), "SAO PAULO", "BRA"
+ * - Collapses extra whitespace
  */
 export const beautifyTransactionTitle = (title: string): string => {
     let clean = title.trim();
 
-    // 1. Specific brand mapping (Case insensitive match)
-    const upper = clean.toUpperCase();
-    if (upper.includes('99APP') || (upper.includes('99') && upper.includes('APP'))) return '99 App';
-    if (upper.includes('UBERRIDES') || upper.includes('UBER RIDES')) return 'UberRides';
-    if (upper.includes('UBER') && upper.includes('EATS')) return 'Uber Eats';
+    // 1. Specific brand mapping (case-insensitive)
+    const upper = clean.toUpperCase().replace(/\*/g, ' ').replace(/\s+/g, ' ');
+    if (/\b99\s*APP\b/.test(upper)) return '99 App';
+    if (/\bUBER\s*RIDES?\b/.test(upper)) return 'UberRides';
+    if (/\bUBER\s*EATS?\b/.test(upper)) return 'Uber Eats';
 
-    // 2. Remove common bank prefixes/separators
-    clean = clean.replace(/^(PAG\*|DL\s*\*|IOF-|AVELAR\*|MARKETPLACE\*)/i, '');
+    // 2. Remove generic bank prefixes: any 2–5 uppercase letters (optionally digits) followed by asterisk
+    // e.g. "IFD*39989529", "PAG*MERCADO", "DL *UberRides", "IOF-"
+    clean = clean.replace(/^[A-Z]{2,5}\s*[\*-]/i, '');
+    // Replace remaining asterisks with a space
     clean = clean.replace(/\*/g, ' ');
 
-    // 3. Remove geographic suffixes (same logic as normalization)
+    // 3. Remove geographic suffixes appended by banks.
+    //    Banks often truncate city names (e.g. "BELO HORIZONT" instead of "BELO HORIZONTE")
+    //    and may or may not include a country code after the city.
+    //    Strategy: remove a trailing city name (exact or truncated) + optional country code,
+    //    OR just a trailing country code alone.
+    const cityPattern = [
+        's[aã]o paulo?',          // São Paulo / Sao Paulo
+        'rio de janeiro',
+        'belo horizont[e]?',      // handles "BELO HORIZONT" (truncated) and "BELO HORIZONTE"
+        'curitiba',
+        'fortaleza',
+        'manaus',
+        'salvador',
+        'recife',
+        'porto alegre',
+        'florian[oó]polis',
+        'goi[aâ]nia',
+        'natal',
+        'macei[oó]',
+        'campinas',
+        'bel[eé]m',
+    ].join('|');
+    const countryPattern = 'br(?:a(?:sil|zil)?)?|s\\.?p\\.?';
+
+    // Remove: trailing city (optionally followed by country code)
     clean = clean.replace(
-        /\s+(?:(?:s[aã]o paulo|rio de janeiro|belo horizonte|curitiba|fortaleza|manaus|salvador|recife|porto alegre)\s+)?(?:br(?:a(?:sil|zil)?)?|s\.?p\.?)\s*$/i,
+        new RegExp(`\\s+(?:${cityPattern})(?:\\s+(?:${countryPattern}))?\\s*$`, 'i'),
+        ''
+    );
+    // Remove: trailing country code only (if no city matched above)
+    clean = clean.replace(
+        new RegExp(`\\s+(?:${countryPattern})\\s*$`, 'i'),
         ''
     );
 
-    // 4. Final Polish: collapse spaces and trim
+    // 4. Final polish: collapse spaces and trim
     return clean.replace(/\s+/g, ' ').trim();
 };
 
