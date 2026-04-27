@@ -12,7 +12,15 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { X, Filter } from 'lucide-react';
 
 interface DashboardExpenseTableProps {
   expenses: Expense[];
@@ -22,6 +30,11 @@ interface DashboardExpenseTableProps {
 
 export function DashboardExpenseTable({ expenses, categories, totalIncome }: DashboardExpenseTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterDate, setFilterDate] = useState('');
+  const [filterBank, setFilterBank] = useState<string>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>('all');
+  const [showFilters, setShowFilters] = useState(false);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -39,10 +52,35 @@ export function DashboardExpenseTable({ expenses, categories, totalIncome }: Das
     if (searchTerm) {
       result = result.filter(e => e.description.toLowerCase().includes(searchTerm.toLowerCase()));
     }
+    if (filterDate) {
+      result = result.filter(e => e.purchaseDate === filterDate);
+    }
+    if (filterBank !== 'all') {
+      if (filterBank === 'None') {
+        result = result.filter(e => !e.bankOrigin);
+      } else {
+        result = result.filter(e => e.bankOrigin === filterBank);
+      }
+    }
+    if (filterCategory !== 'all') {
+      result = result.filter(e => e.categoryId === filterCategory);
+    }
+    if (filterType !== 'all') {
+      result = result.filter(e => e.type === filterType);
+    }
     // Sort by date descending
     result.sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
     return result;
-  }, [expenses, searchTerm]);
+  }, [expenses, searchTerm, filterDate, filterBank, filterCategory, filterType]);
+
+  const hasActiveFilters = searchTerm || filterDate || filterBank !== 'all' || filterCategory !== 'all' || filterType !== 'all';
+  const clearFilters = () => {
+    setSearchTerm('');
+    setFilterDate('');
+    setFilterBank('all');
+    setFilterCategory('all');
+    setFilterType('all');
+  };
 
   const totalExpenses = expenses.reduce((acc, exp) => acc + exp.amount, 0);
 
@@ -55,17 +93,100 @@ export function DashboardExpenseTable({ expenses, categories, totalIncome }: Das
       <CardHeader>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle className="text-lg">Últimas Despesas</CardTitle>
-          <div className="w-full sm:w-64">
-            <Label htmlFor="search-expenses" className="sr-only">Buscar despesa</Label>
-            <Input
-              id="search-expenses"
-              placeholder="Buscar por descrição..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-8 text-sm"
-            />
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64">
+              <Input
+                placeholder="Buscar despesa..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-8 text-sm"
+              />
+            </div>
+            <Button
+              variant={showFilters || hasActiveFilters ? "secondary" : "outline"}
+              size="sm"
+              className="h-8 px-2"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
           </div>
         </div>
+
+        {/* Extended Filters */}
+        {showFilters && (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-4 mt-4 border-t">
+            <div className="space-y-1">
+              <Label className="text-xs">Data</Label>
+              <Input
+                type="date"
+                className="h-8 text-sm"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs">Banco</Label>
+              <Select value={filterBank} onValueChange={setFilterBank}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="Nubank">Nubank</SelectItem>
+                  <SelectItem value="Inter">Inter</SelectItem>
+                  <SelectItem value="None">Sem Banco</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs">Tipo</Label>
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="fixed">Fixa</SelectItem>
+                  <SelectItem value="variable">Variável</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs">Categoria</Label>
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="Todas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  {categories.map(category => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {hasActiveFilters && (
+              <div className="sm:col-span-2 lg:col-span-4 flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="h-8 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="mr-2 h-3 w-3" />
+                  Limpar Filtros
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">

@@ -45,7 +45,7 @@ interface FinanceContextType {
   updateBillingPeriod: (id: string, period: Partial<BillingPeriod>) => Promise<void>;
   deleteBillingPeriod: (id: string) => Promise<void>;
   // Monthly Income
-  setMonthlyIncome: (billingPeriodId: string, salary: number, extra: number) => Promise<void>;
+  setMonthlyIncome: (billingPeriodId: string, salary: number, extra: number, extraDetails?: { id: string; name: string; amount: number }[]) => Promise<void>;
   // Goals
   setCategoryGoal: (categoryId: string, amount: number) => Promise<void>;
   setCategoryGoals: (goals: { categoryId: string; amount: number }[]) => Promise<void>;
@@ -1191,7 +1191,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   // Monthly Income
-  const setMonthlyIncome = async (billingPeriodId: string, salary: number, extra: number) => {
+  const setMonthlyIncome = async (billingPeriodId: string, salary: number, extra: number, extraDetails?: { id: string; name: string; amount: number }[]) => {
     if (!user) return;
 
     const existing = data.monthlyIncomes.find(i => i.billingPeriodId === billingPeriodId);
@@ -1199,7 +1199,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     if (existing) {
       const { error } = await supabase
         .from('monthly_incomes')
-        .update({ salary, extra })
+        .update({ salary, extra, extra_details: extraDetails || [] })
         .eq('id', existing.id);
 
       if (error) throw error;
@@ -1211,6 +1211,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           billing_period_id: billingPeriodId,
           salary,
           extra,
+          extra_details: extraDetails || [],
         });
 
       if (error) throw error;

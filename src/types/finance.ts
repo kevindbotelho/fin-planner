@@ -59,6 +59,7 @@ export interface MonthlyIncome {
   billingPeriodId: string;
   salary: number;
   extra: number;
+  extraDetails?: { id: string; name: string; amount: number }[];
 }
 
 export interface FinanceData {

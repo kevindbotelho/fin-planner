@@ -56,31 +56,35 @@ export function BankSummaryWidget({ expenses }: BankSummaryWidgetProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4 mt-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-white border shadow-sm flex items-center justify-center p-1">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Nubank_logo_2021.svg" alt="Nubank" className="h-full w-full object-contain" />
+          {bankStats.nubankTotal > 0 && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-white border shadow-sm flex items-center justify-center p-1">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Nubank_logo_2021.svg" alt="Nubank" className="h-full w-full object-contain" />
+                </div>
+                <span className="font-medium">Nubank</span>
               </div>
-              <span className="font-medium">Nubank</span>
+              <div className="text-right">
+                <p className="font-bold text-expense">{formatCurrency(bankStats.nubankTotal)}</p>
+                <p className="text-xs text-muted-foreground">{bankStats.nubankPercentage.toFixed(1)}%</p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="font-bold text-expense">{formatCurrency(bankStats.nubankTotal)}</p>
-              <p className="text-xs text-muted-foreground">{bankStats.nubankPercentage.toFixed(1)}%</p>
-            </div>
-          </div>
+          )}
           
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-white border shadow-sm flex items-center justify-center p-1">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/8/8f/Logo_do_banco_Inter_%282023%29.svg" alt="Inter" className="h-full w-full object-contain" />
+          {bankStats.interTotal > 0 && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-white border shadow-sm flex items-center justify-center p-1">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/8/8f/Logo_do_banco_Inter_%282023%29.svg" alt="Inter" className="h-full w-full object-contain" />
+                </div>
+                <span className="font-medium">Inter</span>
               </div>
-              <span className="font-medium">Banco Inter</span>
+              <div className="text-right">
+                <p className="font-bold text-expense">{formatCurrency(bankStats.interTotal)}</p>
+                <p className="text-xs text-muted-foreground">{bankStats.interPercentage.toFixed(1)}%</p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="font-bold text-expense">{formatCurrency(bankStats.interTotal)}</p>
-              <p className="text-xs text-muted-foreground">{bankStats.interPercentage.toFixed(1)}%</p>
-            </div>
-          </div>
+          )}
 
           {bankStats.outrosTotal > 0 && (
             <div className="flex items-center justify-between">

@@ -99,7 +99,7 @@ export default function Settings() {
   });
 
   // Income Form
-  const [incomeForm, setIncomeForm] = useState<{ [key: string]: { salary: string; extra: string } }>({});
+  const [incomeForm, setIncomeForm] = useState<{ [key: string]: { salary: string; extraDetails: { id: string; name: string; amount: string }[] } }>({});
 
   // Category Form
   const [categoryForm, setCategoryForm] = useState({ name: '', color: '#10b981' });
@@ -212,10 +212,13 @@ export default function Settings() {
     const form = incomeForm[periodId];
     if (!form) return;
 
+    const totalExtra = form.extraDetails.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+
     setMonthlyIncome(
       periodId,
       parseFloat(form.salary) || 0,
-      parseFloat(form.extra) || 0
+      totalExtra,
+      form.extraDetails.map(d => ({ ...d, amount: parseFloat(d.amount) || 0 }))
     );
   };
 
@@ -224,8 +227,52 @@ export default function Settings() {
     const existing = getIncomeForPeriod(periodId);
     return {
       salary: existing?.salary?.toString() || '',
-      extra: existing?.extra?.toString() || '',
+      extraDetails: existing?.extraDetails?.map(d => ({ ...d, amount: d.amount.toString() })) || [],
     };
+  };
+
+  const handleAddExtraDetail = (periodId: string) => {
+    setIncomeForm(prev => {
+      const current = prev[periodId] || getIncomeFormValues(periodId);
+      return {
+        ...prev,
+        [periodId]: {
+          ...current,
+          extraDetails: [
+            ...current.extraDetails,
+            { id: Math.random().toString(36).substr(2, 9), name: '', amount: '' }
+          ]
+        }
+      };
+    });
+  };
+
+  const handleRemoveExtraDetail = (periodId: string, idToRemove: string) => {
+    setIncomeForm(prev => {
+      const current = prev[periodId] || getIncomeFormValues(periodId);
+      return {
+        ...prev,
+        [periodId]: {
+          ...current,
+          extraDetails: current.extraDetails.filter(d => d.id !== idToRemove)
+        }
+      };
+    });
+  };
+
+  const handleUpdateExtraDetail = (periodId: string, idToUpdate: string, field: 'name' | 'amount', value: string) => {
+    setIncomeForm(prev => {
+      const current = prev[periodId] || getIncomeFormValues(periodId);
+      return {
+        ...prev,
+        [periodId]: {
+          ...current,
+          extraDetails: current.extraDetails.map(d => 
+            d.id === idToUpdate ? { ...d, [field]: value } : d
+          )
+        }
+      };
+    });
   };
 
   const handleAddCategory = (e: React.FormEvent) => {
@@ -609,38 +656,63 @@ export default function Settings() {
                             {format(parseISO(period.startDate), 'dd/MM/yyyy')} - {format(parseISO(period.endDate), 'dd/MM/yyyy')}
                           </p>
                         </div>
-                        <div className="grid gap-4 sm:grid-cols-3">
+                        <div className="space-y-4">
                           <div className="space-y-2">
-                            <Label>Salário</Label>
+                            <Label>Salário Principal</Label>
                             <CurrencyInput
                               value={formValues.salary}
                               onChange={(value) =>
                                 setIncomeForm(prev => ({
                                   ...prev,
-                                  [period.id]: { ...formValues, salary: value },
+                                  [period.id]: { ...(prev[period.id] || formValues), salary: value },
                                 }))
                               }
                             />
                           </div>
-                          <div className="space-y-2">
-                            <Label>Extra</Label>
-                            <CurrencyInput
-                              value={formValues.extra}
-                              onChange={(value) =>
-                                setIncomeForm(prev => ({
-                                  ...prev,
-                                  [period.id]: { ...formValues, extra: value },
-                                }))
-                              }
-                            />
+
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Label>Rendas Extras</Label>
+                              <Button variant="outline" size="sm" onClick={() => handleAddExtraDetail(period.id)}>
+                                <Plus className="h-4 w-4 mr-1" />
+                                Adicionar
+                              </Button>
+                            </div>
+                            
+                            {formValues.extraDetails.length === 0 ? (
+                              <p className="text-sm text-muted-foreground text-center py-2 border rounded border-dashed">Nenhuma renda extra.</p>
+                            ) : (
+                              <div className="space-y-2">
+                                {formValues.extraDetails.map(detail => (
+                                  <div key={detail.id} className="flex gap-2 items-center">
+                                    <Input 
+                                      placeholder="Ex: Bônus..." 
+                                      value={detail.name}
+                                      onChange={(e) => handleUpdateExtraDetail(period.id, detail.id, 'name', e.target.value)}
+                                      className="flex-1"
+                                    />
+                                    <div className="w-[100px] sm:w-[130px]">
+                                      <CurrencyInput
+                                        value={detail.amount}
+                                        onChange={(value) => handleUpdateExtraDetail(period.id, detail.id, 'amount', value)}
+                                      />
+                                    </div>
+                                    <Button size="icon" variant="ghost" onClick={() => handleRemoveExtraDetail(period.id, detail.id)}>
+                                      <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-end">
+                          
+                          <div className="pt-2">
                             <Button
                               onClick={() => handleSaveIncome(period.id)}
                               className="w-full"
                               variant="secondary"
                             >
-                              Salvar
+                              Salvar Receitas
                             </Button>
                           </div>
                         </div>
