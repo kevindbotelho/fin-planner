@@ -182,6 +182,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         billingPeriodId: i.billing_period_id,
         salary: Number(i.salary),
         extra: Number(i.extra),
+        extraDetails: i.extra_details || [],
       }));
 
       const expenses: Expense[] = (expensesRes.data || []).map(e => ({
