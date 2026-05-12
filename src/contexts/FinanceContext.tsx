@@ -609,6 +609,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           subcategory_id: expense.subcategoryId || null,
           start_date: expense.purchaseDate,
           is_active: true,
+          original_title: expense.originalTitle || null,
         })
         .select()
         .single();
@@ -643,6 +644,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           fixed_template_id: templateData.id,
           display_order: displayOrder,
           bank_origin: expense.bankOrigin || null,
+          original_title: expense.originalTitle || null,
         });
       }
 
@@ -1175,6 +1177,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           type: 'fixed',
           fixed_template_id: template.id,
           bank_origin: lastExpense ? lastExpense.bankOrigin || null : null,
+          original_title: template.original_title || null,
         });
       }
     }

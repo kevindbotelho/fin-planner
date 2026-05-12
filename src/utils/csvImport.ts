@@ -371,7 +371,7 @@ export const reconcileExpenses = (
                 if (!storedTitle) return false;
                 
                 // Token overlap calculation
-                const tokenize = (t: string) => t.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length >= 2);
+                const tokenize = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length >= 2);
                 const tokens1 = new Set(tokenize(row.title));
                 const tokens2 = new Set(tokenize(storedTitle));
                 
