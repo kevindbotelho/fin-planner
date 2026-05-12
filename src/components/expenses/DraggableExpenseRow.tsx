@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { GripVertical, Pencil, RepeatIcon, Trash2 } from 'lucide-react';
+import { GripVertical, Pencil, RepeatIcon, Trash2, Landmark } from 'lucide-react';
 import { Expense, Category, Subcategory } from '@/types/finance';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -90,6 +90,11 @@ export function DraggableExpenseRow({
         {expense.bankOrigin ? (
             <Badge variant="outline" className={expense.bankOrigin === 'Nubank' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-orange-100 text-orange-700 border-orange-200'}>
                 {expense.bankOrigin}
+            </Badge>
+        ) : expense.isReserve ? (
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
+                <Landmark className="h-3 w-3 mr-1" />
+                Reserva
             </Badge>
         ) : (
             <span className="text-muted-foreground text-xs">—</span>

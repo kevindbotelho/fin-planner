@@ -50,8 +50,11 @@ interface FinanceContextType {
   setCategoryGoal: (categoryId: string, amount: number) => Promise<void>;
   setCategoryGoals: (goals: { categoryId: string; amount: number }[]) => Promise<void>;
   setCategoryGoalOverride: (categoryId: string, billingPeriodId: string, amount: number) => Promise<void>;
+  setCategoryGoalOverrides: (billingPeriodId: string, overrides: { categoryId: string; amount: number }[]) => Promise<void>;
   getGoalForCategory: (categoryId: string, billingPeriodId: string) => number;
   deleteCategoryGoalOverride: (categoryId: string, billingPeriodId: string) => Promise<void>;
+  // Reserves
+  toggleExpenseFulfilled: (expenseId: string, fulfilled: boolean) => Promise<void>;
   // Helpers
   getExpensesForPeriod: (periodId: string) => Expense[];
   getIncomeForPeriod: (periodId: string) => MonthlyIncome | undefined;
@@ -198,6 +201,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         displayOrder: e.display_order ?? 0,
         originalTitle: e.original_title || undefined,
         bankOrigin: e.bank_origin || undefined,
+        isReserve: e.is_reserve || false,
+        isFulfilled: e.is_fulfilled || false,
+        fulfilledAt: e.fulfilled_at || null,
       }));
 
       const fixedTemplates: FixedExpenseTemplate[] = (templatesRes.data || []).map(t => ({
@@ -211,6 +217,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         isActive: t.is_active,
         createdAt: t.created_at,
         originalTitle: t.original_title || undefined,
+        isReserve: t.is_reserve || false,
       }));
 
       const fixedExclusions: FixedExpenseExclusion[] = (exclusionsRes.data || []).map(e => ({
@@ -610,6 +617,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           start_date: expense.purchaseDate,
           is_active: true,
           original_title: expense.originalTitle || null,
+          is_reserve: expense.isReserve || false,
         })
         .select()
         .single();
@@ -645,6 +653,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           display_order: displayOrder,
           bank_origin: expense.bankOrigin || null,
           original_title: expense.originalTitle || null,
+          is_reserve: expense.isReserve || false,
         });
       }
 
@@ -671,6 +680,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       type: expense.type || 'variable',
       display_order: displayOrder,
       bank_origin: expense.bankOrigin || null,
+      is_reserve: expense.isReserve || false,
     });
 
     if (error) throw error;
@@ -1178,6 +1188,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           fixed_template_id: template.id,
           bank_origin: lastExpense ? lastExpense.bankOrigin || null : null,
           original_title: template.original_title || null,
+          is_reserve: template.is_reserve || false,
         });
       }
     }
@@ -1401,6 +1412,30 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     toast.success('Meta do mês atualizada');
   };
 
+  const setCategoryGoalOverrides = async (billingPeriodId: string, overrides: { categoryId: string; amount: number }[]) => {
+    if (!user) return;
+
+    const upsertData = overrides.map(o => ({
+      user_id: user.id,
+      category_id: o.categoryId,
+      billing_period_id: billingPeriodId,
+      amount: o.amount,
+    }));
+
+    const { error } = await supabase
+      .from('category_goal_overrides')
+      .upsert(upsertData, { onConflict: 'user_id, category_id, billing_period_id' });
+
+    if (error) {
+      console.error('Error batch saving goal overrides:', error);
+      toast.error('Erro ao salvar metas do mês');
+      throw error;
+    }
+
+    await fetchData();
+    toast.success('Metas do mês atualizadas');
+  };
+
   const deleteCategoryGoalOverride = async (categoryId: string, billingPeriodId: string) => {
     if (!user) return;
 
@@ -1431,6 +1466,28 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     if (defaultGoal) return defaultGoal.amount;
 
     return 0;
+  };
+
+  const toggleExpenseFulfilled = async (expenseId: string, fulfilled: boolean) => {
+    if (!user) return;
+
+    const updateData: Record<string, unknown> = {
+      is_fulfilled: fulfilled,
+      fulfilled_at: fulfilled ? new Date().toISOString() : null,
+    };
+
+    const { error } = await supabase
+      .from('expenses')
+      .update(updateData)
+      .eq('id', expenseId)
+      .eq('user_id', user.id);
+
+    if (error) {
+      toast.error('Erro ao atualizar status da reserva');
+      throw error;
+    }
+
+    await fetchData();
   };
 
   return (
@@ -1467,8 +1524,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       setCategoryGoal,
       setCategoryGoals,
       setCategoryGoalOverride,
+      setCategoryGoalOverrides,
       deleteCategoryGoalOverride,
       getGoalForCategory,
+      toggleExpenseFulfilled,
     }}>
       {children}
     </FinanceContext.Provider>

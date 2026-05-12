@@ -7,6 +7,7 @@ import { BillingPeriodSelector } from '@/components/dashboard/BillingPeriodSelec
 import { DashboardExpenseTable } from '@/components/dashboard/DashboardExpenseTable';
 import { FinancialGoalsWidget } from '@/components/dashboard/FinancialGoalsWidget';
 import { BankSummaryWidget } from '@/components/dashboard/BankSummaryWidget';
+import { ReservesWidget } from '@/components/dashboard/ReservesWidget';
 
 export default function Dashboard() {
   const { data, getExpensesForPeriod, getIncomeForPeriod, selectedPeriodId, setSelectedPeriodId } = useFinance();
@@ -73,6 +74,7 @@ export default function Dashboard() {
               <div className="flex-1 min-h-[300px] h-full flex flex-col">
                 <FinancialGoalsWidget />
               </div>
+              <ReservesWidget />
             </div>
             <div className="flex flex-col space-y-6">
               <CategoryDonutChart

@@ -26,6 +26,9 @@ export interface Expense {
   displayOrder: number; // ordem de exibição manual
   originalTitle?: string | null; // título original do csv para conciliação
   bankOrigin?: 'Nubank' | 'Inter' | null; // origem do banco
+  isReserve?: boolean;         // É reserva de crédito (não fatura)?
+  isFulfilled?: boolean;       // Já separou/transferiu o dinheiro?
+  fulfilledAt?: string | null; // Quando marcou como cumprida
 }
 
 export interface FixedExpenseTemplate {
@@ -39,6 +42,7 @@ export interface FixedExpenseTemplate {
   isActive: boolean;
   createdAt: string;
   originalTitle?: string | null;
+  isReserve?: boolean;
 }
 
 export interface FixedExpenseExclusion {

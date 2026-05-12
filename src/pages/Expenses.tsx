@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Landmark } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -48,6 +48,7 @@ import { FixedExpenseActionDialog } from '@/components/expenses/FixedExpenseActi
 import { DraggableExpenseRow } from '@/components/expenses/DraggableExpenseRow';
 import { CategoryManagerDialog } from '@/components/expenses/CategoryManagerDialog';
 import { ImportCsvButton } from '@/components/expenses/csv/ImportCsvButton';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function Expenses() {
   const {
@@ -87,6 +88,7 @@ export default function Expenses() {
     subcategoryId: '',
     type: 'variable' as ExpenseType,
     bankOrigin: 'None' as 'Nubank' | 'Inter' | 'None',
+    isReserve: false,
   });
 
   // Filters
@@ -104,6 +106,7 @@ export default function Expenses() {
     subcategoryId: '',
     type: 'variable' as ExpenseType,
     bankOrigin: 'None' as 'Nubank' | 'Inter' | 'None',
+    isReserve: false,
   });
 
   // Fixed expense action dialog state
@@ -150,7 +153,8 @@ export default function Expenses() {
       categoryId: formData.categoryId,
       subcategoryId: formData.subcategoryId,
       type: formData.type,
-      bankOrigin: formData.bankOrigin === 'None' ? undefined : formData.bankOrigin,
+      bankOrigin: formData.isReserve ? undefined : (formData.bankOrigin === 'None' ? undefined : formData.bankOrigin),
+      isReserve: formData.isReserve,
     });
 
     setFormData({
@@ -161,6 +165,7 @@ export default function Expenses() {
       subcategoryId: '',
       type: 'variable',
       bankOrigin: 'None',
+      isReserve: false,
     });
   };
 
@@ -189,6 +194,7 @@ export default function Expenses() {
       subcategoryId: expense.subcategoryId,
       type: expense.type || 'variable',
       bankOrigin: expense.bankOrigin || 'None',
+      isReserve: expense.isReserve || false,
     });
   };
 
@@ -212,7 +218,8 @@ export default function Expenses() {
       categoryId: editFormData.categoryId,
       subcategoryId: editFormData.subcategoryId,
       type: editFormData.type,
-      bankOrigin: editFormData.bankOrigin === 'None' ? undefined : editFormData.bankOrigin,
+      bankOrigin: editFormData.isReserve ? undefined : (editFormData.bankOrigin === 'None' ? undefined : editFormData.bankOrigin),
+      isReserve: editFormData.isReserve,
     }, scope);
 
     setEditingExpense(null);
@@ -476,6 +483,29 @@ export default function Expenses() {
                     <SelectItem value="Inter">Inter</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="flex items-center space-x-2 border rounded-md p-3 bg-muted/20">
+                <Checkbox
+                  id="isReserve"
+                  checked={formData.isReserve}
+                  onCheckedChange={(checked) => {
+                    setFormData({
+                      ...formData,
+                      isReserve: !!checked,
+                      bankOrigin: checked ? 'None' : formData.bankOrigin,
+                    });
+                  }}
+                />
+                <div className="flex-1">
+                  <Label htmlFor="isReserve" className="cursor-pointer flex items-center gap-1.5 text-sm font-medium">
+                    <Landmark className="h-3.5 w-3.5" />
+                    Reserva de crédito
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Investimento, caixa ou verba reservada (não é fatura)
+                  </p>
+                </div>
               </div>
 
               <Button type="submit" className="w-full">
@@ -782,6 +812,29 @@ export default function Expenses() {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="flex items-center space-x-2 border rounded-md p-3 bg-muted/20">
+                <Checkbox
+                  id="edit-isReserve"
+                  checked={editFormData.isReserve}
+                  onCheckedChange={(checked) => {
+                    setEditFormData({
+                      ...editFormData,
+                      isReserve: !!checked,
+                      bankOrigin: checked ? 'None' : editFormData.bankOrigin,
+                    });
+                  }}
+                />
+                <div className="flex-1">
+                  <Label htmlFor="edit-isReserve" className="cursor-pointer flex items-center gap-1.5 text-sm font-medium">
+                    <Landmark className="h-3.5 w-3.5" />
+                    Reserva de crédito
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Investimento, caixa ou verba reservada (não é fatura)
+                  </p>
+                </div>
+              </div>
 
             <Button type="submit" className="w-full">
               Salvar Alterações
