@@ -59,6 +59,8 @@ export default function Settings() {
 
   const {
     data,
+    selectedPeriodId,
+    setSelectedPeriodId,
     addBillingPeriod,
     updateBillingPeriod,
     deleteBillingPeriod,
@@ -71,6 +73,8 @@ export default function Settings() {
     updateSubcategory,
     deleteSubcategory,
     setCategoryGoals,
+    setCategoryGoalOverrides,
+    getGoalForCategory,
   } = useFinance();
 
   const onTabChange = (value: string) => {
@@ -108,6 +112,7 @@ export default function Settings() {
 
   // Goals State
   const [goalForms, setGoalForms] = useState<{ [key: string]: string }>({});
+  const [showSaveGoalsDialog, setShowSaveGoalsDialog] = useState(false);
 
   // Edit Category State
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
@@ -128,14 +133,14 @@ export default function Settings() {
   useEffect(() => {
     const goals: { [key: string]: string } = {};
     data.categories.forEach(cat => {
-      const goal = data.goals.find(g => g.categoryId === cat.id);
+      const goalAmount = getGoalForCategory(cat.id, selectedPeriodId);
       // Treat 0 as empty string to show placeholder
-      goals[cat.id] = (goal && goal.amount > 0) ? goal.amount.toString() : '';
+      goals[cat.id] = (goalAmount > 0) ? goalAmount.toString() : '';
     });
     setGoalForms(goals);
-  }, [data.categories, data.goals]);
+  }, [data.categories, selectedPeriodId, data.goals, data.goalOverrides, getGoalForCategory]);
 
-  const handleSaveAllGoals = async () => {
+  const handleSaveAllGoals = async (mode: 'period' | 'all') => {
     const goalsToSave = data.categories.map(category => {
       const amountStr = goalForms[category.id];
       // Treat empty string or NaN as 0
@@ -146,7 +151,12 @@ export default function Settings() {
       };
     });
 
-    await setCategoryGoals(goalsToSave);
+    if (mode === 'period') {
+      await setCategoryGoalOverrides(selectedPeriodId, goalsToSave);
+    } else {
+      await setCategoryGoals(goalsToSave);
+    }
+    setShowSaveGoalsDialog(false);
   };
 
   const getMonthName = (monthValue: string) => {
@@ -960,50 +970,153 @@ export default function Settings() {
           <Card className="border-0 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="space-y-1">
-                <CardTitle className="text-lg">Metas por Categoria (%)</CardTitle>
+                <CardTitle className="text-lg">Metas por Categoria</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Defina qual porcentagem da sua renda mensal deve ser destinada a cada categoria.
+                  Defina o valor limite (R$ ou %) para cada categoria.
                 </p>
               </div>
-              <Button onClick={handleSaveAllGoals}>
-                <Save className="h-4 w-4 mr-2" />
-                Salvar Alterações
-              </Button>
+              <AlertDialog open={showSaveGoalsDialog} onOpenChange={setShowSaveGoalsDialog}>
+                <AlertDialogTrigger asChild>
+                  <Button>
+                    <Save className="h-4 w-4 mr-2" />
+                    Salvar Alterações
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Salvar Metas</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Você deseja aplicar estas metas apenas para o mês selecionado ou para todos os meses futuros?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                    <Button variant="outline" onClick={() => setShowSaveGoalsDialog(false)}>
+                      Cancelar
+                    </Button>
+                    <Button variant="secondary" onClick={() => handleSaveAllGoals('period')}>
+                      Apenas este mês
+                    </Button>
+                    <Button onClick={() => handleSaveAllGoals('all')}>
+                      Todos os meses
+                    </Button>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4 pt-4">
-                {data.categories.map(category => (
-                  <div key={category.id} className="flex items-center justify-between rounded-lg border p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-4 w-4 rounded-full" style={{ backgroundColor: category.color }} />
-                      <span className="font-medium">{category.name}</span>
-                    </div>
-                    <div className="flex gap-2 items-center">
-                      <div className="relative w-24">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={goalForms[category.id] || ''}
-                          onChange={(e) => {
-                            let val = parseFloat(e.target.value);
-                            if (val > 100) val = 100;
-                            // Allow empty string for better UX while typing
-                            setGoalForms(prev => ({ ...prev, [category.id]: e.target.value }));
-                          }}
-                          onWheel={(e) => e.currentTarget.blur()}
-                          placeholder="0"
-                          className="pr-6"
-                        />
-                        <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">%</span>
+              <div className="flex items-center gap-4 mb-6 pt-4 border-b pb-6">
+                <Label className="text-muted-foreground whitespace-nowrap">Período:</Label>
+                <Select value={selectedPeriodId} onValueChange={setSelectedPeriodId}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Selecione um período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {data.billingPeriods.map(period => (
+                      <SelectItem key={period.id} value={period.id}>
+                        {period.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {(() => {
+                const currentIncomeData = getIncomeForPeriod(selectedPeriodId);
+                const periodIncome = currentIncomeData ? currentIncomeData.salary + currentIncomeData.extra : 0;
+                const totalAmount = data.categories.reduce((acc, cat) => acc + (parseFloat(goalForms[cat.id]) || 0), 0);
+                const totalPercentage = periodIncome > 0 ? (totalAmount / periodIncome) * 100 : 0;
+                const isOverLimit = totalPercentage > 100;
+                const isLimitReached = totalPercentage === 100;
+
+                return (
+                  <div className="space-y-6">
+                    <div className="bg-muted/50 p-4 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-4">
+                      <div className="w-full sm:w-auto text-center sm:text-left">
+                        <p className="text-sm text-muted-foreground">Receita do Período</p>
+                        <p className="text-xl font-bold">{formatCurrency(periodIncome)}</p>
+                      </div>
+                      <div className="flex-1 sm:max-w-xs w-full">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-muted-foreground">Total Comprometido</span>
+                          <span className={`font-bold ${isOverLimit ? 'text-destructive' : isLimitReached ? 'text-green-600' : ''}`}>
+                            {formatCurrency(totalAmount)} ({totalPercentage.toFixed(1)}%)
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full transition-all ${isOverLimit ? 'bg-destructive' : 'bg-primary'}`}
+                            style={{ width: `${Math.min(totalPercentage, 100)}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
+
+                    {periodIncome === 0 ? (
+                      <p className="text-center text-muted-foreground py-8">
+                        Cadastre uma receita para este período na aba "Receitas" para definir metas em R$.
+                      </p>
+                    ) : (
+                      <div className="space-y-4">
+                        {data.categories.map(category => {
+                          const amountStr = goalForms[category.id] || '0';
+                          const amount = parseFloat(amountStr) || 0;
+                          const percentage = periodIncome > 0 ? (amount / periodIncome) * 100 : 0;
+
+                          return (
+                            <div key={category.id} className="rounded-lg border p-4 space-y-3">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="h-4 w-4 rounded-full" style={{ backgroundColor: category.color }} />
+                                  <span className="font-medium">{category.name}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-32">
+                                    <CurrencyInput
+                                      value={amountStr}
+                                      onChange={(val) => setGoalForms(prev => ({ ...prev, [category.id]: val }))}
+                                    />
+                                  </div>
+                                  <span className="text-muted-foreground font-medium">=</span>
+                                  <div className="relative w-24">
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      max="100"
+                                      value={percentage > 0 ? percentage.toFixed(1) : ''}
+                                      onChange={(e) => {
+                                        let p = parseFloat(e.target.value) || 0;
+                                        if (p > 100) p = 100;
+                                        const newAmount = (p / 100) * periodIncome;
+                                        setGoalForms(prev => ({ ...prev, [category.id]: newAmount.toString() }));
+                                      }}
+                                      onWheel={(e) => e.currentTarget.blur()}
+                                      placeholder="0"
+                                      className="pr-6"
+                                    />
+                                    <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">%</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+                                <div
+                                  className="h-full transition-all"
+                                  style={{ 
+                                    width: `${Math.min(percentage, 100)}%`, 
+                                    backgroundColor: category.color 
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {data.categories.length === 0 && (
+                          <p className="text-center text-muted-foreground">Nenhuma categoria cadastrada</p>
+                        )}
+                      </div>
+                    )}
                   </div>
-                ))}
-                {data.categories.length === 0 && (
-                  <p className="text-center text-muted-foreground">Nenhuma categoria cadastrada</p>
-                )}
-              </div>
+                );
+              })()}
             </CardContent>
           </Card>
         </TabsContent>

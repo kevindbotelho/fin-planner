@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { Settings, Check, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import { CurrencyInput } from '@/components/ui/currency-input';
 
 export function FinancialGoalsWidget() {
     const navigate = useNavigate();
@@ -56,12 +57,12 @@ export function FinancialGoalsWidget() {
         const expenses = getExpensesForPeriod(selectedPeriodId);
         const categoryExpenses = expenses.filter(e => e.categoryId === category.id);
         const spent = categoryExpenses.reduce((acc, exp) => acc + exp.amount, 0);
-        const goalPercentage = getGoalForCategory(category.id, selectedPeriodId);
+        const goalValue = getGoalForCategory(category.id, selectedPeriodId);
 
         // Hide categories without a defined goal
-        if (goalPercentage === 0) return null;
+        if (goalValue === 0) return null;
 
-        const goalValue = totalIncome * (goalPercentage / 100);
+        const goalPercentage = totalIncome > 0 ? (goalValue / totalIncome) * 100 : 0;
         const percentage = goalValue > 0 ? (spent / goalValue) * 100 : 0;
 
         let statusColor = 'bg-green-500';
@@ -78,10 +79,10 @@ export function FinancialGoalsWidget() {
         };
     }).filter(Boolean) as any[]; // Type assertion for non-null
 
-    const handleOpenDialog = (categoryId: string, currentPercentage: number) => {
+    const handleOpenDialog = (categoryId: string, currentGoalValue: number) => {
         setSelectedCategory(categoryId);
         // If 0, show empty string to display placeholder
-        setGoalAmount(currentPercentage > 0 ? currentPercentage.toString() : '');
+        setGoalAmount(currentGoalValue > 0 ? currentGoalValue.toString() : '');
         setSaveMode('current'); // Default to current month override
         setDialogOpen(true);
     };
@@ -143,7 +144,7 @@ export function FinancialGoalsWidget() {
                                 <div
                                     key={item.id}
                                     className="space-y-1 cursor-pointer hover:bg-muted/30 p-2 rounded-lg transition-colors group"
-                                    onClick={() => handleOpenDialog(item.id, item.goalPercentage)}
+                                    onClick={() => handleOpenDialog(item.id, item.goalValue)}
                                 >
                                     <div className="flex items-center justify-between text-sm">
                                         <div className="flex items-center gap-2">
@@ -186,29 +187,39 @@ export function FinancialGoalsWidget() {
                     <DialogHeader>
                         <DialogTitle>Definir Meta - {categoryForDialog?.name}</DialogTitle>
                         <DialogDescription>
-                            Defina a porcentagem da renda para esta categoria.
+                            Defina o valor limite (R$ ou %) para esta categoria.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="amount">Porcentagem (%)</Label>
-                            <div className="relative">
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    value={goalAmount}
-                                    onChange={(e) => {
-                                        let val = parseFloat(e.target.value);
-                                        if (val > 100) val = 100;
-                                        setGoalAmount(e.target.value);
-                                    }}
-                                    onWheel={(e) => e.currentTarget.blur()}
-                                    placeholder="0"
-                                    className="pr-6"
-                                />
-                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">%</span>
+                            <Label htmlFor="amount">Meta Financeira</Label>
+                            <div className="flex items-center gap-2">
+                                <div className="flex-1">
+                                    <CurrencyInput
+                                        value={goalAmount}
+                                        onChange={(val) => setGoalAmount(val)}
+                                    />
+                                </div>
+                                <span className="text-muted-foreground font-medium">=</span>
+                                <div className="relative w-24">
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={(totalIncome > 0 && parseFloat(goalAmount) > 0) ? ((parseFloat(goalAmount) / totalIncome) * 100).toFixed(1) : ''}
+                                        onChange={(e) => {
+                                            let p = parseFloat(e.target.value) || 0;
+                                            if (p > 100) p = 100;
+                                            const newAmount = (p / 100) * totalIncome;
+                                            setGoalAmount(newAmount.toString());
+                                        }}
+                                        onWheel={(e) => e.currentTarget.blur()}
+                                        placeholder="0"
+                                        className="pr-6"
+                                    />
+                                    <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">%</span>
+                                </div>
                             </div>
                         </div>
 
