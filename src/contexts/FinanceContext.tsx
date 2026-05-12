@@ -886,6 +886,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         subcategory_id: updates.subcategoryId || null,
       };
 
+      if (updates.isReserve !== undefined) {
+        templateUpdate.is_reserve = updates.isReserve;
+      }
+
       // When changing the date for "este mês e todos os seguintes", we also update the template's reference date
       // so new billing periods are generated on the correct day.
       if (updates.purchaseDate !== undefined) {
@@ -924,6 +928,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
               subcategory_id: updates.subcategoryId || null,
             };
 
+            if (updates.isReserve !== undefined) {
+              updatePayload.is_reserve = updates.isReserve;
+            }
+
             // If the user changed the date, propagate the *day* to all future periods.
             // - Current period: keep the exact date the user picked
             // - Future periods: compute a date inside each billing period with the same day-of-month
@@ -961,6 +969,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     if (updates.subcategoryId !== undefined) updateData.subcategory_id = updates.subcategoryId || null;
     if (updates.type !== undefined) updateData.type = updates.type;
     if (updates.bankOrigin !== undefined) updateData.bank_origin = updates.bankOrigin || null;
+    if (updates.isReserve !== undefined) updateData.is_reserve = updates.isReserve;
 
     // Handle Variable -> Fixed conversion
     if (currentExpense.type === 'variable' && updates.type === 'fixed') {
@@ -981,6 +990,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           subcategory_id: finalSubcategoryId || null,
           start_date: finalPurchaseDate,
           is_active: true,
+          is_reserve: updates.isReserve ?? currentExpense.isReserve ?? false,
         })
         .select()
         .single();
@@ -1019,6 +1029,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           fixed_template_id: templateData.id,
           display_order: 0,
           bank_origin: updates.bankOrigin ?? currentExpense.bankOrigin ?? null,
+          is_reserve: updates.isReserve ?? currentExpense.isReserve ?? false,
         });
       }
     }

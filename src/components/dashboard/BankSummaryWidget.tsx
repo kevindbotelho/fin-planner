@@ -22,6 +22,8 @@ export function BankSummaryWidget({ expenses }: BankSummaryWidgetProps) {
     let outrosTotal = 0;
 
     expenses.forEach(expense => {
+      if (expense.isReserve) return; // Reservas não são faturas de cartão
+
       if (expense.bankOrigin === 'Nubank') {
         nubankTotal += expense.amount;
       } else if (expense.bankOrigin === 'Inter') {
