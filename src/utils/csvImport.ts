@@ -356,6 +356,41 @@ export const reconcileExpenses = (
             });
         }
 
+        // 5. FUZZY NAME MATCH (Token Overlap): same amount, date within 5 days, high token overlap.
+        //    Catches cases where the bank completely changes the name but it's the same charge
+        //    e.g., "Léo Eventos Vespasiano" -> "Léo Eventos"
+        if (matchIndex === -1 && !row.isMatchedPair) {
+            matchIndex = availableExpenses.findIndex(exp => {
+                const isExactAmount = exp.amount === Math.abs(row.amount);
+                if (!isExactAmount) return false;
+                
+                const daysDiff = Math.abs(differenceInDays(parseISO(row.date), parseISO(exp.purchaseDate)));
+                if (daysDiff > 5) return false;
+                
+                const storedTitle = exp.originalTitle || exp.description;
+                if (!storedTitle) return false;
+                
+                // Token overlap calculation
+                const tokenize = (t: string) => t.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length >= 2);
+                const tokens1 = new Set(tokenize(row.title));
+                const tokens2 = new Set(tokenize(storedTitle));
+                
+                if (tokens1.size === 0 || tokens2.size === 0) return false;
+                
+                let intersection = 0;
+                for (const t of tokens1) {
+                    if (tokens2.has(t)) intersection++;
+                }
+                
+                // Use minimum length of tokens to allow subset matches (e.g. "Léo Eventos" in "Léo Eventos Vespasiano")
+                const minTokens = Math.min(tokens1.size, tokens2.size);
+                const score = intersection / minTokens;
+                
+                // If 50% or more of the smaller name's tokens are present in the larger one, it's a match
+                return score >= 0.5;
+            });
+        }
+
         // 3. Mark and consume (only if not a matched pair that is skipping the import)
         if (matchIndex !== -1 && !row.isMatchedPair) {
             isDuplicate = true;

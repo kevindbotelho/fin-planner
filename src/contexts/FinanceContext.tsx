@@ -679,6 +679,19 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const addBulkExpenses = async (expensesToInsert: Omit<Expense, 'id' | 'createdAt' | 'displayOrder'>[]) => {
     if (!user || expensesToInsert.length === 0) return;
 
+    // Handle fixed expenses using the existing addExpense logic which creates templates and propagates
+    const fixedExpenses = expensesToInsert.filter(e => e.type === 'fixed');
+    const variableExpenses = expensesToInsert.filter(e => e.type !== 'fixed');
+
+    for (const fixedExp of fixedExpenses) {
+      await addExpense(fixedExp);
+    }
+
+    if (variableExpenses.length === 0) {
+      await fetchData();
+      return;
+    }
+
     // Helper to calculate insertion order and update existing items
     const getInsertionOrderAndUpdates = (periodId: string, itemDates: string[]) => {
       const period = data.billingPeriods.find(p => p.id === periodId);
@@ -736,7 +749,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const expensesByPeriod = new Map<string, Omit<Expense, 'id' | 'createdAt' | 'displayOrder'>[]>();
     const expensesWithNoPeriod: Omit<Expense, 'id' | 'createdAt' | 'displayOrder'>[] = [];
 
-    expensesToInsert.forEach(expense => {
+    variableExpenses.forEach(expense => {
       const period = getBillingPeriodForDate(expense.purchaseDate);
       if (period) {
         if (!expensesByPeriod.has(period.id)) {
