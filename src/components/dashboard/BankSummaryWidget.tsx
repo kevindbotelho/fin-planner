@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Expense } from '@/types/finance';
-import { Building2 } from 'lucide-react';
+import { Building2, Landmark } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface BankSummaryWidgetProps {
@@ -17,12 +17,16 @@ export function BankSummaryWidget({ expenses }: BankSummaryWidgetProps) {
   };
 
   const bankStats = useMemo(() => {
+    let reservaTotal = 0;
     let nubankTotal = 0;
     let interTotal = 0;
     let outrosTotal = 0;
 
     expenses.forEach(expense => {
-      if (expense.isReserve) return; // Reservas não são faturas de cartão
+      if (expense.isReserve) {
+        reservaTotal += expense.amount;
+        return;
+      }
 
       if (expense.bankOrigin === 'Nubank') {
         nubankTotal += expense.amount;
@@ -33,16 +37,18 @@ export function BankSummaryWidget({ expenses }: BankSummaryWidgetProps) {
       }
     });
 
-    const total = nubankTotal + interTotal + outrosTotal;
+    const total = nubankTotal + interTotal + outrosTotal + reservaTotal;
 
     return {
       nubankTotal,
       interTotal,
       outrosTotal,
+      reservaTotal,
       total,
       nubankPercentage: total > 0 ? (nubankTotal / total) * 100 : 0,
       interPercentage: total > 0 ? (interTotal / total) * 100 : 0,
       outrosPercentage: total > 0 ? (outrosTotal / total) * 100 : 0,
+      reservaPercentage: total > 0 ? (reservaTotal / total) * 100 : 0,
     };
   }, [expenses]);
 
@@ -88,6 +94,21 @@ export function BankSummaryWidget({ expenses }: BankSummaryWidgetProps) {
             </div>
           )}
 
+          {bankStats.reservaTotal > 0 && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center dark:bg-blue-900/20 dark:border-blue-800">
+                  <Landmark className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="font-medium">Reserva</span>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-expense">{formatCurrency(bankStats.reservaTotal)}</p>
+                <p className="text-xs text-muted-foreground">{bankStats.reservaPercentage.toFixed(1)}%</p>
+              </div>
+            </div>
+          )}
+
           {bankStats.outrosTotal > 0 && (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -116,6 +137,12 @@ export function BankSummaryWidget({ expenses }: BankSummaryWidgetProps) {
                 <div 
                   className="bg-orange-500 h-full transition-all duration-500" 
                   style={{ width: `${bankStats.interPercentage}%` }} 
+                />
+              )}
+              {bankStats.reservaPercentage > 0 && (
+                <div 
+                  className="bg-blue-500 h-full transition-all duration-500" 
+                  style={{ width: `${bankStats.reservaPercentage}%` }} 
                 />
               )}
               {bankStats.outrosPercentage > 0 && (

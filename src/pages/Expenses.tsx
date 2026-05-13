@@ -153,7 +153,7 @@ export default function Expenses() {
       categoryId: formData.categoryId,
       subcategoryId: formData.subcategoryId,
       type: formData.type,
-      bankOrigin: formData.isReserve ? undefined : (formData.bankOrigin === 'None' ? undefined : formData.bankOrigin),
+      bankOrigin: formData.isReserve ? null : (formData.bankOrigin === 'None' ? null : formData.bankOrigin),
       isReserve: formData.isReserve,
     });
 
@@ -218,7 +218,7 @@ export default function Expenses() {
       categoryId: editFormData.categoryId,
       subcategoryId: editFormData.subcategoryId,
       type: editFormData.type,
-      bankOrigin: editFormData.isReserve ? undefined : (editFormData.bankOrigin === 'None' ? undefined : editFormData.bankOrigin),
+      bankOrigin: editFormData.isReserve ? null : (editFormData.bankOrigin === 'None' ? null : editFormData.bankOrigin),
       isReserve: editFormData.isReserve,
     }, scope);
 
