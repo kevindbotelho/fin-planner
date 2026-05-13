@@ -1415,7 +1415,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           }
 
           if (protectionOverrides.length > 0) {
-            await supabase.from('category_goal_overrides').upsert(protectionOverrides);
+            await supabase.from('category_goal_overrides').upsert(protectionOverrides, { onConflict: 'user_id, category_id, billing_period_id' });
           }
         }
 
@@ -1433,8 +1433,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
               amount: goal.amount
             }))
           );
-          
-          await supabase.from('category_goal_overrides').upsert(futureOverrides);
+          await supabase.from('category_goal_overrides').upsert(futureOverrides, { onConflict: 'user_id, category_id, billing_period_id' });
         }
       }
     }

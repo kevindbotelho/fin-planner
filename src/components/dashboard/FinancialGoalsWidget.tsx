@@ -28,9 +28,8 @@ export function FinancialGoalsWidget() {
         selectedPeriodId,
         getExpensesForPeriod,
         getGoalForCategory,
-        setCategoryGoal,
         setCategoryGoalOverride,
-        deleteCategoryGoalOverride,
+        setCategoryGoals,
         getIncomeForPeriod
     } = useFinance();
 
@@ -97,11 +96,9 @@ export function FinancialGoalsWidget() {
             if (saveMode === 'current') {
                 await setCategoryGoalOverride(selectedCategory, selectedPeriodId, amount);
             } else {
-                // When setting default (all months), we want this to be the source of truth.
-                // So we update the default AND remove any specific override for this month
-                // that might be masking the new default.
-                await setCategoryGoal(selectedCategory, amount);
-                await deleteCategoryGoalOverride(selectedCategory, selectedPeriodId);
+                // When setting default (all months), use the robust setCategoryGoals 
+                // which protects past history and overrides future months properly
+                await setCategoryGoals([{ categoryId: selectedCategory, amount }], selectedPeriodId);
             }
 
             setDialogOpen(false);
