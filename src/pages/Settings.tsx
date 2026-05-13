@@ -1078,19 +1078,14 @@ export default function Settings() {
                                   </div>
                                   <span className="text-muted-foreground font-medium">=</span>
                                   <div className="relative w-24">
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      max="100"
-                                      value={percentage > 0 ? percentage.toFixed(1) : ''}
-                                      onChange={(e) => {
-                                        let p = parseFloat(e.target.value) || 0;
+                                    <CurrencyInput
+                                      value={percentage > 0 ? percentage.toFixed(2) : ''}
+                                      onChange={(val) => {
+                                        let p = parseFloat(val) || 0;
                                         if (p > 100) p = 100;
                                         const newAmount = (p / 100) * periodIncome;
                                         setGoalForms(prev => ({ ...prev, [category.id]: newAmount.toString() }));
                                       }}
-                                      onWheel={(e) => e.currentTarget.blur()}
-                                      placeholder="0"
                                       className="pr-6"
                                     />
                                     <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">%</span>
