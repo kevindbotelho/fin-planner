@@ -62,8 +62,9 @@ export function ReservesWidget() {
                     return (
                         <div
                             key={reserve.id}
+                            onClick={() => toggleExpenseFulfilled(reserve.id, !reserve.isFulfilled)}
                             className={cn(
-                                "flex items-center gap-3 p-3 rounded-lg border transition-all",
+                                "flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer",
                                 reserve.isFulfilled 
                                     ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900" 
                                     : "bg-background hover:bg-muted/30"
@@ -71,11 +72,9 @@ export function ReservesWidget() {
                         >
                             <Checkbox
                                 checked={reserve.isFulfilled}
-                                onCheckedChange={(checked) => {
-                                    toggleExpenseFulfilled(reserve.id, !!checked);
-                                }}
+                                onCheckedChange={() => {}}
                                 className={cn(
-                                    "h-5 w-5",
+                                    "h-5 w-5 pointer-events-none",
                                     reserve.isFulfilled && "data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
                                 )}
                             />
