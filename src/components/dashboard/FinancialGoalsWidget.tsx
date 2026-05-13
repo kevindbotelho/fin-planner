@@ -200,18 +200,13 @@ export function FinancialGoalsWidget() {
                                 </div>
                                 <span className="text-muted-foreground font-medium">=</span>
                                 <div className="relative w-24">
-                                    <Input
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        value={(totalIncome > 0 && parseFloat(goalAmount) > 0) ? ((parseFloat(goalAmount) / totalIncome) * 100).toFixed(1) : ''}
-                                        onChange={(e) => {
-                                            let p = parseFloat(e.target.value) || 0;
+                                    <CurrencyInput
+                                        value={(totalIncome > 0 && parseFloat(goalAmount) > 0) ? ((parseFloat(goalAmount) / totalIncome) * 100).toFixed(2) : ''}
+                                        onChange={(val) => {
+                                            let p = parseFloat(val) || 0;
                                             const newAmount = (p / 100) * totalIncome;
                                             setGoalAmount(newAmount.toString());
                                         }}
-                                        onWheel={(e) => e.currentTarget.blur()}
-                                        placeholder="0"
                                         className="pr-6"
                                     />
                                     <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">%</span>
@@ -225,7 +220,7 @@ export function FinancialGoalsWidget() {
                                 <div className="flex-1">
                                     <Label htmlFor="r1" className="cursor-pointer font-medium">Apenas este mês</Label>
                                     <p className="text-xs text-muted-foreground">
-                                        ({currentPeriod?.name}) - Meta temporária.
+                                        ({currentPeriod?.name})
                                     </p>
                                 </div>
                             </div>
@@ -233,39 +228,13 @@ export function FinancialGoalsWidget() {
                             <div className="flex items-center space-x-2 border p-3 rounded-md cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setSaveMode('default')}>
                                 <RadioGroupItem value="default" id="r2" />
                                 <div className="flex-1">
-                                    <Label htmlFor="r2" className="cursor-pointer font-medium">Todos os meses (Padrão)</Label>
-                                    <p className="text-xs text-muted-foreground">
-                                        Nova meta padrão.
-                                    </p>
+                                    <Label htmlFor="r2" className="cursor-pointer font-medium">Este mês e todos os próximos</Label>
                                 </div>
                             </div>
                         </RadioGroup>
                     </div>
 
-                    <DialogFooter className="flex justify-between sm:justify-between">
-                        {selectedCategory && data.goalOverrides.some(o => o.categoryId === selectedCategory && o.billingPeriodId === selectedPeriodId) ? (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={async () => {
-                                    if (!selectedCategory || !selectedPeriodId) return;
-                                    try {
-                                        await deleteCategoryGoalOverride(selectedCategory, selectedPeriodId);
-                                        toast.success("Meta restaurada para o padrão");
-                                        setDialogOpen(false);
-                                    } catch (error) {
-                                        console.error(error);
-                                    }
-                                }}
-                                className="text-muted-foreground hover:text-foreground"
-                            >
-                                <RotateCcw className="w-4 h-4 mr-2" />
-                                Restaurar Padrão
-                            </Button>
-                        ) : (
-                            <div /> /* Spacer if no revert button */
-                        )}
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-full justify-end">
                             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
                             <Button onClick={handleSave}>Salvar Meta</Button>
                         </div>
