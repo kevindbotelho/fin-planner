@@ -1379,9 +1379,67 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     toast.success('Meta padrão atualizada');
   };
 
-  const setCategoryGoals = async (goals: { categoryId: string; amount: number }[]) => {
+  const setCategoryGoals = async (goals: { categoryId: string; amount: number }[], startPeriodId?: string) => {
     if (!user) return;
 
+    if (startPeriodId) {
+      const startPeriod = data.billingPeriods.find(p => p.id === startPeriodId);
+      if (startPeriod) {
+        // 1. Protect past months: create overrides with the CURRENT default value
+        // for categories that don't have an override in the past yet
+        const pastPeriods = data.billingPeriods.filter(p => 
+          new Date(p.startDate) < new Date(startPeriod.startDate)
+        );
+
+        if (pastPeriods.length > 0) {
+          const protectionOverrides: any[] = [];
+          
+          for (const period of pastPeriods) {
+            for (const goal of goals) {
+              const hasOverride = data.goalOverrides.some(
+                o => o.categoryId === goal.categoryId && o.billingPeriodId === period.id
+              );
+              
+              if (!hasOverride) {
+                const currentDefault = data.goals.find(g => g.categoryId === goal.categoryId);
+                if (currentDefault) {
+                  protectionOverrides.push({
+                    user_id: user.id,
+                    category_id: goal.categoryId,
+                    billing_period_id: period.id,
+                    amount: currentDefault.amount
+                  });
+                }
+              }
+            }
+          }
+
+          if (protectionOverrides.length > 0) {
+            await supabase.from('category_goal_overrides').upsert(protectionOverrides);
+          }
+        }
+
+        // 2. Update overrides for current and all existing future periods
+        const futurePeriods = data.billingPeriods.filter(p => 
+          new Date(p.startDate) >= new Date(startPeriod.startDate)
+        );
+
+        if (futurePeriods.length > 0) {
+          const futureOverrides = futurePeriods.flatMap(period => 
+            goals.map(goal => ({
+              user_id: user.id,
+              category_id: goal.categoryId,
+              billing_period_id: period.id,
+              amount: goal.amount
+            }))
+          );
+          
+          await supabase.from('category_goal_overrides').upsert(futureOverrides);
+        }
+      }
+    }
+
+    // 3. Update the master default goals (for future periods not yet created)
     const upsertData = goals.map(g => ({
       user_id: user.id,
       category_id: g.categoryId,
@@ -1399,7 +1457,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
 
     await fetchData();
-    toast.success('Metas atualizadas com sucesso');
+    toast.success(startPeriodId ? 'Metas atualizadas para este mês e os seguintes' : 'Metas atualizadas com sucesso');
   };
 
   const setCategoryGoalOverride = async (categoryId: string, billingPeriodId: string, amount: number) => {

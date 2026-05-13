@@ -154,7 +154,7 @@ export default function Settings() {
     if (mode === 'period') {
       await setCategoryGoalOverrides(selectedPeriodId, goalsToSave);
     } else {
-      await setCategoryGoals(goalsToSave);
+      await setCategoryGoals(goalsToSave, selectedPeriodId);
     }
     setShowSaveGoalsDialog(false);
   };
@@ -986,7 +986,10 @@ export default function Settings() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Salvar Metas</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Você deseja aplicar estas metas apenas para o mês selecionado ou para todos os meses futuros?
+                      Você deseja aplicar estas metas apenas para o mês selecionado ou para este mês e todos os seguintes?
+                      <span className="text-xs text-muted-foreground mt-2 block">
+                        * Alterar todos os seguintes não afetará meses passados.
+                      </span>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter className="flex-col sm:flex-row gap-2">
@@ -997,7 +1000,7 @@ export default function Settings() {
                       Apenas este mês
                     </Button>
                     <Button onClick={() => handleSaveAllGoals('all')}>
-                      Todos os meses
+                      Este mês e todos os seguintes
                     </Button>
                   </AlertDialogFooter>
                 </AlertDialogContent>
