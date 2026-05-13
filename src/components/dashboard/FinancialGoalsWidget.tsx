@@ -234,6 +234,7 @@ export function FinancialGoalsWidget() {
                         </RadioGroup>
                     </div>
 
+                    <DialogFooter>
                         <div className="flex gap-2 w-full justify-end">
                             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
                             <Button onClick={handleSave}>Salvar Meta</Button>
