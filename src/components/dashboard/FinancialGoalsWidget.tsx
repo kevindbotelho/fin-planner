@@ -210,7 +210,6 @@ export function FinancialGoalsWidget() {
                                         value={(totalIncome > 0 && parseFloat(goalAmount) > 0) ? ((parseFloat(goalAmount) / totalIncome) * 100).toFixed(1) : ''}
                                         onChange={(e) => {
                                             let p = parseFloat(e.target.value) || 0;
-                                            if (p > 100) p = 100;
                                             const newAmount = (p / 100) * totalIncome;
                                             setGoalAmount(newAmount.toString());
                                         }}

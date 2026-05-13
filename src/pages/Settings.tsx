@@ -1085,7 +1085,6 @@ export default function Settings() {
                                       value={percentage > 0 ? percentage.toFixed(2) : ''}
                                       onChange={(val) => {
                                         let p = parseFloat(val) || 0;
-                                        if (p > 100) p = 100;
                                         const newAmount = (p / 100) * periodIncome;
                                         setGoalForms(prev => ({ ...prev, [category.id]: newAmount.toString() }));
                                       }}
