@@ -9,7 +9,7 @@ import { ptBR } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { FilePlus2, CheckCircle2, HelpCircle } from "lucide-react";
 
@@ -184,7 +184,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-[95vw] lg:max-w-6xl h-[85vh] flex flex-col p-0 gap-0">
+            <DialogContent className="max-w-[98vw] md:max-w-[95vw] xl:max-w-[1350px] h-[90vh] md:h-[85vh] flex flex-col p-0 gap-0">
                 <DialogHeader className="p-6 pb-2 border-b">
                     <DialogTitle className="flex items-center gap-2 text-xl">
                         <FilePlus2 className="h-5 w-5 text-primary" />
@@ -392,6 +392,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                 </table>
                             </div>
                         </div>
+                        <ScrollBar orientation="horizontal" />
                     </ScrollArea>
                 </div>
 
