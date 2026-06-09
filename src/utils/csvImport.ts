@@ -38,16 +38,17 @@ export const parseNubankCsv = (csvContent: string): ParsedCsvRow[] => {
         const line = lines[i].trim();
         if (!line) continue;
 
-        const parts = line.split(',');
+        // Expressão regular para lidar corretamente com campos que possuem aspas e vírgulas internas
+        // Ex: 2026-06-09,Amazon,"288,54"
+        const matches = line.match(/(\x22[^\x22]*\x22|[^\x22,\s]+)(?=\s*,|\s*$)/g) || [];
+        const parts = matches.map(val => val.replace(/^\x22|\x22$/g, '').trim());
 
-        // Some lines might use semicolon or have different structures if not standard Nubank
         // We expect at least 3 parts: date, title, amount
         if (parts.length >= 3) {
             const date = parts[0].trim();
-            // Titles might contain commas, so we join everything between the first and last element
-            // For Nubank, it usually doesn't, but just in case
+            // Titles might contain commas, but since we parsed using regex, we can take the fields directly
             let title = parts.slice(1, parts.length - 1).join(',').trim();
-            const amountStr = parts[parts.length - 1].trim();
+            let amountStr = parts[parts.length - 1].trim();
 
             // Basic validation for YYYY-MM-DD
             const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -61,7 +62,10 @@ export const parseNubankCsv = (csvContent: string): ParsedCsvRow[] => {
                 title = 'Importação S/ Titulo';
             }
 
-            const amount = parseFloat(amountStr);
+            // Trata o formato de número brasileiro (vírgula decimal)
+            // Converte "288,54" para "288.54"
+            let cleanAmountStr = amountStr.replace(/\./g, '').replace(',', '.').replace(/[^0-9.-]/g, '');
+            const amount = parseFloat(cleanAmountStr);
             if (isNaN(amount)) {
                 console.warn(`Line ${i + 1}: Invalid amount format "${amountStr}".`);
                 continue;
