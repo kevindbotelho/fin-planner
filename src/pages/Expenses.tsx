@@ -96,6 +96,7 @@ export default function Expenses() {
   const [filterType, setFilterType] = useState<ExpenseType | 'all'>('all');
   const [filterCategoryId, setFilterCategoryId] = useState<string>('all');
   const [filterSubcategoryId, setFilterSubcategoryId] = useState<string>('all');
+  const [showIgnored, setShowIgnored] = useState(false);
 
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [editFormData, setEditFormData] = useState({
@@ -107,6 +108,7 @@ export default function Expenses() {
     type: 'variable' as ExpenseType,
     bankOrigin: 'None' as 'Nubank' | 'Inter' | 'None',
     isReserve: false,
+    isIgnored: false,
   });
 
   // Fixed expense action dialog state
@@ -124,7 +126,12 @@ export default function Expenses() {
 
   const selectedCategory = data.categories.find(c => c.id === formData.categoryId);
   const editSelectedCategory = data.categories.find(c => c.id === editFormData.categoryId);
-  const periodExpenses = selectedPeriodId ? getExpensesForPeriod(selectedPeriodId) : [];
+  
+  const rawPeriodExpenses = selectedPeriodId ? getExpensesForPeriod(selectedPeriodId) : [];
+  const periodExpenses = useMemo(() => {
+    if (showIgnored) return rawPeriodExpenses;
+    return rawPeriodExpenses.filter(e => !e.isIgnored);
+  }, [rawPeriodExpenses, showIgnored]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -195,6 +202,7 @@ export default function Expenses() {
       type: expense.type || 'variable',
       bankOrigin: expense.bankOrigin || 'None',
       isReserve: expense.isReserve || false,
+      isIgnored: expense.isIgnored || false,
     });
   };
 
@@ -220,6 +228,7 @@ export default function Expenses() {
       type: editFormData.type,
       bankOrigin: editFormData.isReserve ? null : (editFormData.bankOrigin === 'None' ? null : editFormData.bankOrigin),
       isReserve: editFormData.isReserve,
+      isIgnored: editFormData.isIgnored,
     }, scope);
 
     setEditingExpense(null);
@@ -626,8 +635,18 @@ export default function Expenses() {
                 </Select>
               </div>
 
-              {hasActiveFilters && (
-                <div className="sm:col-span-2 lg:col-span-4 flex justify-end">
+              <div className="sm:col-span-2 lg:col-span-4 flex items-center justify-between mt-2 pt-2 border-t border-border/40">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="showIgnored"
+                    checked={showIgnored}
+                    onCheckedChange={(checked) => setShowIgnored(!!checked)}
+                  />
+                  <Label htmlFor="showIgnored" className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
+                    Mostrar despesas desconsideradas (pontes de cartão)
+                  </Label>
+                </div>
+                {hasActiveFilters && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -637,8 +656,8 @@ export default function Expenses() {
                     <X className="mr-2 h-3 w-3" />
                     Limpar Filtros
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -832,6 +851,27 @@ export default function Expenses() {
                   </Label>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Investimento, caixa ou verba reservada (não é fatura)
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 border rounded-md p-3 bg-muted/20">
+                <Checkbox
+                  id="edit-isIgnored"
+                  checked={editFormData.isIgnored}
+                  onCheckedChange={(checked) => {
+                    setEditFormData({
+                      ...editFormData,
+                      isIgnored: !!checked,
+                    });
+                  }}
+                />
+                <div className="flex-1">
+                  <Label htmlFor="edit-isIgnored" className="cursor-pointer flex items-center gap-1.5 text-sm font-medium">
+                    Desconsiderar despesa (Ponte)
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Exclui do total de despesas e dos gráficos do Dashboard
                   </p>
                 </div>
               </div>

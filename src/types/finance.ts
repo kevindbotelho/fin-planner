@@ -29,6 +29,7 @@ export interface Expense {
   isReserve?: boolean;         // É reserva de crédito (não fatura)?
   isFulfilled?: boolean;       // Já separou/transferiu o dinheiro?
   fulfilledAt?: string | null; // Quando marcou como cumprida
+  isIgnored?: boolean;         // Despesa ignorada/ponte de cartão
 }
 
 export interface FixedExpenseTemplate {
@@ -43,6 +44,7 @@ export interface FixedExpenseTemplate {
   createdAt: string;
   originalTitle?: string | null;
   isReserve?: boolean;
+  isIgnored?: boolean;
 }
 
 export interface FixedExpenseExclusion {

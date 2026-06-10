@@ -58,7 +58,7 @@ export function DraggableExpenseRow({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.5 : (expense.isIgnored ? 0.4 : 1),
   };
 
   return (
@@ -71,7 +71,9 @@ export function DraggableExpenseRow({
       </TableCell>
       <TableCell className="font-medium">
         <div className="flex items-center gap-2">
-          {expense.description}
+          <span className={expense.isIgnored ? 'line-through text-muted-foreground' : ''}>
+            {expense.description}
+          </span>
           {isRecurring && (
             <TooltipProvider>
               <Tooltip>
@@ -87,7 +89,11 @@ export function DraggableExpenseRow({
         </div>
       </TableCell>
       <TableCell>
-        {expense.bankOrigin ? (
+        {expense.isIgnored ? (
+            <Badge variant="secondary" className="bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-900 dark:text-slate-400">
+                Ponte (Ignorada)
+            </Badge>
+        ) : expense.bankOrigin ? (
             <Badge variant="outline" className={expense.bankOrigin === 'Nubank' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-orange-100 text-orange-700 border-orange-200'}>
                 {expense.bankOrigin}
             </Badge>

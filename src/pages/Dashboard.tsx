@@ -13,7 +13,9 @@ export default function Dashboard() {
   const { data, getExpensesForPeriod, getIncomeForPeriod, selectedPeriodId, setSelectedPeriodId } = useFinance();
 
   const selectedPeriod = data.billingPeriods.find(p => p.id === selectedPeriodId);
-  const periodExpenses = selectedPeriodId ? getExpensesForPeriod(selectedPeriodId) : [];
+  const periodExpenses = selectedPeriodId 
+    ? getExpensesForPeriod(selectedPeriodId).filter(e => !e.isIgnored) 
+    : [];
   const periodIncome = selectedPeriodId ? getIncomeForPeriod(selectedPeriodId) : undefined;
 
   const totalExpenses = periodExpenses.reduce((acc, exp) => acc + exp.amount, 0);
@@ -26,7 +28,7 @@ export default function Dashboard() {
       .slice(-6);
 
     return sortedPeriods.map(period => {
-      const expenses = getExpensesForPeriod(period.id);
+      const expenses = getExpensesForPeriod(period.id).filter(e => !e.isIgnored);
       const income = getIncomeForPeriod(period.id);
       const totalExp = expenses.reduce((acc, exp) => acc + exp.amount, 0);
       const totalInc = (income?.salary || 0) + (income?.extra || 0);

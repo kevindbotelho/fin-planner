@@ -119,28 +119,28 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
             return newData;
         });
     };
-
     const handleSave = async () => {
-        const toProcess = reconciledData.filter(row => !row.ignored);
+        const activeExpenses = reconciledData.filter(row => !row.ignored);
+        const ignoredExpenses = reconciledData.filter(row => row.ignored && !row.isDuplicate && !row.isMatchedPair);
 
-        // Validation for 'new'
-        const newExpenses = toProcess.filter(r => r.actionType === 'new');
-        const missingCategories = newExpenses.filter(row => !row.categoryId);
+        // Validation for 'new' active expenses
+        const newActiveExpenses = activeExpenses.filter(r => r.actionType === 'new');
+        const missingCategories = newActiveExpenses.filter(row => !row.categoryId);
         if (missingCategories.length > 0) {
             toast.error(`Selecione uma categoria para as ${missingCategories.length} novas despesas.`);
             return;
         }
 
-        // Validation for 'link'
-        const linkExpenses = toProcess.filter(r => r.actionType === 'link');
+        // Validation for 'link' active expenses
+        const linkExpenses = activeExpenses.filter(r => r.actionType === 'link');
         const missingLinks = linkExpenses.filter(row => !row.linkedExpenseId || !row.linkedTemplateId);
         if (missingLinks.length > 0) {
             toast.error(`Selecione a despesa correspondente para vincular as despesas fixas.`);
             return;
         }
 
-        if (toProcess.length === 0) {
-            toast.error("Nenhuma despesa selecionada para importação.");
+        if (activeExpenses.length === 0 && ignoredExpenses.length === 0) {
+            toast.error("Nenhuma despesa para importação.");
             return;
         }
 
@@ -148,10 +148,13 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
         try {
             const promises: Promise<void>[] = [];
 
-            // 1. Add bulk new expenses (variable + fixed)
-            const createExpenses = toProcess.filter(r => r.actionType === 'new');
-            if (createExpenses.length > 0) {
-                promises.push(addBulkExpenses(createExpenses.map(row => ({
+            // Find default category for ignored expenses if needed
+            const defaultCategory = financeData.categories.find(c => c.name.toLowerCase() === 'outros') || financeData.categories[0];
+            const defaultCategoryId = defaultCategory?.id;
+
+            // Combine active and ignored new expenses to insert in bulk
+            const bulkInserts = [
+                ...activeExpenses.filter(r => r.actionType === 'new').map(row => ({
                     description: beautifyTransactionTitle(row.title),
                     amount: Math.abs(row.amount),
                     purchaseDate: row.date,
@@ -160,7 +163,23 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                     type: row.expenseType,
                     originalTitle: row.title,
                     bankOrigin: row.bankOrigin,
-                }))));
+                    isIgnored: false,
+                })),
+                ...ignoredExpenses.map(row => ({
+                    description: beautifyTransactionTitle(row.title),
+                    amount: Math.abs(row.amount),
+                    purchaseDate: row.date,
+                    categoryId: row.categoryId || defaultCategoryId!,
+                    subcategoryId: row.subcategoryId,
+                    type: row.expenseType || 'variable',
+                    originalTitle: row.title,
+                    bankOrigin: row.bankOrigin,
+                    isIgnored: true,
+                }))
+            ];
+
+            if (bulkInserts.length > 0) {
+                promises.push(addBulkExpenses(bulkInserts));
             }
 
             // 2. Link each fixed expense
@@ -180,6 +199,7 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
     if (!hasReconciled) return null;
 
     const validToImportCount = reconciledData.filter(r => !r.ignored).length;
+    const ignoredExpensesToImportCount = reconciledData.filter(row => row.ignored && !row.isDuplicate && !row.isMatchedPair).length;
     const duplicateCount = reconciledData.filter(r => r.isDuplicate).length;
 
     return (
@@ -262,7 +282,6 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
                                                             <Checkbox
                                                                 checked={!isIgnored}
                                                                 onCheckedChange={() => handleToggleIgnore(index)}
-                                                                disabled={isDuplicate && !isIgnored}
                                                             />
                                                         </td>
                                                         <td className="p-4 align-middle">{format(new Date(`${row.date}T12:00:00`), "dd/MM", { locale: ptBR })}</td>
@@ -398,13 +417,13 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
 
                 <DialogFooter className="p-6 border-t bg-muted/20 flex sm:justify-between items-center w-full">
                     <div className="text-sm text-muted-foreground flex-1">
-                        <strong>{validToImportCount}</strong> transações prontas para processar
+                        <strong>{validToImportCount}</strong> transações prontas{ignoredExpensesToImportCount > 0 && <span> (e <strong>{ignoredExpensesToImportCount}</strong> desconsideradas)</span>} para processar
                     </div>
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={onClose} disabled={isProcessing}>
                             Cancelar
                         </Button>
-                        <Button onClick={handleSave} disabled={isProcessing || validToImportCount === 0}>
+                        <Button onClick={handleSave} disabled={isProcessing || (validToImportCount === 0 && ignoredExpensesToImportCount === 0)}>
                             {isProcessing ? "Processando..." : "Salvar Importação"}
                         </Button>
                     </div>

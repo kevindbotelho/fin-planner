@@ -204,6 +204,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         isReserve: e.is_reserve || false,
         isFulfilled: e.is_fulfilled || false,
         fulfilledAt: e.fulfilled_at || null,
+        isIgnored: e.is_ignored || false,
       }));
 
       const fixedTemplates: FixedExpenseTemplate[] = (templatesRes.data || []).map(t => ({
@@ -218,6 +219,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         createdAt: t.created_at,
         originalTitle: t.original_title || undefined,
         isReserve: t.is_reserve || false,
+        isIgnored: t.is_ignored || false,
       }));
 
       const fixedExclusions: FixedExpenseExclusion[] = (exclusionsRes.data || []).map(e => ({
@@ -618,6 +620,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           is_active: true,
           original_title: expense.originalTitle || null,
           is_reserve: expense.isReserve || false,
+          is_ignored: expense.isIgnored || false,
         })
         .select()
         .single();
@@ -654,6 +657,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           bank_origin: expense.bankOrigin || null,
           original_title: expense.originalTitle || null,
           is_reserve: expense.isReserve || false,
+          is_ignored: expense.isIgnored || false,
         });
       }
 
@@ -681,6 +685,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       display_order: displayOrder,
       bank_origin: expense.bankOrigin || null,
       is_reserve: expense.isReserve || false,
+      is_ignored: expense.isIgnored || false,
     });
 
     if (error) throw error;
@@ -795,6 +800,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           display_order: startingIndex + idx,
           original_title: expense.originalTitle || null,
           bank_origin: expense.bankOrigin || null,
+          is_ignored: expense.isIgnored || false,
         });
       });
     }
@@ -812,6 +818,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         display_order: 0,
         original_title: expense.originalTitle || null,
         bank_origin: expense.bankOrigin || null,
+        is_ignored: expense.isIgnored || false,
       });
     });
 
@@ -890,6 +897,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         templateUpdate.is_reserve = updates.isReserve;
       }
 
+      if (updates.isIgnored !== undefined) {
+        templateUpdate.is_ignored = updates.isIgnored;
+      }
+
       // When changing the date for "este mês e todos os seguintes", we also update the template's reference date
       // so new billing periods are generated on the correct day.
       if (updates.purchaseDate !== undefined) {
@@ -932,6 +943,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
               updatePayload.is_reserve = updates.isReserve;
             }
 
+            if (updates.isIgnored !== undefined) {
+              updatePayload.is_ignored = updates.isIgnored;
+            }
+
             // If the user changed the date, propagate the *day* to all future periods.
             // - Current period: keep the exact date the user picked
             // - Future periods: compute a date inside each billing period with the same day-of-month
@@ -970,6 +985,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     if (updates.type !== undefined) updateData.type = updates.type;
     if (updates.bankOrigin !== undefined) updateData.bank_origin = updates.bankOrigin || null;
     if (updates.isReserve !== undefined) updateData.is_reserve = updates.isReserve;
+    if (updates.isIgnored !== undefined) updateData.is_ignored = updates.isIgnored;
 
     // Handle Variable -> Fixed conversion
     if (currentExpense.type === 'variable' && updates.type === 'fixed') {
@@ -991,6 +1007,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           start_date: finalPurchaseDate,
           is_active: true,
           is_reserve: updates.isReserve ?? currentExpense.isReserve ?? false,
+          is_ignored: updates.isIgnored ?? currentExpense.isIgnored ?? false,
         })
         .select()
         .single();
@@ -1030,6 +1047,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           display_order: 0,
           bank_origin: updates.bankOrigin ?? currentExpense.bankOrigin ?? null,
           is_reserve: updates.isReserve ?? currentExpense.isReserve ?? false,
+          is_ignored: updates.isIgnored ?? currentExpense.isIgnored ?? false,
         });
       }
     }
@@ -1200,6 +1218,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           bank_origin: lastExpense ? lastExpense.bankOrigin || null : null,
           original_title: template.original_title || null,
           is_reserve: template.is_reserve || false,
+          is_ignored: template.is_ignored || false,
         });
       }
     }
