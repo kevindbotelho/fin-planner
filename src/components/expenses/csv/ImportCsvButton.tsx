@@ -4,19 +4,19 @@ import { Upload, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { parseNubankCsv, parseInterCsv, ParsedCsvRow } from "@/utils/csvImport";
 import { CsvImportPreview } from "./CsvImportPreview";
+import { useFinance } from "@/contexts/FinanceContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+ 
 export function ImportCsvButton() {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [parsedData, setParsedData] = useState<ParsedCsvRow[]>([]);
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const { csvParsedData, startCsvImport, cancelCsvImport } = useFinance();
     const [activeBank, setActiveBank] = useState<'Nubank' | 'Inter'>('Nubank');
-
+ 
     const handleButtonClick = (bank: 'Nubank' | 'Inter') => {
         setActiveBank(bank);
         fileInputRef.current?.click();
@@ -49,8 +49,7 @@ export function ImportCsvButton() {
                     return;
                 }
 
-                setParsedData(parsed);
-                setIsPreviewOpen(true);
+                startCsvImport(parsed);
             } catch (error) {
                 console.error("Error parsing CSV:", error);
                 toast.error(`Erro ao ler o arquivo CSV. Verifique se ele está no formato correto (padrão ${activeBank}).`);
@@ -105,11 +104,10 @@ export function ImportCsvButton() {
                 className="hidden"
             />
 
-            {isPreviewOpen && (
+            {csvParsedData.length > 0 && (
                 <CsvImportPreview
-                    isOpen={isPreviewOpen}
-                    onClose={() => setIsPreviewOpen(false)}
-                    parsedData={parsedData}
+                    isOpen={csvParsedData.length > 0}
+                    onClose={cancelCsvImport}
                 />
             )}
         </>

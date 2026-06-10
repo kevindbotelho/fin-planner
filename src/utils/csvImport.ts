@@ -19,6 +19,14 @@ export interface ReconciledCsvRow extends ParsedCsvRow {
     duplicateReason?: string;
 }
 
+export interface ExtendedReconciledCsvRow extends ReconciledCsvRow {
+    actionType: 'new' | 'link';
+    expenseType: 'variable' | 'fixed';
+    linkedExpenseId?: string;
+    linkedTemplateId?: string;
+    isMatchedPair?: boolean;
+}
+
 /**
  * Parses a standard Nubank CSV file into an array of objects.
  * Nubank CSV format: date (YYYY-MM-DD), title, amount

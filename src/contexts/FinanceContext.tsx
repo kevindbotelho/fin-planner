@@ -4,6 +4,7 @@ import { Category, Subcategory, Expense, BillingPeriod, MonthlyIncome, FinanceDa
 import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ParsedCsvRow, ExtendedReconciledCsvRow, reconcileExpenses, mapBankCategoryToSystem } from '@/utils/csvImport';
 
 // Helper to sort expenses (matches logic in Expenses.tsx)
 const sortExpenses = (expenses: Expense[]) => {
@@ -65,6 +66,12 @@ interface FinanceContextType {
   refreshData: () => Promise<void>;
   // Fixed expense helpers
   isFixedExpenseWithTemplate: (expense: Expense) => boolean;
+  // CSV Import State
+  csvParsedData: ParsedCsvRow[];
+  csvReconciledData: ExtendedReconciledCsvRow[];
+  setCsvReconciledData: React.Dispatch<React.SetStateAction<ExtendedReconciledCsvRow[]>>;
+  startCsvImport: (parsedData: ParsedCsvRow[]) => void;
+  cancelCsvImport: () => void;
 }
 
 const defaultData: FinanceData = {
@@ -85,6 +92,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<FinanceData>(defaultData);
   const [loading, setLoading] = useState(true);
   const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
+  const [csvParsedData, setCsvParsedData] = useState<ParsedCsvRow[]>([]);
+  const [csvReconciledData, setCsvReconciledData] = useState<ExtendedReconciledCsvRow[]>([]);
   const initializationAttempted = useRef(false);
 
   const fetchData = useCallback(async () => {
@@ -1577,6 +1586,37 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     await fetchData();
   };
 
+  const startCsvImport = (parsedRows: ParsedCsvRow[]) => {
+    setCsvParsedData(parsedRows);
+    const reconciled = reconcileExpenses(parsedRows, data.expenses, data.fixedTemplates);
+    const extended = reconciled.map(r => {
+      let categoryId = r.categoryId;
+      let subcategoryId = r.subcategoryId;
+
+      if (!categoryId && r.bankCategory) {
+        const mapped = mapBankCategoryToSystem(r.bankCategory, r.title, data.categories);
+        if (mapped) {
+          categoryId = mapped.categoryId;
+          subcategoryId = mapped.subcategoryId;
+        }
+      }
+
+      return {
+        ...r,
+        categoryId,
+        subcategoryId,
+        actionType: 'new' as const,
+        expenseType: 'variable' as const,
+      };
+    });
+    setCsvReconciledData(extended);
+  };
+
+  const cancelCsvImport = () => {
+    setCsvParsedData([]);
+    setCsvReconciledData([]);
+  };
+
   return (
     <FinanceContext.Provider value={{
       data,
@@ -1615,6 +1655,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       deleteCategoryGoalOverride,
       getGoalForCategory,
       toggleExpenseFulfilled,
+      csvParsedData,
+      csvReconciledData,
+      setCsvReconciledData,
+      startCsvImport,
+      cancelCsvImport,
     }}>
       {children}
     </FinanceContext.Provider>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ParsedCsvRow, reconcileExpenses, ReconciledCsvRow, beautifyTransactionTitle, mapBankCategoryToSystem } from "@/utils/csvImport";
+import { ParsedCsvRow, ReconciledCsvRow, ExtendedReconciledCsvRow, beautifyTransactionTitle } from "@/utils/csvImport";
 import { useFinance } from "@/contexts/FinanceContext";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
@@ -12,63 +12,29 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { FilePlus2, CheckCircle2, HelpCircle } from "lucide-react";
-
+ 
 interface CsvImportPreviewProps {
     isOpen: boolean;
     onClose: () => void;
-    parsedData: ParsedCsvRow[];
 }
 
-export interface ExtendedReconciledCsvRow extends ReconciledCsvRow {
-    actionType: 'new' | 'link';
-    expenseType: 'variable' | 'fixed';
-    linkedExpenseId?: string;
-    linkedTemplateId?: string;
-    isMatchedPair?: boolean;
-}
-
-export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPreviewProps) {
-    const { data: financeData, addBulkExpenses, linkExpenseToFixed, getBillingPeriodForDate } = useFinance();
-    const [reconciledData, setReconciledData] = useState<ExtendedReconciledCsvRow[]>([]);
+export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
+    const { 
+        data: financeData, 
+        addBulkExpenses, 
+        linkExpenseToFixed, 
+        getBillingPeriodForDate,
+        csvParsedData: parsedData,
+        csvReconciledData: reconciledData,
+        setCsvReconciledData: setReconciledData
+    } = useFinance();
     const [isProcessing, setIsProcessing] = useState(false);
-    const [hasReconciled, setHasReconciled] = useState(false);
 
     // Show ALL fixed expenses for the current period — including those already linked (originalTitle set)
     // This allows re-linking when the card changes (e.g. Crunchyroll moved from Nubank to Inter)
     const linkableFixedExpenses = financeData.expenses
         .filter(e => e.fixedTemplateId != null)
         .sort((a, b) => new Date(a.purchaseDate).getTime() - new Date(b.purchaseDate).getTime());
-
-    React.useEffect(() => {
-        if (isOpen && parsedData.length > 0) {
-            const reconciled = reconcileExpenses(parsedData, financeData.expenses, financeData.fixedTemplates);
-            setReconciledData(reconciled.map(r => {
-                let categoryId = r.categoryId;
-                let subcategoryId = r.subcategoryId;
-
-                // Tenta mapear categoria automaticamente se for uma despesa nova e tiver bankCategory
-                if (!categoryId && r.bankCategory) {
-                    const mapped = mapBankCategoryToSystem(r.bankCategory, r.title, financeData.categories);
-                    if (mapped) {
-                        categoryId = mapped.categoryId;
-                        subcategoryId = mapped.subcategoryId;
-                    }
-                }
-
-                return {
-                    ...r,
-                    categoryId,
-                    subcategoryId,
-                    actionType: 'new' as const,
-                    expenseType: 'variable' as const,
-                };
-            }));
-            setHasReconciled(true);
-        } else {
-            setReconciledData([]);
-            setHasReconciled(false);
-        }
-    }, [isOpen, parsedData, financeData.expenses]);
 
     const handleCategoryChange = (index: number, categoryId: string) => {
         setReconciledData(prev => {
@@ -211,8 +177,6 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
             setIsProcessing(false);
         }
     };
-
-    if (!hasReconciled) return null;
 
     const validToImportCount = reconciledData.filter(r => !r.ignored).length;
     const ignoredExpensesToImportCount = reconciledData.filter(row => row.ignored && !row.isDuplicate && !row.isMatchedPair).length;
