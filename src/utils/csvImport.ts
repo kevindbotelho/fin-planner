@@ -1,4 +1,4 @@
-import { Expense, FixedExpenseTemplate } from "@/types/finance";
+import { Expense, FixedExpenseTemplate, Category } from "@/types/finance";
 import { differenceInDays, parseISO } from "date-fns";
 
 export interface ParsedCsvRow {
@@ -7,6 +7,7 @@ export interface ParsedCsvRow {
     amount: number;
     originalLineNumber: number;
     bankOrigin?: 'Nubank' | 'Inter' | null;
+    bankCategory?: string | null;
 }
 
 export interface ReconciledCsvRow extends ParsedCsvRow {
@@ -90,12 +91,23 @@ export const parseNubankCsv = (csvContent: string): ParsedCsvRow[] => {
  */
 export const parseInterCsv = (csvContent: string): ParsedCsvRow[] => {
     const lines = csvContent.split('\n');
-    const parsedData: ParsedCsvRow[] = [];
     
     let startIdx = 0;
     if (lines[0] && (lines[0].toLowerCase().includes('data') || lines[0].toLowerCase().includes('lançamento') || lines[0].toLowerCase().includes('lancamento'))) {
         startIdx = 1;
     }
+
+    interface TempRow {
+        date: string;
+        rawTitle: string;
+        cleanTitle: string;
+        bankCategory: string | null;
+        type: string;
+        amount: number;
+        originalLineNumber: number;
+    }
+
+    const tempRows: TempRow[] = [];
 
     for (let i = startIdx; i < lines.length; i++) {
         const line = lines[i].trim();
@@ -108,6 +120,8 @@ export const parseInterCsv = (csvContent: string): ParsedCsvRow[] => {
         if (parts.length >= 3) {
             let dateStr = parts[0];
             let title = parts[1];
+            let bankCategory = parts.length >= 5 ? parts[2] : null;
+            let type = parts.length >= 5 ? parts[3] : '';
             let amountStr = parts[parts.length - 1];
 
             // Parse DD/MM/YYYY
@@ -126,17 +140,130 @@ export const parseInterCsv = (csvContent: string): ParsedCsvRow[] => {
             let amount = parseFloat(cleanAmountStr);
             if (isNaN(amount)) continue;
 
-            parsedData.push({
+            tempRows.push({
                 date,
-                title,
+                rawTitle: title,
+                cleanTitle: beautifyTransactionTitle(title),
+                bankCategory,
+                type,
                 amount,
-                originalLineNumber: i + 1,
-                bankOrigin: 'Inter',
+                originalLineNumber: i + 1
             });
         }
     }
-    
-    return parsedData;
+
+    // Processar e agrupar parcelas
+    const installmentRegex = /parcela\s+(\d+)\/(\d+)/i;
+
+    interface GroupedInstallment {
+        key: string;
+        date: string;
+        cleanTitle: string;
+        bankCategory: string | null;
+        totalInstallments: number;
+        unitAmount: number;
+        rows: TempRow[];
+    }
+
+    const installmentGroups = new Map<string, GroupedInstallment>();
+    const nonInstallmentRows: ParsedCsvRow[] = [];
+
+    tempRows.forEach(row => {
+        const match = row.type.match(installmentRegex);
+        if (match) {
+            const totalInstallments = parseInt(match[2], 10);
+            const unitAmount = row.amount;
+            
+            // Chave de agrupamento: data + título limpo + total de parcelas + valor unitário da parcela
+            const key = `${row.date}_${row.cleanTitle.toLowerCase()}_${totalInstallments}_${unitAmount}`;
+            
+            if (!installmentGroups.has(key)) {
+                installmentGroups.set(key, {
+                    key,
+                    date: row.date,
+                    cleanTitle: row.cleanTitle,
+                    bankCategory: row.bankCategory,
+                    totalInstallments,
+                    unitAmount,
+                    rows: []
+                });
+            }
+            installmentGroups.get(key)!.rows.push(row);
+        } else {
+            // Não é parcela, é compra à vista ou pagamentos
+            nonInstallmentRows.push({
+                date: row.date,
+                title: row.rawTitle,
+                amount: row.amount,
+                originalLineNumber: row.originalLineNumber,
+                bankOrigin: 'Inter',
+                bankCategory: row.bankCategory
+            });
+        }
+    });
+
+    // Formatar e agrupar as parcelas
+    const processedInstallmentRows: ParsedCsvRow[] = [];
+
+    installmentGroups.forEach(group => {
+        const rows = group.rows;
+        // Extrai os números das parcelas presentes
+        const installmentNumbers = rows
+            .map(r => {
+                const m = r.type.match(installmentRegex);
+                return m ? parseInt(m[1], 10) : 0;
+            })
+            .filter(n => n > 0);
+        
+        // Remove duplicados e ordena
+        const uniqueNumbers = Array.from(new Set(installmentNumbers)).sort((a, b) => a - b);
+        
+        // Soma os valores das parcelas agrupadas (com arredondamento de duas casas decimais)
+        const totalAmount = parseFloat(rows.reduce((sum, r) => sum + r.amount, 0).toFixed(2));
+        
+        // Menor número de linha do arquivo original para preservação de ordem
+        const minLineNumber = Math.min(...rows.map(r => r.originalLineNumber));
+
+        // Formatação do sufixo de parcelas
+        let suffix = '';
+        if (uniqueNumbers.length === 1) {
+            suffix = `(Parcela ${uniqueNumbers[0]}/${group.totalInstallments})`;
+        } else {
+            // Verifica se são consecutivas
+            let isConsecutive = true;
+            for (let i = 1; i < uniqueNumbers.length; i++) {
+                if (uniqueNumbers[i] !== uniqueNumbers[i - 1] + 1) {
+                    isConsecutive = false;
+                    break;
+                }
+            }
+            if (isConsecutive) {
+                suffix = `(Parcela ${uniqueNumbers[0]} a ${uniqueNumbers[uniqueNumbers.length - 1]}/${group.totalInstallments})`;
+            } else {
+                suffix = `(Parcelas ${uniqueNumbers.join(',')}/${group.totalInstallments})`;
+            }
+        }
+
+        // Título final combinando o título limpo + o sufixo formatado das parcelas
+        const finalTitle = `${group.cleanTitle} ${suffix}`;
+
+        processedInstallmentRows.push({
+            date: group.date,
+            title: finalTitle,
+            amount: totalAmount,
+            originalLineNumber: minLineNumber,
+            bankOrigin: 'Inter',
+            bankCategory: group.bankCategory
+        });
+    });
+
+    // Combina despesas normais e parceladas
+    const allRows = [...nonInstallmentRows, ...processedInstallmentRows];
+
+    // Ordena pelo originalLineNumber para manter a ordem do arquivo
+    allRows.sort((a, b) => a.originalLineNumber - b.originalLineNumber);
+
+    return allRows;
 };
 
 
@@ -417,4 +544,65 @@ export const reconcileExpenses = (
             duplicateReason: reason
         };
     });
+};
+
+/**
+ * Maps a bank category string from Banco Inter to a category and subcategory in the system.
+ */
+export const mapBankCategoryToSystem = (
+    bankCategory: string,
+    title: string,
+    systemCategories: Category[]
+): { categoryId: string; subcategoryId?: string } | null => {
+    const normBank = bankCategory.toUpperCase().trim();
+    const normTitle = title.toUpperCase();
+
+    let targetCategoryName = '';
+    let targetSubcategoryName = '';
+
+    if (normBank === 'TRANSPORTE') {
+        targetCategoryName = 'Transporte';
+        if (normTitle.includes('UBER') || normTitle.includes('99APP') || normTitle.includes('99FOOD')) {
+            targetSubcategoryName = 'Uber/99';
+        }
+    } else if (normBank === 'RESTAURANTES') {
+        targetCategoryName = 'Alimentação';
+        targetSubcategoryName = 'Restaurantes';
+    } else if (normBank === 'SUPERMERCADO') {
+        targetCategoryName = 'Alimentação';
+        targetSubcategoryName = 'Supermercado';
+    } else if (normBank === 'DROGARIA') {
+        targetCategoryName = 'Saúde';
+        targetSubcategoryName = 'Farmácia';
+    } else if (normBank === 'VESTUARIO') {
+        targetCategoryName = 'Vestuário';
+        targetSubcategoryName = 'Roupas';
+    } else if (normBank === 'ENSINO') {
+        targetCategoryName = 'Educação';
+    } else if (normBank === 'LAZER') {
+        targetCategoryName = 'Lazer';
+    } else if (normBank === 'BARES') {
+        targetCategoryName = 'Alimentação';
+        targetSubcategoryName = 'Restaurantes';
+    } else if (normBank === 'OUTROS' || normBank === 'COMPRAS' || normBank === 'SERVICOS') {
+        targetCategoryName = 'Outros';
+    }
+
+    if (!targetCategoryName) return null;
+
+    const cat = systemCategories.find(c => c.name.toLowerCase() === targetCategoryName.toLowerCase());
+    if (!cat) return null;
+
+    let subcategoryId: string | undefined = undefined;
+    if (targetSubcategoryName && cat.subcategories) {
+        const sub = cat.subcategories.find((s: any) => s.name.toLowerCase() === targetSubcategoryName.toLowerCase());
+        if (sub) {
+            subcategoryId = sub.id;
+        }
+    }
+
+    return {
+        categoryId: cat.id,
+        subcategoryId
+    };
 };

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ParsedCsvRow, reconcileExpenses, ReconciledCsvRow, beautifyTransactionTitle } from "@/utils/csvImport";
+import { ParsedCsvRow, reconcileExpenses, ReconciledCsvRow, beautifyTransactionTitle, mapBankCategoryToSystem } from "@/utils/csvImport";
 import { useFinance } from "@/contexts/FinanceContext";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
@@ -42,11 +42,27 @@ export function CsvImportPreview({ isOpen, onClose, parsedData }: CsvImportPrevi
     React.useEffect(() => {
         if (isOpen && parsedData.length > 0) {
             const reconciled = reconcileExpenses(parsedData, financeData.expenses, financeData.fixedTemplates);
-            setReconciledData(reconciled.map(r => ({
-                ...r,
-                actionType: 'new' as const,
-                expenseType: 'variable' as const,
-            })));
+            setReconciledData(reconciled.map(r => {
+                let categoryId = r.categoryId;
+                let subcategoryId = r.subcategoryId;
+
+                // Tenta mapear categoria automaticamente se for uma despesa nova e tiver bankCategory
+                if (!categoryId && r.bankCategory) {
+                    const mapped = mapBankCategoryToSystem(r.bankCategory, r.title, financeData.categories);
+                    if (mapped) {
+                        categoryId = mapped.categoryId;
+                        subcategoryId = mapped.subcategoryId;
+                    }
+                }
+
+                return {
+                    ...r,
+                    categoryId,
+                    subcategoryId,
+                    actionType: 'new' as const,
+                    expenseType: 'variable' as const,
+                };
+            }));
             setHasReconciled(true);
         } else {
             setReconciledData([]);
