@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { FilePlus2, CheckCircle2, HelpCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
  
 interface CsvImportPreviewProps {
     isOpen: boolean;
@@ -184,60 +185,60 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-[98vw] md:max-w-[95vw] xl:max-w-[1350px] h-[90vh] md:h-[85vh] flex flex-col p-0 gap-0">
-                <DialogHeader className="p-6 pb-2 border-b">
-                    <DialogTitle className="flex items-center gap-2 text-xl">
-                        <FilePlus2 className="h-5 w-5 text-primary" />
+            <DialogContent className="max-w-[98vw] md:max-w-[95vw] xl:max-w-[1350px] h-[90vh] md:h-[85vh] flex flex-col p-0 gap-0 liquid-glass border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md">
+                <DialogHeader className="p-6 pb-3 border-b border-slate-200/50 dark:border-slate-800/50">
+                    <DialogTitle className="flex items-center gap-2 text-base font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100">
+                        <FilePlus2 className="h-4.5 w-4.5 text-brand-500" />
                         Revisão de Importação CSV
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="text-xs text-slate-400 mt-1 font-medium">
                         Encontramos {parsedData.length} transações no arquivo. Revise as categorias e deduplicações.
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="flex-1 overflow-hidden flex flex-col">
                     {duplicateCount > 0 && (
-                        <div className="px-6 py-2 bg-muted/50 border-b flex items-center gap-2 text-sm text-muted-foreground">
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <div className="px-6 py-2.5 bg-amber-500/10 border-b border-slate-200/50 dark:border-slate-800/50 flex items-center gap-2 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                            <CheckCircle2 className="h-4 w-4" />
                             <span>Identificamos <strong>{duplicateCount}</strong> transações que já existem no seu sistema. Elas foram ocultadas por padrão.</span>
                         </div>
                     )}
 
                     <ScrollArea className="flex-1">
                         <div className="p-4 md:p-6 min-w-[max-content]">
-                            <div className="rounded-md border">
+                            <div className="rounded-xl border border-slate-200/50 dark:border-slate-800/50 overflow-hidden bg-white/20 dark:bg-black/10 backdrop-blur-sm shadow-sm">
                                 <table className="w-full text-sm">
-                                    <thead className="bg-muted/50 sticky top-0 z-10 shadow-sm">
-                                        <tr className="border-b">
-                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[50px]">Imp.</th>
-                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[100px]">Data</th>
-                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[80px]">Banco</th>
-                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground max-w-[200px]">Descrição (Banco)</th>
-                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[120px]">Valor</th>
-                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[160px]">
+                                    <thead className="bg-slate-100/50 dark:bg-slate-900/50 sticky top-0 z-10">
+                                        <tr className="border-b border-slate-200/50 dark:border-slate-800/50">
+                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[50px]">Imp.</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[100px]">Data</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[80px]">Banco</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope max-w-[200px]">Descrição (Banco)</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[120px]">Valor</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[160px]">
                                                 <div className="flex items-center gap-1">
                                                     Ação
                                                     <TooltipProvider>
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
-                                                                <HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" />
+                                                                <HelpCircle className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 cursor-help" />
                                                             </TooltipTrigger>
-                                                            <TooltipContent side="top" className="max-w-[200px] text-xs">
+                                                            <TooltipContent side="top" className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl text-[10px] font-semibold text-slate-600 dark:text-slate-300 max-w-[220px]">
                                                                 <p>"Vincular" serve para despesas fixas já projetadas. Associa o lançamento do banco à despesa que o sistema gerou pro mês.</p>
                                                             </TooltipContent>
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 </div>
                                             </th>
-                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[110px]">Tipo</th>
-                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[200px]">Categoria / Vínculo</th>
-                                            <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[180px]">Subcategoria</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[110px]">Tipo</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[200px]">Categoria / Vínculo</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[180px]">Subcategoria</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {reconciledData.length === 0 ? (
                                             <tr>
-                                                <td colSpan={8} className="h-24 text-center text-muted-foreground">
+                                                <td colSpan={9} className="h-24 text-center text-slate-400 dark:text-slate-500 text-xs font-medium">
                                                     Nenhuma transação encontrada no arquivo.
                                                 </td>
                                             </tr>
@@ -257,30 +258,46 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                 });
 
                                                 return (
-                                                    <tr key={`csv-row-${index}`} className={`border-b transition-colors hover:bg-muted/50 ${isIgnored ? 'opacity-50 bg-muted/30' : ''}`}>
+                                                    <tr key={`csv-row-${index}`} className={cn(
+                                                      "border-b border-slate-200/50 dark:border-slate-800/50 transition-colors hover:bg-slate-100/40 dark:hover:bg-slate-900/40",
+                                                      isIgnored && "opacity-50 bg-slate-100/10 dark:bg-slate-900/10"
+                                                    )}>
                                                         <td className="p-4 align-middle">
                                                             <Checkbox
                                                                 checked={!isIgnored}
                                                                 onCheckedChange={() => handleToggleIgnore(index)}
+                                                                className="h-5 w-5 pointer-events-auto rounded-md border-slate-300 dark:border-slate-800 data-[state=checked]:bg-brand-500 data-[state=checked]:border-brand-500"
                                                             />
                                                         </td>
-                                                        <td className="p-4 align-middle">{format(new Date(`${row.date}T12:00:00`), "dd/MM", { locale: ptBR })}</td>
+                                                        <td className="p-4 align-middle text-[10px] font-mono text-slate-400 dark:text-slate-500">
+                                                          {format(new Date(`${row.date}T12:00:00`), "dd/MM", { locale: ptBR })}
+                                                        </td>
                                                         <td className="p-4 align-middle">
                                                             {row.bankOrigin ? (
-                                                                <Badge variant="outline" className={row.bankOrigin === 'Nubank' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-orange-100 text-orange-700 border-orange-200'}>
+                                                                <Badge className={cn(
+                                                                  "border-0 text-[10px] font-semibold rounded-md pointer-events-none px-2 py-0.5",
+                                                                  row.bankOrigin === 'Nubank' 
+                                                                    ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400' 
+                                                                    : 'bg-orange-500/10 text-orange-600 dark:text-orange-400'
+                                                                )}>
                                                                     {row.bankOrigin}
                                                                 </Badge>
                                                             ) : (
-                                                                <span className="text-muted-foreground text-xs">—</span>
+                                                                <span className="text-slate-400 dark:text-slate-600 text-xs font-mono">—</span>
                                                             )}
                                                         </td>
-                                                        <td className="p-4 align-middle font-medium truncate max-w-[200px]" title={row.title}>{beautifyTransactionTitle(row.title)}</td>
-                                                        <td className={`p-4 align-middle font-semibold ${row.amount < 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                        <td className="p-4 align-middle text-xs font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[200px]" title={row.title}>
+                                                          {beautifyTransactionTitle(row.title)}
+                                                        </td>
+                                                        <td className={cn(
+                                                          "p-4 align-middle text-xs font-mono font-bold whitespace-nowrap",
+                                                          row.amount < 0 ? 'text-emerald-500' : 'text-rose-500'
+                                                        )}>
                                                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(row.amount)}
                                                         </td>
                                                         <td className="p-4 align-middle">
                                                             {isDuplicate ? (
-                                                                <Badge variant="secondary" className="bg-amber-100 text-amber-800" title={row.duplicateReason}>Já Existe</Badge>
+                                                                <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0 text-[10px] font-semibold rounded-md pointer-events-none px-2 py-0.5" title={row.duplicateReason}>Já Existe</Badge>
                                                             ) : (
                                                                 <div className="flex flex-col gap-1">
                                                                     <Select
@@ -288,36 +305,36 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                         onValueChange={(val: 'new' | 'link') => handleActionTypeChange(index, val)}
                                                                         disabled={isIgnored}
                                                                     >
-                                                                        <SelectTrigger className="h-8">
+                                                                        <SelectTrigger className="h-8 liquid-glass border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors disabled:opacity-40">
                                                                             <SelectValue />
                                                                         </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            <SelectItem value="new">Nova</SelectItem>
-                                                                            <SelectItem value="link">Vincular</SelectItem>
+                                                                        <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl backdrop-blur-md shadow-lg">
+                                                                            <SelectItem value="new" className="focus:bg-slate-100/50 dark:focus:bg-slate-900/50 rounded-lg text-xs font-medium">Nova</SelectItem>
+                                                                            <SelectItem value="link" className="focus:bg-slate-100/50 dark:focus:bg-slate-900/50 rounded-lg text-xs font-medium">Vincular</SelectItem>
                                                                         </SelectContent>
                                                                     </Select>
                                                                     {row.isNegative && (
-                                                                        <span className="text-[10px] text-muted-foreground leading-tight px-1 font-medium">Entrada/Estorno</span>
+                                                                        <span className="text-[9px] text-slate-400 font-medium px-1">Entrada/Estorno</span>
                                                                     )}
                                                                 </div>
                                                             )}
                                                         </td>
-                                                        <td className={`p-4 align-middle ${row.actionType === 'link' || isDuplicate ? 'opacity-30' : ''}`}>
+                                                        <td className={cn("p-4 align-middle", (row.actionType === 'link' || isDuplicate) && 'opacity-30')}>
                                                             {!isDuplicate && row.actionType === 'new' && !isIgnored ? (
                                                                 <Select
                                                                     value={row.expenseType}
                                                                     onValueChange={(val: 'variable' | 'fixed') => handleExpenseTypeChange(index, val)}
                                                                 >
-                                                                    <SelectTrigger className="h-8">
+                                                                    <SelectTrigger className="h-8 liquid-glass border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors">
                                                                         <SelectValue />
                                                                     </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="variable">Variável</SelectItem>
-                                                                        <SelectItem value="fixed">Fixa</SelectItem>
+                                                                    <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl backdrop-blur-md shadow-lg">
+                                                                        <SelectItem value="variable" className="focus:bg-slate-100/50 dark:focus:bg-slate-900/50 rounded-lg text-xs font-medium">Variável</SelectItem>
+                                                                        <SelectItem value="fixed" className="focus:bg-slate-100/50 dark:focus:bg-slate-900/50 rounded-lg text-xs font-medium">Fixa</SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
                                                             ) : !isDuplicate ? (
-                                                                <span className="text-xs text-muted-foreground italic px-1">—</span>
+                                                                <span className="text-slate-400 dark:text-slate-600 text-xs font-mono px-1">—</span>
                                                             ) : null}
                                                         </td>
                                                         <td className="p-4 align-middle">
@@ -326,12 +343,15 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                     value={row.categoryId || ""}
                                                                     onValueChange={(val) => handleCategoryChange(index, val)}
                                                                 >
-                                                                    <SelectTrigger className={`h-8 w-full ${!row.categoryId ? 'border-destructive ring-destructive' : ''}`}>
+                                                                    <SelectTrigger className={cn(
+                                                                      "h-8 w-full liquid-glass text-xs font-semibold rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors",
+                                                                      !row.categoryId ? 'border-rose-500 ring-rose-500 dark:border-rose-500' : 'border-slate-200 dark:border-slate-800'
+                                                                    )}>
                                                                         <SelectValue placeholder="Categoria..." />
                                                                     </SelectTrigger>
-                                                                    <SelectContent>
+                                                                    <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl backdrop-blur-md shadow-lg">
                                                                         {financeData.categories.map(cat => (
-                                                                            <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                                                                            <SelectItem key={cat.id} value={cat.id} className="focus:bg-slate-100/50 dark:focus:bg-slate-900/50 rounded-lg text-xs font-medium">{cat.name}</SelectItem>
                                                                         ))}
                                                                     </SelectContent>
                                                                 </Select>
@@ -341,25 +361,28 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                     value={row.linkedExpenseId || ""}
                                                                     onValueChange={(val) => handleLinkedExpenseChange(index, val)}
                                                                 >
-                                                                    <SelectTrigger className={`h-8 w-full ${!row.linkedExpenseId ? 'border-destructive ring-destructive' : ''}`}>
+                                                                    <SelectTrigger className={cn(
+                                                                      "h-8 w-full liquid-glass text-xs font-semibold rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors",
+                                                                      !row.linkedExpenseId ? 'border-rose-500 ring-rose-500' : 'border-slate-200 dark:border-slate-800'
+                                                                    )}>
                                                                         <SelectValue placeholder="Selecione..." />
                                                                     </SelectTrigger>
-                                                                    <SelectContent>
+                                                                    <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl backdrop-blur-md shadow-lg">
                                                                         {validLinkableExpenses.map(exp => {
                                                                             const template = financeData.fixedTemplates.find(t => t.id === exp.fixedTemplateId);
                                                                             const alreadyLinked = !!exp.originalTitle;
                                                                             return (
-                                                                                <SelectItem key={exp.id} value={exp.id}>
+                                                                                <SelectItem key={exp.id} value={exp.id} className="focus:bg-slate-100/50 dark:focus:bg-slate-900/50 rounded-lg text-xs font-medium">
                                                                                     {template?.description || exp.description}
                                                                                     {' '}({format(parseISO(exp.purchaseDate), 'dd/MM')})
                                                                                     {alreadyLinked && (
-                                                                                        <span className="ml-1 text-[10px] text-amber-600 font-medium">[re-vincular]</span>
+                                                                                        <span className="ml-1 text-[9px] text-amber-500 font-semibold uppercase">[re-vincular]</span>
                                                                                     )}
                                                                                 </SelectItem>
                                                                             )
                                                                         })}
                                                                         {validLinkableExpenses.length === 0 && (
-                                                                            <SelectItem value="none" disabled>Nenhuma despesa pendente</SelectItem>
+                                                                            <SelectItem value="none" disabled className="text-xs">Nenhuma despesa pendente</SelectItem>
                                                                         )}
                                                                     </SelectContent>
                                                                 </Select>
@@ -371,13 +394,13 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                     value={row.subcategoryId || "none"}
                                                                     onValueChange={(val) => handleSubcategoryChange(index, val === "none" ? "" : val)}
                                                                 >
-                                                                    <SelectTrigger className="h-8 w-full [&>span]:text-left">
+                                                                    <SelectTrigger className="h-8 w-full liquid-glass border-slate-200 dark:border-slate-800 text-xs font-semibold rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors [&>span]:text-left">
                                                                         <SelectValue placeholder="Nenhuma subcategoria..." />
                                                                     </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="none" className="text-muted-foreground italic text-left">Nenhuma subcategoria</SelectItem>
+                                                                    <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl backdrop-blur-md shadow-lg">
+                                                                        <SelectItem value="none" className="text-slate-400 italic text-left focus:bg-slate-100/50 dark:focus:bg-slate-900/50 rounded-lg text-xs">Nenhuma subcategoria</SelectItem>
                                                                         {selectedCat.subcategories.map(sub => (
-                                                                            <SelectItem key={sub.id} value={sub.id}>{sub.name}</SelectItem>
+                                                                            <SelectItem key={sub.id} value={sub.id} className="focus:bg-slate-100/50 dark:focus:bg-slate-900/50 rounded-lg text-xs font-medium">{sub.name}</SelectItem>
                                                                         ))}
                                                                     </SelectContent>
                                                                 </Select>
@@ -395,15 +418,15 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                     </ScrollArea>
                 </div>
 
-                <DialogFooter className="p-6 border-t bg-muted/20 flex sm:justify-between items-center w-full">
-                    <div className="text-sm text-muted-foreground flex-1">
+                <DialogFooter className="p-6 border-t border-slate-200/50 dark:border-slate-800/50 bg-slate-100/20 dark:bg-slate-900/20 flex sm:justify-between items-center w-full">
+                    <div className="text-xs text-slate-400 dark:text-slate-500 font-semibold flex-1">
                         <strong>{validToImportCount}</strong> transações prontas{ignoredExpensesToImportCount > 0 && <span> (e <strong>{ignoredExpensesToImportCount}</strong> desconsideradas)</span>} para processar
                     </div>
                     <div className="flex gap-2">
-                        <Button variant="outline" onClick={onClose} disabled={isProcessing}>
+                        <Button variant="outline" className="rounded-xl h-[38px] text-xs font-semibold uppercase tracking-wider border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors" onClick={onClose} disabled={isProcessing}>
                             Cancelar
                         </Button>
-                        <Button onClick={handleSave} disabled={isProcessing || (validToImportCount === 0 && ignoredExpensesToImportCount === 0)}>
+                        <Button className="rounded-xl h-[38px] text-xs font-semibold uppercase tracking-wider bg-brand-500 hover:bg-brand-600 text-white dark:bg-brand-500 dark:hover:bg-brand-600 dark:text-white transition-colors shadow-md shadow-brand-500/10" onClick={handleSave} disabled={isProcessing || (validToImportCount === 0 && ignoredExpensesToImportCount === 0)}>
                             {isProcessing ? "Processando..." : "Salvar Importação"}
                         </Button>
                     </div>

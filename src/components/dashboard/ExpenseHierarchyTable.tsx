@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DatePickerInput } from '@/components/ui/date-picker-input';
 import {
   Table,
   TableBody,
@@ -222,13 +223,12 @@ export function ExpenseHierarchyTable({ expenses, categories, totalIncome }: Exp
         {/* Filters */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 p-4 bg-muted/30 rounded-lg border border-border/50 mt-4">
           <div className="space-y-1">
-            <Label htmlFor="hierarchy-filter-date" className="text-xs">Data</Label>
-            <Input
-              id="hierarchy-filter-date"
-              type="date"
-              className="h-8 text-sm"
+            <Label htmlFor="hierarchy-filter-date" className="text-xs">Data da Compra</Label>
+            <DatePickerInput
               value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
+              onChange={setFilterDate}
+              placeholder="Todas as datas"
+              className="h-8"
             />
           </div>
 

@@ -5,6 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Category, Expense } from '@/types/finance';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface CategoryDonutChartProps {
   expenses: Expense[];
@@ -227,28 +228,28 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
   };
 
   return (
-    <Card className="border-0 shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg font-semibold">
+    <Card className="liquid-glass liquid-glass-bevel border-0 shadow-sm rounded-2xl">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-base font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100">
           {(selectedCategory || selectedSubcategory) ? (
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleBack}
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 rounded-full border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="flex items-center gap-1 text-sm sm:text-lg">
+              <div className="flex items-center gap-1 text-xs sm:text-sm font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                 {selectedSubcategory ? (
                   <>
-                    <span className="text-muted-foreground hidden sm:inline">{selectedCategory?.name}</span>
-                    <span className="text-muted-foreground hidden sm:inline"> {'>'} </span>
-                    <span>{selectedSubcategory.name}</span>
+                    <span className="text-slate-400 hidden sm:inline">{selectedCategory?.name}</span>
+                    <span className="text-slate-400 hidden sm:inline"> {'>'} </span>
+                    <span className="text-slate-800 dark:text-slate-100">{selectedSubcategory.name}</span>
                   </>
                 ) : (
-                  <span>{selectedCategory?.name}</span>
+                  <span className="text-slate-800 dark:text-slate-100">{selectedCategory?.name}</span>
                 )}
               </div>
             </div>
@@ -269,12 +270,12 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
             }
           `}</style>
 
-          <div className="h-[300px] w-full relative">
+          <div className="h-[260px] w-full relative">
             {/* Center Info Overlay */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground font-medium max-w-[100px] truncate">{centerLabel}</p>
-                <p className="text-lg font-bold text-primary">{formatCurrency(centerValue)}</p>
+              <div className="text-center flex flex-col items-center">
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider font-manrope max-w-[110px] truncate">{centerLabel}</p>
+                <p className="text-lg lg:text-xl font-extrabold font-manrope bg-gradient-to-r from-slate-950 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent mt-0.5">{formatCurrency(centerValue)}</p>
               </div>
             </div>
 
@@ -284,9 +285,9 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                   data={chartData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={75}
-                  outerRadius={105}
-                  paddingAngle={2}
+                  innerRadius={70}
+                  outerRadius={95}
+                  paddingAngle={2.5}
                   dataKey="value"
                   onClick={handlePieClick}
                   onMouseEnter={(_, index) => !isAnimating && setHoveredItem(chartData[index])}
@@ -294,33 +295,36 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                   label={renderCustomLabel}
                   labelLine={false}
                   animationBegin={0}
-                  animationDuration={1200}
+                  animationDuration={1000}
                   activeIndex={activeIndex}
                   activeShape={renderActiveShape}
                   style={{ cursor: selectedSubcategory ? 'default' : 'pointer', outline: 'none' }}
-                  isAnimationActive={true} // Add this to ensure transitions work but might need check
-                  tabIndex={-1} // Prevent focus
+                  isAnimationActive={true}
+                  tabIndex={-1}
                 >
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={entry.color}
-                      strokeWidth={0} // Clean borders
+                      strokeWidth={0}
                       stroke="#fff"
                       style={{ outline: 'none' }}
                     />
                   ))}
                 </Pie>
-                {/* Removed Tooltip to rely on Center Info and Smart Labels */}
               </PieChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="space-y-2 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
             {chartData.map((item: any, index) => (
               <div
                 key={`${item.name}-${index}`}
-                className={`flex items-center justify-between p-2 rounded-lg transition-colors ${!selectedSubcategory ? 'hover:bg-muted/50 cursor-pointer' : ''} ${hoveredItem === item ? 'bg-muted/80 ring-1 ring-primary/20' : ''}`}
+                className={cn(
+                  "flex items-center justify-between p-2.5 rounded-xl transition-all duration-200 border border-transparent",
+                  !selectedSubcategory && "hover:bg-slate-100/50 dark:hover:bg-slate-900/40 hover:border-slate-200/30 dark:hover:border-white/5 cursor-pointer",
+                  hoveredItem === item && "bg-slate-100/70 dark:bg-slate-900/60 border-slate-200/50 dark:border-white/10 shadow-sm"
+                )}
                 onClick={() => !isAnimating && !selectedSubcategory && handlePieClick(item)}
                 onMouseEnter={() => !isAnimating && setHoveredItem(item)}
                 onMouseLeave={() => setHoveredItem(null)}
@@ -328,28 +332,30 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className="h-3 w-3 rounded-full shrink-0"
+                    className="h-3 w-3 rounded-full shrink-0 shadow-sm"
                     style={{ backgroundColor: item.color }}
                   />
                   <div className="min-w-0">
-                    <span className="text-sm font-medium line-clamp-1 break-all" title={item.name}>{item.name}</span>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 line-clamp-1 break-all" title={item.name}>
+                      {item.name}
+                    </span>
                     {item.date && (
-                      <p className="text-[10px] text-muted-foreground">
+                      <span className="text-[9px] text-slate-400 font-mono mt-0.5 block">
                         {formatDate(item.date)}
-                      </p>
+                      </span>
                     )}
                   </div>
                 </div>
                 <div className="text-right whitespace-nowrap ml-2 shrink-0">
-                  <p className="text-sm font-semibold">{formatCurrency(item.value)}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-100">{formatCurrency(item.value)}</p>
+                  <p className="text-[10px] text-slate-400 font-mono font-medium">
                     {item.percentage.toFixed(1)}%
                   </p>
                 </div>
               </div>
             ))}
             {chartData.length === 0 && (
-              <p className="text-center text-muted-foreground py-8">
+              <p className="text-center text-slate-400 dark:text-slate-500 text-xs py-8 font-medium">
                 Nenhuma despesa registrada
               </p>
             )}

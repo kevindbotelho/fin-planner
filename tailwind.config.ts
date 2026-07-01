@@ -15,8 +15,27 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        manrope: ['Manrope', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
+        oswald: ['Oswald', 'sans-serif'],
+        jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
       },
       colors: {
+        brand: {
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          500: '#10b981',
+          600: '#059669',
+          700: '#047857',
+        },
+        finexBlue: {
+          500: '#3b82f6',
+          600: '#2563eb',
+        },
+        darkGray: {
+          50: 'hsl(225, 20%, 10%)',
+          100: 'hsl(225, 15%, 15%)',
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -102,11 +121,20 @@ export default {
           from: { opacity: "0", transform: "translateY(10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        "beam-spin": {
+          to: { transform: "rotate(360deg)" },
+        },
+        "lines-slide": {
+          "0%": { backgroundPosition: "0 0" },
+          "100%": { backgroundPosition: "24px 0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
+        "beam-spin": "beam-spin 3s linear infinite",
+        "lines-slide": "lines-slide 2s linear infinite",
       },
     },
   },

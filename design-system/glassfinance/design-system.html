@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>GlassFinance - Sistema de Design & Planner Financeiro</title>
+
+  <!-- Tailwind CSS Runtime -->
+  <script src="assets/js/tailwind-runtime.js"></script>
+
+  <!-- Iconify Component Runtime -->
+  <script src="assets/js/iconify-icon.js"></script>
+
+  <!-- Lucide Icon Runtime -->
+  <script src="assets/js/lucide.js"></script>
+
+  <!-- Google Fonts: Manrope, Inter, Oswald, Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Oswald:wght@300;400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <!-- Local Styles -->
+  <link rel="stylesheet" href="assets/css/base.css"/>
+  <link rel="stylesheet" href="assets/css/glassfinance.css"/>
+
+  <!-- Tailwind config extension -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            manrope: ['Manrope', 'sans-serif'],
+            inter: ['Inter', 'sans-serif'],
+            oswald: ['Oswald', 'sans-serif'],
+            jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981', // Emerald do Swipeely
+              600: '#059669',
+              700: '#047857',
+            },
+            finexBlue: {
+              500: '#3b82f6',
+              600: '#2563eb',
+            },
+            darkGray: {
+              50: 'hsl(225, 20%, 10%)',
+              100: 'hsl(225, 15%, 15%)',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="antialiased font-inter selection:bg-brand-500 selection:text-white text-slate-800 bg-slate-50 dark:text-slate-100 dark:bg-black transition-colors duration-300">
+
+  <!-- Dashed Architectural Guides (Swipeely style) -->
+  <div class="dashed-guide-container max-w-7xl mx-auto">
+    <div class="dashed-guide-line"></div>
+    <div class="dashed-guide-line"></div>
+    <div class="dashed-guide-line"></div>
+    <div class="dashed-guide-line"></div>
+  </div>
+
+  <!-- Navigation Bar (Top Sticky Menu in Liquid Glass) -->
+  <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between liquid-glass border-b border-white/20 dark:border-white/5 shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold font-manrope shadow-md shadow-brand-500/20">GF</span>
+        <span class="text-lg font-extrabold tracking-tight font-manrope bg-gradient-to-r from-brand-600 to-brand-500 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">GlassFinance</span>
+      </div>
+      <span class="text-[9px] uppercase tracking-widest bg-brand-100 text-brand-700 dark:bg-brand-500/20 dark:text-brand-500 px-2 py-0.5 rounded-full font-mono font-bold">DS v1.0</span>
+    </div>
+    
+    <nav class="hidden md:flex items-center gap-6 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">
+      <a href="#hero" class="hover:text-brand-500 dark:hover:text-brand-500 transition-colors">Início</a>
+      <a href="#showcase" class="hover:text-brand-500 dark:hover:text-brand-500 transition-colors">Showcase</a>
+      <a href="#typography" class="hover:text-brand-500 dark:hover:text-brand-500 transition-colors">Tipografia</a>
+      <a href="#colors" class="hover:text-brand-500 dark:hover:text-brand-500 transition-colors">Cores</a>
+      <a href="#components" class="hover:text-brand-500 dark:hover:text-brand-500 transition-colors">Componentes</a>
+      <a href="#layout" class="hover:text-brand-500 dark:hover:text-brand-500 transition-colors">Grid</a>
+      <a href="#motion" class="hover:text-brand-500 dark:hover:text-brand-500 transition-colors">Movimento</a>
+      <a href="#icons" class="hover:text-brand-500 dark:hover:text-brand-500 transition-colors">Ícones</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <!-- Theme Toggle Button -->
+      <button class="theme-toggle-btn w-9 h-9 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors" aria-label="Alternar Tema">
+        <iconify-icon class="text-lg text-slate-600 dark:text-slate-300" icon="lucide:moon"></iconify-icon>
+      </button>
+      
+      <a class="bg-slate-900 text-white dark:bg-white dark:text-black px-4 py-2 rounded-full text-xs font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 transition-all flex items-center gap-1.5 shadow-sm" href="#showcase">
+        <span>Dashboard</span>
+        <iconify-icon icon="lucide:arrow-right" class="text-xs"></iconify-icon>
+      </a>
+    </div>
+  </header>
+
+  <!-- main-wrapper -->
+  <div class="mx-auto max-w-7xl relative min-h-screen z-10 px-4 md:px-6 lg:px-8">
+    <main class="py-12 space-y-24">
+
+      <!-- 0) HERO SECTION (Liquid Glass Elements + Double Actions) -->
+      <section id="hero" class="relative w-full rounded-[2.5rem] overflow-hidden bg-slate-900 text-white min-h-[580px] flex flex-col justify-between p-8 lg:p-12 shadow-2xl border border-white/10 scroll-item scroll-blur-in">
+        <!-- Abstract Background Image -->
+        <div class="absolute inset-0 z-0">
+          <img alt="Fundo Abstrato 3D" class="opacity-45 mix-blend-overlay w-full h-full object-cover" src="assets/images/hero-bg.webp"/>
+          <div class="bg-gradient-to-t from-slate-950 via-transparent to-slate-950 absolute inset-0"></div>
+          <div class="absolute top-1/4 left-1/4 w-80 h-80 bg-brand-500/20 rounded-full blur-[100px]"></div>
+          <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-finexBlue-500/20 rounded-full blur-[100px]"></div>
+        </div>
+
+        <div class="relative z-10 w-full flex justify-center">
+          <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-full py-1.5 px-4 flex items-center gap-4 text-xs font-medium">
+            <span class="bg-brand-500 text-black px-2 py-0.5 rounded-full text-[9px] font-bold">NOVO</span>
+            <span class="text-slate-300">A fusão de três ecossistemas visuais de alta fidelidade</span>
+          </div>
+        </div>
+
+        <div class="relative z-10 mt-12 max-w-3xl space-y-6">
+          <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight font-manrope leading-[1.05]">
+            Onde a clareza se une à <br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-finexBlue-500">alta fidelidade financeira.</span>
+          </h1>
+          <p class="text-slate-300 text-sm md:text-base leading-relaxed max-w-xl font-normal">
+            GlassFinance DS unifica a clareza e elegância do Swipeely, o dinamismo inovador do Finex e o efeito Liquid Glass estilo Apple do StreamFlow. Criado sob medida para o gerenciamento de finanças pessoais de alto nível.
+          </p>
+          
+          <div class="flex flex-wrap gap-4 pt-4">
+            <!-- Beam CTA Button (Finex) -->
+            <a href="#showcase" class="group inline-flex overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(16,185,129,0.35)] text-xs font-semibold text-white h-[48px] rounded-full pt-3.5 pr-6 pb-3.5 pl-6 relative items-center justify-center" style="position: relative; --border-gradient: conic-gradient(from 0deg, transparent 0 300deg, #10b981 360deg); --border-radius-before: 9999px">
+              <div class="absolute inset-0 -z-20 rounded-full overflow-hidden p-[1px]">
+                <div class="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0_300deg,#10b981_360deg)] animate-beam-spin"></div>
+                <div class="absolute inset-[1px] rounded-full bg-slate-950"></div>
+              </div>
+              <div class="overflow-hidden bg-slate-900 rounded-full absolute top-[1.5px] right-[1.5px] bottom-[1.5px] left-[1.5px]">
+                <div class="bg-gradient-to-b from-brand-500/10 to-transparent absolute inset-0"></div>
+                <div class="opacity-[0.05] mix-blend-plus-lighter absolute inset-0" style="background-image: repeating-linear-gradient(90deg, #fff, #fff 1px, transparent 1px, transparent 8px); background-size: 24px 100%; animation: lines-slide 2s linear infinite;"></div>
+              </div>
+              <span class="relative z-10 uppercase tracking-wider">Testar Dashboard</span>
+              <iconify-icon icon="lucide:arrow-right" class="relative z-10 ml-2 text-sm transition-transform duration-300 group-hover:translate-x-1"></iconify-icon>
+            </a>
+
+            <!-- Glass Button (Streamflow) -->
+            <a href="#components" class="glass-button bg-white/5 border border-white/20 text-xs font-semibold uppercase tracking-wider text-white px-6 py-3.5 rounded-full hover:bg-white/10">
+              Explorar Guias
+            </a>
+          </div>
+        </div>
+
+        <div class="relative z-10 flex flex-wrap items-center justify-between gap-6 pt-12 mt-8 border-t border-white/10 text-xs text-slate-400">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-brand-500 animate-pulse"></span>
+            <span>Sistema Ativo - Light &amp; Dark Ready</span>
+          </div>
+          <div class="flex gap-4">
+            <span class="hover:text-white transition-colors">Swipeely (60%)</span>
+            <span>•</span>
+            <span class="hover:text-white transition-colors">Finex (25%)</span>
+            <span>•</span>
+            <span class="hover:text-white transition-colors">StreamFlow (15%)</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 1) SHOWCASE FINANCEIRO (Foco Dashboard Financeiro - Liquid Glass + Anim) -->
+      <section id="showcase" class="scroll-mt-24 space-y-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div class="space-y-2">
+            <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/50 px-3 py-1 text-[11px] text-slate-500 font-sans shadow-sm">
+              <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+              Demonstrativo Financeiro Real
+            </div>
+            <h2 class="text-3xl md:text-5xl font-bold tracking-tight font-manrope">Planner Financeiro Pessoal</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm max-w-xl">
+              Showcase prático de aplicação do design system em um planner de gestão financeira. Apresenta o efeito **Liquid Glass**, contadores em loop e a linha de gráfico dinâmico.
+            </p>
+          </div>
+          <div>
+            <button onclick="window.replayGlobalDashboardAnimations()" class="bg-brand-500 text-white font-semibold text-xs px-4 py-2.5 rounded-full hover:bg-brand-600 transition-all flex items-center gap-1.5 shadow-md shadow-brand-500/10">
+              <iconify-icon icon="lucide:refresh-cw" class="text-sm"></iconify-icon>
+              <span>Re-animar Gráficos</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- The Interactive Dashboard Component (Liquid Glass Bevel Effect) -->
+        <div id="dashboard-showcase" class="liquid-glass liquid-glass-bevel rounded-[2.5rem] p-6 md:p-8 space-y-8 border border-white/40 dark:border-white/5">
+          <!-- Dashboard Header -->
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/50 dark:border-slate-800/40 pb-6">
+            <div>
+              <p class="text-xs text-slate-400 uppercase tracking-widest font-semibold">Resumo Geral</p>
+              <h3 class="text-xl font-bold font-manrope">Junho, 2026</h3>
+            </div>
+            <div class="flex gap-2">
+              <span class="text-[10px] px-2.5 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20 font-semibold flex items-center gap-1">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Conexão Criptografada
+              </span>
+              <span class="text-[10px] px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/40 dark:border-slate-700/40 font-semibold flex items-center gap-1">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i> Atualizado
+              </span>
+            </div>
+          </div>
+
+          <!-- Cards de Métricas Financeiras -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Balance Card -->
+            <div class="p-6 rounded-3xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+              <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-brand-500/10 rounded-full blur-2xl group-hover:bg-brand-500/20 transition-all pointer-events-none"></div>
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Saldo Disponível</span>
+                <span class="w-8 h-8 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+                  <i data-lucide="wallet" class="w-4 h-4"></i>
+                </span>
+              </div>
+              <h4 class="text-3xl font-bold tracking-tight font-manrope mb-2" 
+                  data-counter-target="124500.20" 
+                  data-counter-format="currency">R$ 0,00</h4>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-brand-600 dark:text-brand-400 font-bold flex items-center gap-0.5">
+                  <i data-lucide="trending-up" class="w-3 h-3"></i> +12,4%
+                </span>
+                <span class="text-slate-400">vs. mês anterior</span>
+              </div>
+            </div>
+
+            <!-- Income Card -->
+            <div class="p-6 rounded-3xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+              <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all pointer-events-none"></div>
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Entradas / Receitas</span>
+                <span class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                  <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+                </span>
+              </div>
+              <h4 class="text-3xl font-bold tracking-tight font-manrope mb-2" 
+                  data-counter-target="24890.00" 
+                  data-counter-format="currency">R$ 0,00</h4>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-blue-600 dark:text-blue-400 font-bold flex items-center gap-0.5">
+                  <i data-lucide="trending-up" class="w-3 h-3"></i> +8,2%
+                </span>
+                <span class="text-slate-400">meta mensal batida</span>
+              </div>
+            </div>
+
+            <!-- Expense Card -->
+            <div class="p-6 rounded-3xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+              <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all pointer-events-none"></div>
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Saídas / Despesas</span>
+                <span class="w-8 h-8 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center">
+                  <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                </span>
+              </div>
+              <h4 class="text-3xl font-bold tracking-tight font-manrope mb-2" 
+                  data-counter-target="12350.00" 
+                  data-counter-format="currency">R$ 0,00</h4>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-red-500 font-bold flex items-center gap-0.5">
+                  <i data-lucide="trending-down" class="w-3 h-3"></i> -4,1%
+                </span>
+                <span class="text-slate-400">dentro do planejado</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráfico SVG com Animação Continuada e Preenchimento Gradiente (Swipeely + Finex) -->
+          <div class="bg-white/50 dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/60 p-6 rounded-3xl relative overflow-hidden">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h4 class="text-sm font-semibold">Desempenho da Carteira</h4>
+                <p class="text-xs text-slate-400">Rendimento real vs. CDI nos últimos 6 meses</p>
+              </div>
+              <div class="flex items-center gap-4 text-xs font-medium">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-1.5 bg-brand-500 rounded-full"></span> Carteira (GF)</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-1.5 bg-slate-300 dark:bg-slate-600 rounded-full"></span> CDI</span>
+              </div>
+            </div>
+            
+            <!-- SVG Chart -->
+            <div class="h-64 w-full">
+              <svg class="w-full h-full overflow-visible" viewBox="0 0 600 200" preserveAspectRatio="none">
+                <defs>
+                  <!-- Gradient para o preenchimento do gráfico sob a linha -->
+                  <linearGradient id="chartGradientFill" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" class="chart-gradient-stop-0"></stop>
+                    <stop offset="100%" class="chart-gradient-stop-100"></stop>
+                  </linearGradient>
+                </defs>
+                
+                <!-- Grid Lines -->
+                <line x1="0" y1="40" x2="600" y2="40" stroke="rgba(148, 163, 184, 0.08)" stroke-width="1"></line>
+                <line x1="0" y1="90" x2="600" y2="90" stroke="rgba(148, 163, 184, 0.08)" stroke-width="1"></line>
+                <line x1="0" y1="140" x2="600" y2="140" stroke="rgba(148, 163, 184, 0.08)" stroke-width="1"></line>
+                <line x1="0" y1="190" x2="600" y2="190" stroke="rgba(148, 163, 184, 0.15)" stroke-width="1.5"></line>
+
+                <!-- CDI Curve (Static/Dotted) -->
+                <path d="M0 170 C 100 160, 200 145, 300 135 C 400 125, 500 115, 600 100" fill="none" stroke="rgba(148, 163, 184, 0.35)" stroke-width="2" stroke-dasharray="4 4"></path>
+
+                <!-- GF Curve Fill (Swipeely Chart Gradient Fill) -->
+                <path d="M0 180 C 80 170, 160 110, 240 120 C 320 130, 400 60, 480 70 C 560 80, 580 40, 600 30 V 200 H 0 Z" fill="url(#chartGradientFill)"></path>
+
+                <!-- GF Curve Line (Finex animate-draw) -->
+                <path class="animate-draw" d="M0 180 C 80 170, 160 110, 240 120 C 320 130, 400 60, 480 70 C 560 80, 580 40, 600 30" fill="none" stroke="currentColor" class="text-brand-500" stroke-width="3" stroke-linecap="round"></path>
+                
+                <!-- Bullet points at peaks -->
+                <circle cx="240" cy="120" r="5" class="fill-brand-500 stroke-white dark:stroke-black" stroke-width="2.5"></circle>
+                <circle cx="480" cy="70" r="5" class="fill-brand-500 stroke-white dark:stroke-black" stroke-width="2.5"></circle>
+                <circle cx="600" cy="30" r="6" class="fill-brand-500 stroke-white dark:stroke-black" stroke-width="2.5"></circle>
+              </svg>
+            </div>
+            
+            <!-- Chart Labels -->
+            <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-4">
+              <span>Jan</span>
+              <span>Fev</span>
+              <span>Mar</span>
+              <span>Abr</span>
+              <span>Mai</span>
+              <span>Jun</span>
+            </div>
+          </div>
+
+          <!-- Tabela de Planejamento de Orçamento (Swipeely py-24 + Padding Elegante) -->
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <h4 class="text-sm font-semibold">Orçamento Mensal Planejado</h4>
+              <span class="text-xs text-slate-400 font-mono">Última alteração: 2 dias atrás</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                    <th class="pb-3 pr-4">Categoria</th>
+                    <th class="pb-3 px-4">Meta Alocada</th>
+                    <th class="pb-3 px-4">Consumido</th>
+                    <th class="pb-3 px-4">Progresso</th>
+                    <th class="pb-3 pl-4 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/40 text-xs font-medium">
+                  <!-- Linha Alimentação -->
+                  <tr>
+                    <td class="py-4 pr-4 flex items-center gap-3">
+                      <span class="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center">
+                        <i data-lucide="utensils" class="w-4 h-4"></i>
+                      </span>
+                      <span>Alimentação</span>
+                    </td>
+                    <td class="py-4 px-4 font-mono">R$ 1.500,00</td>
+                    <td class="py-4 px-4 font-mono text-slate-500 dark:text-slate-400">R$ 1.250,00</td>
+                    <td class="py-4 px-4">
+                      <div class="w-32 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-orange-500 h-full rounded-full animate-width" style="--target-width: 83.3%;"></div>
+                      </div>
+                    </td>
+                    <td class="py-4 pl-4 text-right">
+                      <span class="text-[9px] px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20 font-bold">ALERTA</span>
+                    </td>
+                  </tr>
+                  
+                  <!-- Linha Investimentos -->
+                  <tr>
+                    <td class="py-4 pr-4 flex items-center gap-3">
+                      <span class="w-7 h-7 rounded-lg bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i>
+                      </span>
+                      <span>Investimentos</span>
+                    </td>
+                    <td class="py-4 px-4 font-mono">R$ 4.000,00</td>
+                    <td class="py-4 px-4 font-mono text-slate-500 dark:text-slate-400">R$ 4.000,00</td>
+                    <td class="py-4 px-4">
+                      <div class="w-32 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-brand-500 h-full rounded-full animate-width" style="--target-width: 100%;"></div>
+                      </div>
+                    </td>
+                    <td class="py-4 pl-4 text-right">
+                      <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold">CONCLUÍDO</span>
+                    </td>
+                  </tr>
+
+                  <!-- Linha Moradia -->
+                  <tr>
+                    <td class="py-4 pr-4 flex items-center gap-3">
+                      <span class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                        <i data-lucide="home" class="w-4 h-4"></i>
+                      </span>
+                      <span>Moradia</span>
+                    </td>
+                    <td class="py-4 px-4 font-mono">R$ 3.500,00</td>
+                    <td class="py-4 px-4 font-mono text-slate-500 dark:text-slate-400">R$ 1.750,00</td>
+                    <td class="py-4 px-4">
+                      <div class="w-32 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-blue-500 h-full rounded-full animate-width" style="--target-width: 50%;"></div>
+                      </div>
+                    </td>
+                    <td class="py-4 pl-4 text-right">
+                      <span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-bold">ATIVO</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 2) TYPOGRAPHY SECTION (Swipeely + Finex + Streamflow) -->
+      <section id="typography" class="scroll-mt-24 bg-white dark:bg-zinc-950 rounded-[2rem] p-8 lg:p-12 border border-slate-200 dark:border-slate-900 shadow-xl space-y-8 scroll-item scroll-fade-up">
+        <div class="space-y-2">
+          <div class="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900 px-3 py-1 text-xs text-slate-500 shadow-sm font-semibold">01 / Tipografia</div>
+          <h2 class="text-3xl md:text-5xl font-bold tracking-tight font-manrope">Escala Visual &amp; Ritmo</h2>
+          <p class="text-slate-500 dark:text-slate-400 text-sm max-w-xl">
+            Nosso ecossistema tipográfico utiliza **Manrope** para títulos expressivos do Light Mode, **Oswald** para títulos secundários de contraste e **Inter** para o corpo de texto principal.
+          </p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 text-xs text-slate-400 font-mono uppercase">
+                <th class="py-4 pr-4">Estilo</th>
+                <th class="py-4 px-4 min-w-[300px]">Visualização</th>
+                <th class="py-4 pl-4 text-right">Especificação</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/40 font-sans">
+              <!-- Heading 1 (Manrope) -->
+              <tr>
+                <td class="py-6 pr-4 align-middle">
+                  <span class="text-xs font-mono text-slate-400 block">Heading 1 (Hero)</span>
+                  <span class="text-[10px] text-brand-600 dark:text-brand-500 font-bold block mt-1">Manrope</span>
+                </td>
+                <td class="py-6 px-4 align-middle">
+                  <h1 class="text-4xl md:text-6xl font-bold text-slate-900 dark:text-white font-manrope tracking-tight leading-tight">Gestão Inteligente</h1>
+                </td>
+                <td class="py-6 pl-4 align-middle text-right font-mono text-xs text-slate-500">
+                  <span>60px / 66px</span>
+                </td>
+              </tr>
+              <!-- Heading 2 (Oswald) -->
+              <tr>
+                <td class="py-6 pr-4 align-middle">
+                  <span class="text-xs font-mono text-slate-400 block">Heading 2 (Contrast)</span>
+                  <span class="text-[10px] text-blue-500 font-bold block mt-1">Oswald</span>
+                </td>
+                <td class="py-6 px-4 align-middle">
+                  <h2 class="text-3xl md:text-4xl font-light text-slate-900 dark:text-white font-oswald uppercase tracking-tight">Investimentos de Alto Risco</h2>
+                </td>
+                <td class="py-6 pl-4 align-middle text-right font-mono text-xs text-slate-500">
+                  <span>36px / 42px</span>
+                </td>
+              </tr>
+              <!-- Heading 3 (Jakarta) -->
+              <tr>
+                <td class="py-6 pr-4 align-middle">
+                  <span class="text-xs font-mono text-slate-400 block">Heading 3 (Modern)</span>
+                  <span class="text-[10px] text-purple-500 font-bold block mt-1">Plus Jakarta Sans</span>
+                </td>
+                <td class="py-6 px-4 align-middle">
+                  <h3 class="text-2xl font-bold text-slate-900 dark:text-white font-jakarta tracking-tight">Distribuição de Lucro</h3>
+                </td>
+                <td class="py-6 pl-4 align-middle text-right font-mono text-xs text-slate-500">
+                  <span>24px / 30px</span>
+                </td>
+              </tr>
+              <!-- Body Body (Inter) -->
+              <tr>
+                <td class="py-6 pr-4 align-middle">
+                  <span class="text-xs font-mono text-slate-400 block">Body Text</span>
+                  <span class="text-[10px] text-slate-400 block mt-1">Inter / Sans-serif</span>
+                </td>
+                <td class="py-6 px-4 align-middle">
+                  <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-sans max-w-md">
+                    Abstraímos toda a complexidade de cadastrar lançamentos recorrentes. Com apenas dois toques, seu orçamento mensal está planejado e sincronizado.
+                  </p>
+                </td>
+                <td class="py-6 pl-4 align-middle text-right font-mono text-xs text-slate-500">
+                  <span>14px / 20px</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+      <!-- 3) CORES, GRADIENTES & LIQUID GLASS SHOWCASE -->
+      <section id="colors" class="scroll-mt-24 bg-white dark:bg-zinc-950 rounded-[2rem] p-8 lg:p-12 border border-slate-200 dark:border-slate-900 shadow-xl space-y-12 scroll-item scroll-fade-up">
+        <div class="space-y-2">
+          <div class="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900 px-3 py-1 text-xs text-slate-500 shadow-sm font-semibold">02 / Cores &amp; Superfícies</div>
+          <h2 class="text-3xl md:text-5xl font-bold tracking-tight font-manrope">Paleta Cromática &amp; Texturas</h2>
+          <p class="text-slate-500 dark:text-slate-400 text-sm max-w-xl">
+            Definições cromáticas do GlassFinance DS, integrando os tons esmeralda de Swipeely, azul/preto absoluto de Finex e efeitos de superfícies translúcidas.
+          </p>
+        </div>
+
+        <!-- Paletas de Cores -->
+        <div class="space-y-8">
+          <!-- Cores Principais -->
+          <div>
+            <h3 class="text-xs uppercase tracking-widest text-slate-400 font-mono mb-4">Cores Principais (Brand &amp; Accent)</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
+              <div class="flex flex-col gap-2">
+                <div class="h-24 w-full rounded-2xl bg-brand-500 border border-brand-600/10 shadow-sm flex items-end p-3"><span class="text-[10px] font-mono bg-black/60 text-white rounded px-1.5 py-0.5">#10B981</span></div>
+                <div class="text-xs">
+                  <p class="font-semibold">Emerald Primary (Swipeely)</p>
+                  <p class="text-slate-400 font-mono">bg-brand-500</p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <div class="h-24 w-full rounded-2xl bg-[#059669] border border-emerald-600/10 shadow-sm flex items-end p-3"><span class="text-[10px] font-mono bg-black/60 text-white rounded px-1.5 py-0.5">#059669</span></div>
+                <div class="text-xs">
+                  <p class="font-semibold">Emerald Hover</p>
+                  <p class="text-slate-400 font-mono">bg-[#059669]</p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <div class="h-24 w-full rounded-2xl bg-brand-50 border border-brand-100 flex items-end p-3 dark:bg-brand-500/20"><span class="text-[10px] font-mono bg-black/60 text-white rounded px-1.5 py-0.5">#ECFDF5</span></div>
+                <div class="text-xs">
+                  <p class="font-semibold">Emerald Tint (Soft)</p>
+                  <p class="text-slate-400 font-mono">bg-brand-50</p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <div class="h-24 w-full rounded-2xl bg-finexBlue-500 border border-blue-600/10 shadow-sm flex items-end p-3"><span class="text-[10px] font-mono bg-black/60 text-white rounded px-1.5 py-0.5">#3B82F6</span></div>
+                <div class="text-xs">
+                  <p class="font-semibold">Finex Electric Blue</p>
+                  <p class="text-slate-400 font-mono">bg-finexBlue-500</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Superfícies -->
+          <div>
+            <h3 class="text-xs uppercase tracking-widest text-slate-400 font-mono mb-4">Superfícies de Fundo (Claro e Escuro)</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
+              <div class="flex flex-col gap-2">
+                <div class="h-24 w-full rounded-2xl bg-slate-50 border border-slate-200 flex items-end p-3"><span class="text-[10px] font-mono bg-black/60 text-white rounded px-1.5 py-0.5">#F8FAFC</span></div>
+                <div class="text-xs">
+                  <p class="font-semibold">Fundo Claro Padrão</p>
+                  <p class="text-slate-400 font-mono">bg-slate-5" (Light)</p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <div class="h-24 w-full rounded-2xl bg-white border border-slate-200 flex items-end p-3"><span class="text-[10px] font-mono bg-black/60 text-white rounded px-1.5 py-0.5">#FFFFFF</span></div>
+                <div class="text-xs">
+                  <p class="font-semibold">Fundo do Card Claro</p>
+                  <p class="text-slate-400 font-mono">bg-white</p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <div class="h-24 w-full rounded-2xl bg-[#050505] border border-white/5 flex items-end p-3"><span class="text-[10px] font-mono bg-black/60 text-white rounded px-1.5 py-0.5">#050505</span></div>
+                <div class="text-xs">
+                  <p class="font-semibold">Fundo Escuro Padrão</p>
+                  <p class="text-slate-400 font-mono">bg-[#050505]</p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <div class="h-24 w-full rounded-2xl bg-black border border-white/5 flex items-end p-3"><span class="text-[10px] font-mono bg-black/60 text-white rounded px-1.5 py-0.5">#000000</span></div>
+                <div class="text-xs">
+                  <p class="font-semibold">Preto Absoluto (OLED)</p>
+                  <p class="text-slate-400 font-mono">bg-black</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Liquid Glass (Showcase de Efeito) -->
+          <div>
+            <h3 class="text-xs uppercase tracking-widest text-slate-400 font-mono mb-4">A Estética Liquid Glass (StreamFlow + Apple)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-100 dark:bg-slate-900 p-8 rounded-3xl relative overflow-hidden">
+              <!-- Grid BG pattern inside showcase -->
+              <div class="absolute inset-0 opacity-15" style="background-image: radial-gradient(#94a3b8 1px, transparent 1px); background-size: 20px 20px;"></div>
+              
+              <!-- Light Liquid Glass Example -->
+              <div class="flex flex-col gap-3 relative z-10">
+                <div class="liquid-glass rounded-2xl p-6 h-32 flex flex-col justify-between border border-white/50 text-slate-900">
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase tracking-wider">Liquid Glass - Modo Claro</span>
+                    <span class="w-6 h-6 rounded-full bg-white/40 flex items-center justify-center text-xs"><i data-lucide="sun" class="w-3.5 h-3.5"></i></span>
+                  </div>
+                  <pre class="text-[10px] font-mono bg-white/20 p-2 rounded w-fit">bg-white/40 backdrop-blur-20px</pre>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Preenchimento suave branco de 40%, blur de 20px, saturação de 190% e bordas claras de alta visibilidade.</p>
+              </div>
+
+              <!-- Dark Liquid Glass Example -->
+              <div class="flex flex-col gap-3 relative z-10">
+                <div class="liquid-glass dark rounded-2xl p-6 h-32 flex flex-col justify-between border border-white/5 text-white bg-slate-950/40">
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-100">Liquid Glass - Modo Escuro</span>
+                    <span class="w-6 h-6 rounded-full bg-black/40 flex items-center justify-center text-xs"><i data-lucide="moon" class="w-3.5 h-3.5"></i></span>
+                  </div>
+                  <pre class="text-[10px] font-mono bg-black/40 p-2 rounded w-fit">bg-slate-950/40 backdrop-blur-20px</pre>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Preenchimento escuro de 40% a 60%, blur de 20px, saturação de 190% e borda fina de 7% de branco.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gradientes Especiais -->
+          <div>
+            <h3 class="text-xs uppercase tracking-widest text-slate-400 font-mono mb-4">Gradientes Especiais &amp; Glows</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <!-- Conic Gradient -->
+              <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-5 flex flex-col justify-between h-48">
+                <span class="text-xs font-semibold">Gradiente Cônico (CTA Beam)</span>
+                <div class="h-16 w-full rounded-lg bg-[conic-gradient(from_0deg,transparent_0_300deg,#10b981_360deg)] flex items-center justify-center">
+                  <span class="text-[10px] font-mono bg-slate-950/80 text-white rounded px-2 py-0.5">conic-gradient (#10b981)</span>
+                </div>
+                <p class="text-[10px] text-slate-400">Efeito giratório de neon utilizado em botões de ação e destaque.</p>
+              </div>
+
+              <!-- Radial Glow -->
+              <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-5 flex flex-col justify-between h-48 overflow-hidden relative group">
+                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-500/10 via-transparent to-transparent opacity-80 z-0"></div>
+                <div class="relative z-10 flex flex-col justify-between h-full">
+                  <span class="text-xs font-semibold">Glow Radial (Top-Down)</span>
+                  <div class="h-16 w-full rounded-lg border border-slate-200/50 dark:border-white/5 bg-slate-50/50 dark:bg-black/35 flex items-center justify-center">
+                    <span class="text-[10px] font-mono text-brand-600 dark:text-brand-500">radial-gradient ellipse</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400">Superfície com luz difusa superior vindo de tons de esmeralda.</p>
+                </div>
+              </div>
+
+              <!-- Chart Gradient -->
+              <div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-5 flex flex-col justify-between h-48">
+                <span class="text-xs font-semibold">Preenchimento de Gráfico (SVG Fill)</span>
+                <div class="h-16 w-full rounded-lg bg-gradient-to-b from-brand-500/20 to-transparent flex items-center justify-center border border-brand-500/10">
+                  <span class="text-[10px] font-mono text-slate-600 dark:text-slate-400">linear-gradient (to bottom)</span>
+                </div>
+                <p class="text-[10px] text-slate-400">Gradiente linear de opacidade decrescente (0.22 a 0.01) para cobrir a área do gráfico de linha.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 4) COMPONENTES DE UI SECTION (Unificado) -->
+      <section id="components" class="scroll-mt-24 space-y-12">
+        <div class="flex gap-3 items-center">
+          <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-brand-500/10 text-[11px] font-mono font-medium text-brand-600 dark:text-brand-400 border border-brand-500/20 shadow-sm font-sans">03</span>
+          <span class="text-sm font-medium tracking-widest uppercase text-slate-500 font-sans font-bold">Biblioteca</span>
+        </div>
+        <h2 class="text-3xl md:text-5xl font-bold tracking-tight font-manrope">Componentes de UI</h2>
+        <p class="leading-relaxed text-sm text-slate-500 dark:text-slate-400 max-w-xl">
+          Biblioteca de blocos estruturais do GlassFinance DS, integrando os comportamentos e estados interativos de todos os design systems originais.
+        </p>
+
+        <!-- Grade de Componentes -->
+        <div class="space-y-12">
+          
+          <!-- Seção de Botões -->
+          <div class="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 md:p-8 space-y-6">
+            <h3 class="text-lg font-bold">Botões (Buttons)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <!-- Beam CTA (rotativo) -->
+              <div class="space-y-3">
+                <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest block">01. Beam CTA Button (Finex)</span>
+                <div class="bg-slate-50 dark:bg-black/40 border border-slate-200/50 dark:border-white/5 p-6 rounded-2xl flex items-center justify-center">
+                  <button class="group inline-flex overflow-hidden transition-all duration-300 hover:scale-[1.02] text-xs font-semibold text-white h-[48px] rounded-full pt-3.5 pr-6 pb-3.5 pl-6 relative items-center justify-center" style="position: relative; --border-gradient: conic-gradient(from 0deg, transparent 0 300deg, #10b981 360deg); --border-radius-before: 9999px">
+                    <div class="absolute inset-0 -z-20 rounded-full overflow-hidden p-[1px]">
+                      <div class="absolute inset-[-100%] bg-[conic-gradient(from_0deg,transparent_0_300deg,#10b981_360deg)] animate-beam-spin"></div>
+                      <div class="absolute inset-[1px] rounded-full bg-slate-950"></div>
+                    </div>
+                    <div class="overflow-hidden bg-slate-900 rounded-full absolute top-[1.5px] right-[1.5px] bottom-[1.5px] left-[1.5px]">
+                      <div class="bg-gradient-to-b from-brand-500/10 to-transparent absolute inset-0"></div>
+                    </div>
+                    <span class="relative z-10 uppercase tracking-wider">CTA ROTATIVO</span>
+                    <iconify-icon icon="lucide:arrow-right" class="relative z-10 ml-2 text-sm transition-transform duration-300 group-hover:translate-x-1"></iconify-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Glass Button (Streamflow) -->
+              <div class="space-y-3">
+                <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest block">02. Liquid Glass Button</span>
+                <div class="bg-slate-50 dark:bg-black/40 border border-slate-200/50 dark:border-white/5 p-6 rounded-2xl flex items-center justify-center">
+                  <button class="glass-button bg-brand-500/20 hover:bg-brand-500/30 border border-brand-500/40 text-xs font-bold uppercase tracking-wider text-brand-700 dark:text-brand-400 px-6 py-3.5 rounded-full flex items-center gap-1.5">
+                    <iconify-icon icon="lucide:layers" class="text-sm"></iconify-icon>
+                    <span>Glass Button</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Emerald CTA (Swipeely) -->
+              <div class="space-y-3">
+                <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest block">03. Emerald Solid (Swipeely)</span>
+                <div class="bg-slate-50 dark:bg-black/40 border border-slate-200/50 dark:border-white/5 p-6 rounded-2xl flex items-center justify-center">
+                  <button class="px-6 py-3.5 rounded-full bg-gradient-to-b from-brand-500 to-brand-700 text-white font-semibold text-xs tracking-wider uppercase transition-all shadow-[0_0_20px_rgba(16,185,129,0.18)] hover:brightness-110 flex items-center gap-2">
+                    <span>COMEÇAR GRÁTIS</span>
+                    <iconify-icon icon="lucide:arrow-right" class="text-sm"></iconify-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tags & Badges (StreamFlow + Finex) -->
+          <div class="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 md:p-8 space-y-6">
+            <h3 class="text-lg font-bold">Tags &amp; Badges (Copiar e Colar)</h3>
+            <p class="text-xs text-slate-400">Distintivos de status financeiro com gradientes de preenchimento e bordas coloridas prontas.</p>
+            <div class="bg-slate-50 dark:bg-black/40 border border-slate-200/50 dark:border-white/5 p-6 rounded-2xl">
+              <div class="flex flex-wrap gap-4 items-center">
+                <div class="space-y-1">
+                  <span class="text-[8px] font-mono text-slate-400 block uppercase">Neutro</span>
+                  <span class="text-[10px] font-bold px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60">PADRÃO</span>
+                </div>
+                <div class="space-y-1">
+                  <span class="text-[8px] font-mono text-slate-400 block uppercase">Sucesso</span>
+                  <span class="text-[10px] font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">RECEITA OK</span>
+                </div>
+                <div class="space-y-1">
+                  <span class="text-[8px] font-mono text-slate-400 block uppercase">Info</span>
+                  <span class="text-[10px] font-bold px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">RECORRENTE</span>
+                </div>
+                <div class="space-y-1">
+                  <span class="text-[8px] font-mono text-slate-400 block uppercase">Alerta</span>
+                  <span class="text-[10px] font-bold px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20">PAGAMENTO HOJE</span>
+                </div>
+                <div class="space-y-1">
+                  <span class="text-[8px] font-mono text-slate-400 block uppercase">Erro / Perigo</span>
+                  <span class="text-[10px] font-bold px-3 py-1 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">LIMITE EXCEDIDO</span>
+                </div>
+                <div class="space-y-1">
+                  <span class="text-[8px] font-mono text-slate-400 block uppercase">Finex Badge</span>
+                  <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-500/10 text-[11px] font-mono font-bold text-blue-400 border border-blue-500/20 shadow-sm">01</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Campos de Entrada (Inputs) -->
+          <div class="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 md:p-8 space-y-6">
+            <h3 class="text-lg font-bold">Campos de Entrada (Inputs)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 dark:bg-black/40 border border-slate-200/50 dark:border-white/5 p-6 rounded-2xl">
+              <!-- Default -->
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Valor Lançamento</label>
+                <div class="relative rounded-lg shadow-sm">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-mono">R$</span>
+                  <input class="w-full bg-white dark:bg-[#111] border border-slate-200 dark:border-slate-800 rounded-lg py-2 pl-9 pr-3 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors" type="text" value="350,00"/>
+                </div>
+              </div>
+              
+              <!-- Focus/Active state simulated -->
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Categoria (Foco Esmeralda)</label>
+                <div class="relative rounded-lg shadow-sm">
+                  <input class="w-full bg-white dark:bg-[#111] border border-brand-500 rounded-lg py-2 px-3 text-xs focus:outline-none ring-1 ring-brand-500 transition-colors" type="text" value="Alimentação"/>
+                </div>
+              </div>
+
+              <!-- Error State -->
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-red-500">Data Inválida (Erro)</label>
+                <div class="relative rounded-lg shadow-sm">
+                  <input class="w-full bg-white dark:bg-[#111] border-red-500 rounded-lg py-2 px-3 text-xs text-red-500 focus:outline-none transition-colors" type="text" value="31/02/2026"/>
+                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-red-500"><i data-lucide="alert-circle" class="w-4 h-4"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cards (Estatísticos, radial, Visa Infinite) -->
+          <div class="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 md:p-8 space-y-6">
+            <h3 class="text-lg font-bold">Cartões Especializados (Cards)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+              
+              <!-- Testimonial / Transaction Card (Com avatar grayscale no hover do Swipeely) -->
+              <div class="space-y-2">
+                <span class="text-xs font-mono text-slate-400 block">1. Hover Grayscale Card (Swipeely)</span>
+                <div class="bg-slate-50 dark:bg-[#15151a] p-6 border border-slate-200/50 dark:border-slate-800 flex flex-col justify-between hover:shadow-lg transition-all duration-300 group rounded-3xl min-h-[220px]">
+                  <div>
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-tight font-manrope">Lançamento Conciliado</h4>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs mt-2">"O sistema de conciliação automática do GlassFinance me poupou 5 horas semanais de digitação."</p>
+                  </div>
+                  <div class="flex items-center gap-3 pt-4 border-t border-slate-200/40 dark:border-slate-800/40 mt-4">
+                    <img alt="Perfil" class="w-8 h-8 rounded-full object-cover bg-slate-200 grayscale group-hover:grayscale-0 transition-all duration-500" src="assets/images/profile.avif"/>
+                    <div>
+                      <p class="text-xs font-bold">Sarah J.</p>
+                      <p class="text-[10px] text-slate-400">Usuário Pro</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Glow Radial & Grid (Finex) -->
+              <div class="space-y-2">
+                <span class="text-xs font-mono text-slate-400 block">2. Card Radial Glow (Finex)</span>
+                <div class="relative h-[220px] rounded-3xl bg-[#050508] border border-slate-800 p-6 overflow-hidden flex flex-col justify-between group hover:border-brand-500/20 transition-all">
+                  <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-500/10 via-transparent to-transparent"></div>
+                  <div class="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.08]" style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 20px 20px;"></div>
+                  <div class="relative z-10">
+                    <h4 class="text-sm font-bold text-white font-manrope">Previsão de Rendas</h4>
+                    <p class="mt-1 text-xs text-slate-400">Rendimento estimado sobre proventos futuros.</p>
+                  </div>
+                  <div class="relative z-10 flex justify-between items-end">
+                    <span class="text-xs text-brand-500 font-bold font-mono">+18,4% a.a.</span>
+                    <span class="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center"><i data-lucide="calculator" class="w-4 h-4"></i></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Visa Infinite Card (Finex) -->
+              <div class="space-y-2">
+                <span class="text-xs font-mono text-slate-400 block">3. Cartão de Crédito Físico (Finex)</span>
+                <div class="overflow-hidden group cursor-pointer text-white bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 relative shadow-lg h-[220px] flex flex-col justify-between">
+                  <div class="absolute -right-4 -top-4 w-24 h-24 bg-brand-500/10 rounded-full blur-2xl group-hover:bg-brand-500/20 transition-all pointer-events-none"></div>
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Cartão Principal</p>
+                      <h4 class="text-sm font-bold font-manrope">Visa Infinite</h4>
+                    </div>
+                    <i data-lucide="wifi" class="w-4 h-4 text-slate-400"></i>
+                  </div>
+                  <div class="flex items-end justify-between">
+                    <span class="font-mono text-xs tracking-widest text-slate-300">•••• 4242</span>
+                    <span class="text-[9px] font-bold bg-brand-500/15 text-brand-400 px-2 py-0.5 rounded border border-brand-500/25">ATIVO</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- 5) LAYOUT & SPACING SECTION (Swipeely py-24 + padding) -->
+      <section id="layout" class="scroll-mt-24 bg-white dark:bg-zinc-950 rounded-[2rem] p-8 lg:p-12 border border-slate-200 dark:border-slate-900 shadow-xl space-y-8 scroll-item scroll-fade-up">
+        <div class="space-y-2">
+          <div class="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900 px-3 py-1 text-xs text-slate-500 shadow-sm font-semibold">04 / Layout &amp; Spacing</div>
+          <h2 class="text-3xl md:text-5xl font-bold tracking-tight font-manrope">Estruturas &amp; Alinhamentos</h2>
+          <p class="text-slate-500 dark:text-slate-400 text-sm max-w-xl">
+            Os layouts do GlassFinance DS baseiam-se em containers centralizados em **1280px (max-w-7xl)**, com réguas rígidas de margens para garantir alinhamento visual de alta elegância.
+          </p>
+        </div>
+
+        <div class="space-y-6">
+          <h3 class="text-xs uppercase tracking-widest text-slate-400 font-mono">Réguas de Margens e Padding Utilizados</h3>
+          <div class="bg-slate-50 dark:bg-black/40 p-6 border border-slate-200/50 dark:border-white/5 rounded-2xl space-y-4">
+            
+            <!-- py-24 -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div class="w-32 text-xs font-mono text-slate-400">py-24 (96px)</div>
+              <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 relative overflow-hidden">
+                <div class="absolute inset-y-0 left-0 bg-brand-500/10 w-24 border-r border-brand-500/20"></div>
+                <div class="text-xs pl-28 font-medium">Espaçamento Vertical de Grandes Seções (Hero, Showcase e Métricas)</div>
+              </div>
+            </div>
+
+            <!-- p-8 lg:p-12 -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div class="w-32 text-xs font-mono text-slate-400">p-8 lg:p-12</div>
+              <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 relative overflow-hidden">
+                <div class="absolute inset-y-0 left-0 bg-brand-500/10 w-12 border-r border-brand-500/20"></div>
+                <div class="text-xs pl-16 font-medium">Espaçamento Interno Padrão dos Painéis Principais</div>
+              </div>
+            </div>
+
+            <!-- gap-6 -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div class="w-32 text-xs font-mono text-slate-400">gap-6 (24px)</div>
+              <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 relative overflow-hidden flex gap-6 items-center">
+                <div class="w-px h-5 bg-brand-500"></div>
+                <div class="text-xs font-medium">Espaçamento (Gap) Padrão de Grids para Cards Estatísticos</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 6) MOVIMENTOS & ESTADOS DINÂMICOS (Galeria Interativa) -->
+      <section id="motion" class="scroll-mt-24 space-y-8">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/50 px-3 py-1 text-xs text-slate-500 font-sans shadow-sm font-semibold">
+            05 / Motion &amp; Interaction
+          </div>
+          <h2 class="text-3xl md:text-5xl font-bold tracking-tight font-manrope">Interações &amp; Estados Dinâmicos</h2>
+          <p class="text-slate-500 dark:text-slate-400 text-sm max-w-xl">
+            Abaixo estão representados os micro-movimentos rápidos integrados para animar a interface de forma natural, sem poluir visualmente a experiência financeira.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          <!-- Hover Zoom (Swipeely Areia) -->
+          <div class="group relative bg-slate-900 rounded-3xl p-6 overflow-hidden min-h-[200px] flex flex-col justify-between border border-slate-800 cursor-pointer shadow-md">
+            <div class="absolute inset-0 z-0">
+              <img alt="Textura Areia" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-60" src="assets/images/sand-texture.jpg"/>
+            </div>
+            <div class="relative z-10 bg-black/45 backdrop-blur-sm p-3 rounded-xl text-white w-fit">
+              <span class="text-[9px] font-mono opacity-80 block">Efeito 1</span>
+              <p class="text-xs font-bold mt-0.5">Hover Image Zoom</p>
+            </div>
+            <span class="relative z-10 text-[9px] text-slate-300 font-mono bg-black/60 px-2 py-1 rounded w-fit">
+              duration-700 hover:scale-105
+            </span>
+          </div>
+
+          <!-- Translate Icon (Seta Swipeely) -->
+          <div class="group bg-white dark:bg-zinc-950 rounded-3xl p-6 min-h-[200px] flex flex-col justify-between border border-slate-200 dark:border-slate-900 cursor-pointer hover:border-brand-500 transition-colors duration-300 shadow-md">
+            <div>
+              <div class="flex justify-between items-center mb-4">
+                <span class="text-[9px] font-mono text-slate-400 uppercase">Efeito 2</span>
+                <iconify-icon class="text-slate-400 group-hover:text-brand-500 group-hover:translate-x-1.5 group-hover:-translate-y-1.5 transition-all duration-300 text-2xl" icon="lucide:arrow-up-right"></iconify-icon>
+              </div>
+              <h4 class="text-xs font-bold">Translate Icon Hover</h4>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-2">A seta desloca-se 5px diagonalmente no hover.</p>
+            </div>
+            <span class="text-[9px] text-slate-400 font-mono">translate-x-1.5 -translate-y-1.5</span>
+          </div>
+
+          <!-- Color Grayscale transition -->
+          <div class="group bg-white dark:bg-zinc-950 rounded-3xl p-6 min-h-[200px] flex flex-col justify-between border border-slate-200 dark:border-slate-900 cursor-pointer hover:shadow-lg transition-all duration-300 shadow-md">
+            <div class="flex items-center gap-3">
+              <img alt="Perfil" class="w-10 h-10 rounded-full object-cover bg-slate-200 grayscale group-hover:grayscale-0 transition-all duration-500" src="assets/images/profile.avif"/>
+              <div>
+                <h4 class="text-xs font-bold">Avatar Color Flow</h4>
+                <p class="text-[10px] text-slate-400">Passe o mouse para colorir</p>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-2">O perfil em preto e branco transita suavemente para cores.</p>
+            <span class="text-[9px] text-slate-400 font-mono">grayscale group-hover:grayscale-0</span>
+          </div>
+
+          <!-- Progress Bar Fill (Swipeely Efeito 4) -->
+          <div class="group bg-white dark:bg-zinc-950 rounded-3xl p-6 min-h-[200px] flex flex-col justify-between border border-slate-200 dark:border-slate-900 cursor-pointer shadow-md">
+            <div class="space-y-3">
+              <span class="text-[9px] font-mono text-slate-400 uppercase">Efeito 4</span>
+              <h4 class="text-xs font-bold">Hover ProgressBar Fill</h4>
+              <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full w-1/3 bg-brand-500 rounded-full group-hover:w-full transition-all duration-1000 ease-out"></div>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-2 font-medium">Passe o mouse para carregar de 33% a 100%.</p>
+            <span class="text-[9px] text-slate-400 font-mono">group-hover:w-full duration-1000</span>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- 7) ICONS SECTION -->
+      <section id="icons" class="scroll-mt-24 bg-white dark:bg-zinc-950 rounded-[2rem] p-8 lg:p-12 border border-slate-200 dark:border-slate-900 shadow-xl space-y-8 scroll-item scroll-fade-up">
+        <div class="space-y-2">
+          <div class="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900 px-3 py-1 text-xs text-slate-500 shadow-sm font-semibold">06 / Ícones</div>
+          <h2 class="text-3xl md:text-5xl font-bold tracking-tight font-manrope">Biblioteca de Ícones</h2>
+          <p class="text-slate-500 dark:text-slate-400 text-sm max-w-xl">
+            Unificação de ícones provindos da coleção **Lucide** e **Iconify** com suporte a swap dinâmico de cores de acordo com o tema.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 text-center">
+          
+          <div class="p-4 bg-slate-50 dark:bg-black/35 border border-slate-200/50 dark:border-white/5 rounded-2xl flex flex-col items-center gap-2">
+            <i data-lucide="wallet" class="text-2xl text-brand-500 w-6 h-6"></i>
+            <span class="text-[9px] font-mono text-slate-500">wallet</span>
+          </div>
+          
+          <div class="p-4 bg-slate-50 dark:bg-black/35 border border-slate-200/50 dark:border-white/5 rounded-2xl flex flex-col items-center gap-2">
+            <i data-lucide="trending-up" class="text-2xl text-brand-500 w-6 h-6"></i>
+            <span class="text-[9px] font-mono text-slate-500">trending-up</span>
+          </div>
+
+          <div class="p-4 bg-slate-50 dark:bg-black/35 border border-slate-200/50 dark:border-white/5 rounded-2xl flex flex-col items-center gap-2">
+            <i data-lucide="arrow-down-left" class="text-2xl text-brand-500 w-6 h-6"></i>
+            <span class="text-[9px] font-mono text-slate-500">arrow-down-left</span>
+          </div>
+
+          <div class="p-4 bg-slate-50 dark:bg-black/35 border border-slate-200/50 dark:border-white/5 rounded-2xl flex flex-col items-center gap-2">
+            <i data-lucide="utensils" class="text-2xl text-brand-500 w-6 h-6"></i>
+            <span class="text-[9px] font-mono text-slate-500">utensils</span>
+          </div>
+
+          <div class="p-4 bg-slate-50 dark:bg-black/35 border border-slate-200/50 dark:border-white/5 rounded-2xl flex flex-col items-center gap-2">
+            <i data-lucide="home" class="text-2xl text-brand-500 w-6 h-6"></i>
+            <span class="text-[9px] font-mono text-slate-500">home</span>
+          </div>
+
+          <div class="p-4 bg-slate-50 dark:bg-black/35 border border-slate-200/50 dark:border-white/5 rounded-2xl flex flex-col items-center gap-2">
+            <i data-lucide="shield-check" class="text-2xl text-brand-500 w-6 h-6"></i>
+            <span class="text-[9px] font-mono text-slate-500">shield-check</span>
+          </div>
+
+          <div class="p-4 bg-slate-50 dark:bg-black/35 border border-slate-200/50 dark:border-white/5 rounded-2xl flex flex-col items-center gap-2">
+            <i data-lucide="calculator" class="text-2xl text-brand-500 w-6 h-6"></i>
+            <span class="text-[9px] font-mono text-slate-500">calculator</span>
+          </div>
+
+          <div class="p-4 bg-slate-50 dark:bg-black/35 border border-slate-200/50 dark:border-white/5 rounded-2xl flex flex-col items-center gap-2">
+            <i data-lucide="refresh-cw" class="text-2xl text-brand-500 w-6 h-6"></i>
+            <span class="text-[9px] font-mono text-slate-500">refresh-cw</span>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Footer (Glass & Simple Details) -->
+  <footer class="border-t border-slate-200/60 dark:border-slate-900 bg-white/40 dark:bg-black relative z-10 py-12 mt-24">
+    <div class="w-full max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-500 dark:text-slate-400">
+      <div class="flex items-center gap-2">
+        <span class="w-6 h-6 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold font-manrope">G</span>
+        <span class="font-bold text-slate-800 dark:text-slate-100 font-manrope">GlassFinance DS</span>
+      </div>
+      <p>© 2026 GlassFinance Inc. Consolidando Swipeely, Finex e StreamFlow.</p>
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Showcase Vivo Operando</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Local Scripts -->
+  <script src="assets/js/theme-toggle.js"></script>
+  <script src="assets/js/dashboard.js"></script>
+</body>
+</html>

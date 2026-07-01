@@ -1,0 +1,237 @@
+/* GlassFinance Design System: Core UI Styles & Animations */
+
+/* ==========================================
+   1. Liquid Glass (Apple-Style Glassmorphism)
+   ========================================== */
+
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.03),
+              inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .liquid-glass {
+  background: rgba(10, 10, 15, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4),
+              inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Liquid Glass with dynamic border overlay (Bevel effect) */
+.liquid-glass-bevel {
+  position: relative;
+}
+
+.liquid-glass-bevel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.2px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.1) 40%, rgba(16, 185, 129, 0.15) 60%, rgba(16, 185, 129, 0.4)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 5;
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .liquid-glass-bevel::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.02) 40%, rgba(59, 130, 246, 0.15) 60%, rgba(59, 130, 246, 0.4)) border-box;
+}
+
+/* Glass buttons transition and scale */
+.glass-button {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-button:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================
+   2. Beam CTA & Gradient Border Helpers (Finex)
+   ========================================== */
+
+[style*="--border-gradient"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  border-radius: var(--border-radius-before, inherit);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  background: var(--border-gradient);
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes beam-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes lines-slide {
+  0% { background-position: 0 0; }
+  100% { background-position: 24px 0; }
+}
+
+.animate-beam-spin {
+  animation: beam-spin 3s linear infinite;
+}
+
+/* ==========================================
+   3. Looping Dashboard Animations (Finex)
+   ========================================== */
+
+@keyframes draw-path-loop {
+  0% { stroke-dashoffset: 1000; opacity: 0; }
+  5% { opacity: 1; }
+  45% { stroke-dashoffset: 0; }
+  90% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes width-grow-loop {
+  0% { width: 0; opacity: 1; }
+  45% { width: var(--target-width, 70%); }
+  90% { width: var(--target-width, 70%); opacity: 1; }
+  100% { width: var(--target-width, 70%); opacity: 0; }
+}
+
+@keyframes scale-in-loop {
+  0% { transform: scale(0.85); opacity: 0; }
+  20% { transform: scale(1); opacity: 1; }
+  90% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes fade-in-up-loop {
+  0% { opacity: 0; transform: translateY(8px); }
+  20% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(0); }
+}
+
+.animate-draw {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw-path-loop 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-play-state: paused;
+}
+
+.animate-width {
+  width: 0;
+  animation: width-grow-loop 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-play-state: paused;
+}
+
+.animate-scale {
+  opacity: 0;
+  animation: scale-in-loop 6s cubic-bezier(0.175, 0.885, 0.32, 1.2) infinite;
+  animation-play-state: paused;
+}
+
+.animate-fade-up {
+  opacity: 0;
+  animation: fade-in-up-loop 6s ease-out infinite;
+  animation-play-state: paused;
+}
+
+/* Play animations only when parent has .in-view class */
+.in-view .animate-draw,
+.in-view .animate-width,
+.in-view .animate-scale,
+.in-view .animate-fade-up {
+  animation-play-state: running;
+}
+
+/* ==========================================
+   4. Scroll-Triggered Entrance Animations
+   ========================================== */
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(25px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blurIn {
+  0% { opacity: 0; filter: blur(12px); transform: scale(0.96); }
+  100% { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+.scroll-item {
+  animation-duration: 0.8s;
+  animation-fill-mode: both;
+  animation-play-state: paused;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.scroll-fade-up {
+  animation-name: fadeInUp;
+}
+
+.scroll-blur-in {
+  animation-name: blurIn;
+}
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* Trigger active scroll elements */
+.scroll-reveal-active {
+  animation-play-state: running !important;
+}
+
+/* ==========================================
+   5. Interactive Elements & Fine Details
+   ========================================== */
+
+/* Custom grid guides (dashed lines of Swipeely) */
+.dashed-guide-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 1rem;
+  opacity: 0.15;
+  z-index: 0;
+}
+
+.dashed-guide-line {
+  width: 1px;
+  height: 100%;
+  background: repeating-linear-gradient(to bottom, #94a3b8, #94a3b8 4px, transparent 4px, transparent 8px);
+}
+
+/* Custom chart gradient fill area */
+.chart-gradient-stop-0 {
+  stop-color: #10b981;
+  stop-opacity: 0.22;
+}
+.chart-gradient-stop-100 {
+  stop-color: #10b981;
+  stop-opacity: 0.01;
+}
+
+.dark .chart-gradient-stop-0 {
+  stop-color: #3b82f6;
+  stop-opacity: 0.25;
+}
+.dark .chart-gradient-stop-100 {
+  stop-color: #3b82f6;
+  stop-opacity: 0.01;
+}

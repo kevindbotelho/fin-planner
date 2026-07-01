@@ -1511,21 +1511,49 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const setCategoryGoalOverrides = async (billingPeriodId: string, overrides: { categoryId: string; amount: number }[]) => {
     if (!user) return;
 
-    const upsertData = overrides.map(o => ({
-      user_id: user.id,
-      category_id: o.categoryId,
-      billing_period_id: billingPeriodId,
-      amount: o.amount,
-    }));
+    const toDelete: typeof overrides = [];
+    const toUpsert: typeof overrides = [];
 
-    const { error } = await supabase
-      .from('category_goal_overrides')
-      .upsert(upsertData, { onConflict: 'user_id, category_id, billing_period_id' });
+    overrides.forEach(o => {
+      const defaultGoal = data.goals.find(g => g.categoryId === o.categoryId);
+      const defaultAmount = defaultGoal ? defaultGoal.amount : 0;
+      if (o.amount === defaultAmount) {
+        toDelete.push(o);
+      } else {
+        toUpsert.push(o);
+      }
+    });
 
-    if (error) {
-      console.error('Error batch saving goal overrides:', error);
-      toast.error('Erro ao salvar metas do mês');
-      throw error;
+    if (toDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('category_goal_overrides')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('billing_period_id', billingPeriodId)
+        .in('category_id', toDelete.map(d => d.categoryId));
+
+      if (deleteError) {
+        console.error('Error deleting redundant goal overrides:', deleteError);
+      }
+    }
+
+    if (toUpsert.length > 0) {
+      const upsertData = toUpsert.map(o => ({
+        user_id: user.id,
+        category_id: o.categoryId,
+        billing_period_id: billingPeriodId,
+        amount: o.amount,
+      }));
+
+      const { error: upsertError } = await supabase
+        .from('category_goal_overrides')
+        .upsert(upsertData, { onConflict: 'user_id, category_id, billing_period_id' });
+
+      if (upsertError) {
+        console.error('Error batch saving goal overrides:', upsertError);
+        toast.error('Erro ao salvar metas do mês');
+        throw upsertError;
+      }
     }
 
     await fetchData();

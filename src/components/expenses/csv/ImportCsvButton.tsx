@@ -67,28 +67,28 @@ export function ImportCsvButton() {
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="outline"
-                        className="gap-2 bg-primary/5 hover:bg-primary/10 text-primary hover:text-primary border-primary/20"
+                        className="gap-2 rounded-xl h-9 text-xs font-semibold uppercase tracking-wider liquid-glass border-slate-200 dark:border-slate-800 text-brand-600 dark:text-brand-400 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 hover:text-brand-600 transition-all duration-200"
                     >
                         <Upload className="h-4 w-4" />
                         Importar CSV
                         <ChevronDown className="h-4 w-4 opacity-50" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align="end" className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl backdrop-blur-md shadow-lg w-48 p-1.5">
                     <DropdownMenuItem 
                         onClick={() => handleButtonClick('Nubank')}
-                        className="gap-2 cursor-pointer text-purple-700 hover:text-purple-800 hover:bg-purple-50 focus:bg-purple-50 focus:text-purple-800"
+                        className="gap-2.5 cursor-pointer text-xs font-semibold text-purple-600 dark:text-purple-400 focus:bg-purple-500/10 focus:text-purple-600 dark:focus:bg-purple-500/15 rounded-lg p-2.5 transition-colors"
                     >
-                        <div className="h-5 w-5 bg-white rounded-sm flex items-center justify-center overflow-hidden p-[2px]">
+                        <div className="h-5 w-5 bg-white border border-slate-150 rounded-md flex items-center justify-center overflow-hidden p-[2px]">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Nubank_logo_2021.svg" alt="Nubank" className="h-full w-full object-contain" />
                         </div>
                         Fatura Nubank
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                         onClick={() => handleButtonClick('Inter')}
-                        className="gap-2 cursor-pointer text-orange-600 hover:text-orange-700 hover:bg-orange-50 focus:bg-orange-50 focus:text-orange-700"
+                        className="gap-2.5 cursor-pointer text-xs font-semibold text-orange-600 dark:text-orange-400 focus:bg-orange-500/10 focus:text-orange-600 dark:focus:bg-orange-500/15 rounded-lg p-2.5 transition-colors"
                     >
-                        <div className="h-5 w-5 bg-white rounded-sm flex items-center justify-center overflow-hidden p-[2px]">
+                        <div className="h-5 w-5 bg-white border border-slate-150 rounded-md flex items-center justify-center overflow-hidden p-[2px]">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/8/8f/Logo_do_banco_Inter_%282023%29.svg" alt="Inter" className="h-full w-full object-contain" />
                         </div>
                         Fatura Inter

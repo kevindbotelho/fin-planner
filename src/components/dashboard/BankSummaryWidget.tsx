@@ -55,99 +55,99 @@ export function BankSummaryWidget({ expenses }: BankSummaryWidgetProps) {
   if (expenses.length === 0) return null;
 
   return (
-    <Card className="border-0 shadow-sm flex flex-col h-full col-span-full xl:col-span-1">
+    <Card className="liquid-glass liquid-glass-bevel border-0 shadow-sm flex flex-col h-full rounded-2xl col-span-full xl:col-span-1">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-muted-foreground" />
+        <CardTitle className="text-base font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          <Building2 className="h-4.5 w-4.5 text-brand-500" />
           Despesas por Banco
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-1">
-        <div className="space-y-4 mt-2">
+      <CardContent className="flex-1 flex flex-col justify-between">
+        <div className="space-y-3.5 mt-2">
           {bankStats.nubankTotal > 0 && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-white border shadow-sm flex items-center justify-center p-1">
+            <div className="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-100/30 dark:hover:bg-slate-900/30 transition-all duration-200">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-full bg-white border border-slate-200/50 shadow-sm flex items-center justify-center p-1.5 overflow-hidden">
                   <img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Nubank_logo_2021.svg" alt="Nubank" className="h-full w-full object-contain" />
                 </div>
-                <span className="font-medium">Nubank</span>
+                <span className="font-semibold text-xs text-slate-700 dark:text-slate-200">Nubank</span>
               </div>
-              <div className="text-right">
-                <p className="font-bold text-expense">{formatCurrency(bankStats.nubankTotal)}</p>
-                <p className="text-xs text-muted-foreground">{bankStats.nubankPercentage.toFixed(1)}%</p>
+              <div className="text-right whitespace-nowrap ml-2 shrink-0">
+                <p className="font-bold text-xs text-slate-800 dark:text-slate-100">{formatCurrency(bankStats.nubankTotal)}</p>
+                <p className="text-[10px] text-slate-400 font-mono font-medium">{bankStats.nubankPercentage.toFixed(1)}%</p>
               </div>
             </div>
           )}
           
           {bankStats.interTotal > 0 && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-white border shadow-sm flex items-center justify-center p-1">
+            <div className="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-100/30 dark:hover:bg-slate-900/30 transition-all duration-200">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-full bg-white border border-slate-200/50 shadow-sm flex items-center justify-center p-1.5 overflow-hidden">
                   <img src="https://upload.wikimedia.org/wikipedia/commons/8/8f/Logo_do_banco_Inter_%282023%29.svg" alt="Inter" className="h-full w-full object-contain" />
                 </div>
-                <span className="font-medium">Inter</span>
+                <span className="font-semibold text-xs text-slate-700 dark:text-slate-200">Inter</span>
               </div>
-              <div className="text-right">
-                <p className="font-bold text-expense">{formatCurrency(bankStats.interTotal)}</p>
-                <p className="text-xs text-muted-foreground">{bankStats.interPercentage.toFixed(1)}%</p>
+              <div className="text-right whitespace-nowrap ml-2 shrink-0">
+                <p className="font-bold text-xs text-slate-800 dark:text-slate-100">{formatCurrency(bankStats.interTotal)}</p>
+                <p className="text-[10px] text-slate-400 font-mono font-medium">{bankStats.interPercentage.toFixed(1)}%</p>
               </div>
             </div>
           )}
 
           {bankStats.reservaTotal > 0 && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center dark:bg-blue-900/20 dark:border-blue-800">
-                  <Landmark className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <div className="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-100/30 dark:hover:bg-slate-900/30 transition-all duration-200">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center dark:bg-blue-500/15 dark:border-blue-500/10 shrink-0">
+                  <Landmark className="h-4 w-4 text-blue-500" />
                 </div>
-                <span className="font-medium">Reserva</span>
+                <span className="font-semibold text-xs text-slate-700 dark:text-slate-200">Reserva</span>
               </div>
-              <div className="text-right">
-                <p className="font-bold text-expense">{formatCurrency(bankStats.reservaTotal)}</p>
-                <p className="text-xs text-muted-foreground">{bankStats.reservaPercentage.toFixed(1)}%</p>
+              <div className="text-right whitespace-nowrap ml-2 shrink-0">
+                <p className="font-bold text-xs text-slate-800 dark:text-slate-100">{formatCurrency(bankStats.reservaTotal)}</p>
+                <p className="text-[10px] text-slate-400 font-mono font-medium">{bankStats.reservaPercentage.toFixed(1)}%</p>
               </div>
             </div>
           )}
 
           {bankStats.outrosTotal > 0 && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
-                  <span className="text-slate-600 font-bold text-sm">?</span>
+            <div className="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-100/30 dark:hover:bg-slate-900/30 transition-all duration-200">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-full bg-slate-500/10 border border-slate-500/20 flex items-center justify-center shrink-0">
+                  <span className="text-slate-500 font-bold text-xs">?</span>
                 </div>
-                <span className="font-medium text-muted-foreground">Não Especificado</span>
+                <span className="font-semibold text-xs text-slate-400 dark:text-slate-500">Não Especificado</span>
               </div>
-              <div className="text-right">
-                <p className="font-bold text-muted-foreground">{formatCurrency(bankStats.outrosTotal)}</p>
-                <p className="text-xs text-muted-foreground">{bankStats.outrosPercentage.toFixed(1)}%</p>
+              <div className="text-right whitespace-nowrap ml-2 shrink-0">
+                <p className="font-bold text-xs text-slate-400 dark:text-slate-500">{formatCurrency(bankStats.outrosTotal)}</p>
+                <p className="text-[10px] text-slate-400 font-mono font-medium">{bankStats.outrosPercentage.toFixed(1)}%</p>
               </div>
             </div>
           )}
           
-          <div className="pt-4 border-t border-border/50">
+          <div className="pt-3 border-t border-slate-200/50 dark:border-slate-800/50 mt-2">
             {/* Visual representation bar */}
-            <div className="h-2 w-full rounded-full flex overflow-hidden bg-muted">
+            <div className="h-2 w-full rounded-full flex overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200/50 dark:border-white/5 shadow-inner">
               {bankStats.nubankPercentage > 0 && (
                 <div 
-                  className="bg-purple-500 h-full transition-all duration-500" 
+                  className="bg-[#8a05be] h-full transition-all duration-500" 
                   style={{ width: `${bankStats.nubankPercentage}%` }} 
                 />
               )}
               {bankStats.interPercentage > 0 && (
                 <div 
-                  className="bg-orange-500 h-full transition-all duration-500" 
+                  className="bg-[#ff7a00] h-full transition-all duration-500" 
                   style={{ width: `${bankStats.interPercentage}%` }} 
                 />
               )}
               {bankStats.reservaPercentage > 0 && (
                 <div 
-                  className="bg-blue-500 h-full transition-all duration-500" 
+                  className="bg-[#3b82f6] h-full transition-all duration-500" 
                   style={{ width: `${bankStats.reservaPercentage}%` }} 
                 />
               )}
               {bankStats.outrosPercentage > 0 && (
                 <div 
-                  className="bg-slate-300 h-full transition-all duration-500" 
+                  className="bg-slate-400 h-full transition-all duration-500" 
                   style={{ width: `${bankStats.outrosPercentage}%` }} 
                 />
               )}

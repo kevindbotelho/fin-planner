@@ -43,10 +43,10 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Visão geral das suas finanças</p>
+          <h1 className="text-xl font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100">Dashboard</h1>
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Visão geral das suas finanças</p>
         </div>
         <BillingPeriodSelector
           periods={data.billingPeriods}
@@ -72,7 +72,11 @@ export default function Dashboard() {
 
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="flex flex-col space-y-6 lg:col-span-2">
-              <IncomeExpenseChart data={chartData} />
+              <IncomeExpenseChart 
+                monthlyData={chartData} 
+                periodExpenses={periodExpenses}
+                selectedPeriod={selectedPeriod}
+              />
               <div className="flex-1 min-h-[300px] h-full flex flex-col">
                 <FinancialGoalsWidget />
               </div>

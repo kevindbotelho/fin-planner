@@ -37,6 +37,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { BillingPeriodSelector } from '@/components/dashboard/BillingPeriodSelector';
+import { DatePickerInput } from '@/components/ui/date-picker-input';
 import {
   Dialog,
   DialogContent,
@@ -337,10 +338,10 @@ export default function Expenses() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Despesas</h1>
-          <p className="text-muted-foreground">Registre e gerencie suas despesas</p>
+          <h1 className="text-xl font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100">Despesas</h1>
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Registre e gerencie suas despesas</p>
         </div>
         <div className="flex items-center gap-2">
           <ImportCsvButton />
@@ -352,60 +353,61 @@ export default function Expenses() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="border-0 shadow-sm lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-lg">Nova Despesa</CardTitle>
+      <div className="grid gap-6 lg:grid-cols-4 items-start">
+        <Card className="liquid-glass liquid-glass-bevel border-0 shadow-sm lg:col-span-1 rounded-2xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100">Nova Despesa</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="description">Descrição</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Descrição</Label>
                 <Input
                   id="description"
                   placeholder="Ex: Almoço no restaurante"
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
+                  className="h-9 liquid-glass border-slate-200 dark:border-slate-800 focus-visible:ring-brand-500 rounded-xl text-xs font-semibold"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="amount">Valor (R$)</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="amount" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Valor (R$)</Label>
                 <CurrencyInput
                   value={formData.amount}
                   onChange={value => setFormData({ ...formData, amount: value })}
                   placeholder="0,00"
+                  className="h-9 liquid-glass border-slate-200 dark:border-slate-800 focus-visible:ring-brand-500 rounded-xl text-xs font-semibold"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="purchaseDate">Data da Compra</Label>
-                <Input
-                  id="purchaseDate"
-                  type="date"
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Data da Compra</Label>
+                <DatePickerInput
                   value={formData.purchaseDate}
-                  onChange={e => setFormData({ ...formData, purchaseDate: e.target.value })}
+                  onChange={(val) => setFormData({ ...formData, purchaseDate: val })}
+                  placeholder="Selecionar data"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="type">Tipo</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="type" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tipo</Label>
                 <Select
                   value={formData.type}
                   onValueChange={(value: ExpenseType) => setFormData({ ...formData, type: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-[42px] w-full liquid-glass border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-xl transition-colors text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg backdrop-blur-md p-1">
                     <SelectItem value="fixed">Fixa (recorrente)</SelectItem>
                     <SelectItem value="variable">Variável</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">Categoria</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="category" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Categoria</Label>
                 <Select
                   value={formData.categoryId}
                   onValueChange={(value) => {
@@ -416,23 +418,23 @@ export default function Expenses() {
                     }
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-[42px] w-full liquid-glass border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-xl transition-colors text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
                     <SelectValue placeholder="Selecione uma categoria" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg backdrop-blur-md p-1">
                     {data.categories.map(category => (
                       <SelectItem key={category.id} value={category.id}>
                         <div className="flex items-center gap-2">
                           <div
-                            className="h-3 w-3 rounded-full"
+                            className="h-2.5 w-2.5 rounded-full"
                             style={{ backgroundColor: category.color }}
                           />
                           {category.name}
                         </div>
                       </SelectItem>
                     ))}
-                    <div className="p-1 border-t mt-1">
-                      <SelectItem value="new-category" className="text-primary font-medium cursor-pointer">
+                    <div className="p-1 border-t border-slate-200/50 dark:border-slate-800/50 mt-1">
+                      <SelectItem value="new-category" className="relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-9 pr-4 text-xs font-semibold outline-none transition-colors text-brand-500 bg-transparent focus:bg-brand-500/10 focus:text-brand-600 dark:focus:text-brand-400 focus:shadow-sm">
                         <div className="flex items-center gap-2">
                           <Plus className="h-4 w-4" />
                           Nova Categoria
@@ -443,8 +445,8 @@ export default function Expenses() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="subcategory">Subcategoria</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="subcategory" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Subcategoria</Label>
                 <Select
                   value={formData.subcategoryId}
                   onValueChange={(value) => {
@@ -456,17 +458,17 @@ export default function Expenses() {
                   }}
                   disabled={!formData.categoryId}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-[42px] w-full liquid-glass border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-xl transition-colors text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm disabled:opacity-45 disabled:cursor-not-allowed">
                     <SelectValue placeholder="Selecione uma subcategoria" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg backdrop-blur-md p-1">
                     {selectedCategory?.subcategories.map(sub => (
                       <SelectItem key={sub.id} value={sub.id}>
                         {sub.name}
                       </SelectItem>
                     ))}
-                    <div className="p-1 border-t mt-1">
-                      <SelectItem value="new-subcategory" className="text-primary font-medium cursor-pointer">
+                    <div className="p-1 border-t border-slate-200/50 dark:border-slate-800/50 mt-1">
+                      <SelectItem value="new-subcategory" className="relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-9 pr-4 text-xs font-semibold outline-none transition-colors text-brand-500 bg-transparent focus:bg-brand-500/10 focus:text-brand-600 dark:focus:text-brand-400 focus:shadow-sm">
                         <div className="flex items-center gap-2">
                           <Plus className="h-4 w-4" />
                            Nova Subcategoria
@@ -477,16 +479,16 @@ export default function Expenses() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="bankOrigin">Banco</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="bankOrigin" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Banco</Label>
                 <Select
                   value={formData.bankOrigin}
                   onValueChange={(value: 'Nubank' | 'Inter' | 'None') => setFormData({ ...formData, bankOrigin: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-[42px] w-full liquid-glass border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-xl transition-colors text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
                     <SelectValue placeholder="Selecione um banco" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg backdrop-blur-md p-1">
                     <SelectItem value="None">Nenhum</SelectItem>
                     <SelectItem value="Nubank">Nubank</SelectItem>
                     <SelectItem value="Inter">Inter</SelectItem>
@@ -494,7 +496,7 @@ export default function Expenses() {
                 </Select>
               </div>
 
-              <div className="flex items-center space-x-2 border rounded-md p-3 bg-muted/20">
+              <div className="flex items-start space-x-2.5 border border-slate-200/50 dark:border-slate-800/50 rounded-xl p-3 bg-slate-100/20 dark:bg-slate-900/20 transition-all duration-200">
                 <Checkbox
                   id="isReserve"
                   checked={formData.isReserve}
@@ -505,19 +507,20 @@ export default function Expenses() {
                       bankOrigin: checked ? 'None' : formData.bankOrigin,
                     });
                   }}
+                  className="h-5 w-5 pointer-events-auto rounded-md border-slate-300 dark:border-slate-800 data-[state=checked]:bg-brand-500 data-[state=checked]:border-brand-500 mt-0.5"
                 />
                 <div className="flex-1">
-                  <Label htmlFor="isReserve" className="cursor-pointer flex items-center gap-1.5 text-sm font-medium">
-                    <Landmark className="h-3.5 w-3.5" />
+                  <Label htmlFor="isReserve" className="cursor-pointer flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    <Landmark className="h-3.5 w-3.5 text-brand-500" />
                     Reserva de crédito
                   </Label>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 leading-relaxed">
                     Investimento, caixa ou verba reservada (não é fatura)
                   </p>
                 </div>
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full rounded-xl h-[42px] text-xs font-semibold uppercase tracking-wider bg-brand-500 hover:bg-brand-600 text-white dark:bg-brand-500 dark:hover:bg-brand-600 dark:text-white transition-colors shadow-md shadow-brand-500/10 mt-2">
                 <Plus className="mr-2 h-4 w-4" />
                 Adicionar Despesa
               </Button>
@@ -548,39 +551,37 @@ export default function Expenses() {
           }}
         />
 
-        <Card className="border-0 shadow-sm lg:col-span-2">
-          <CardHeader>
+        <Card className="liquid-glass liquid-glass-bevel border-0 shadow-sm lg:col-span-3 rounded-2xl">
+          <CardHeader className="pb-3">
             <div className="flex flex-row items-center justify-between mb-4">
-              <CardTitle className="text-lg">Despesas do Período</CardTitle>
+              <CardTitle className="text-base font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100">Despesas do Período</CardTitle>
               <div className="text-right">
-                <p className="text-sm text-muted-foreground">{hasActiveFilters ? 'Total Filtrado' : 'Total'}</p>
-                <p className="text-xl font-bold text-expense">{formatCurrency(totalExpenses)}</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider font-manrope">{hasActiveFilters ? 'Total Filtrado' : 'Total'}</p>
+                <p className="text-lg font-extrabold text-rose-500 font-manrope mt-0.5">{formatCurrency(totalExpenses)}</p>
               </div>
             </div>
 
             {/* Filters */}
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 p-4 bg-muted/30 rounded-lg border border-border/50">
-              <div className="space-y-1">
-                <Label htmlFor="filter-date" className="text-xs">Data</Label>
-                <Input
-                  id="filter-date"
-                  type="date"
-                  className="h-8 text-sm"
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-12 p-5 bg-slate-100/30 dark:bg-slate-900/30 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+              <div className="space-y-1 lg:col-span-3">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Data da Compra</Label>
+                <DatePickerInput
                   value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
+                  onChange={setFilterDate}
+                  placeholder="Todas as datas"
                 />
               </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="filter-type" className="text-xs">Tipo</Label>
+              <div className="space-y-1 lg:col-span-2">
+                <Label htmlFor="filter-type" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tipo</Label>
                 <Select
                   value={filterType}
                   onValueChange={(value: ExpenseType | 'all') => setFilterType(value)}
                 >
-                  <SelectTrigger className="h-8 text-sm">
+                  <SelectTrigger className="h-[42px] w-full liquid-glass border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-xl transition-colors text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg backdrop-blur-md p-1">
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="fixed">Fixa</SelectItem>
                     <SelectItem value="variable">Variável</SelectItem>
@@ -588,22 +589,22 @@ export default function Expenses() {
                 </Select>
               </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="filter-category" className="text-xs">Categoria</Label>
+              <div className="space-y-1 lg:col-span-3">
+                <Label htmlFor="filter-category" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Categoria</Label>
                 <Select
                   value={filterCategoryId}
                   onValueChange={handleCategoryFilterChange}
                 >
-                  <SelectTrigger className="h-8 text-sm">
+                  <SelectTrigger className="h-[42px] w-full liquid-glass border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-xl transition-colors text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
                     <SelectValue placeholder="Todas" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg backdrop-blur-md p-1">
                     <SelectItem value="all">Todas</SelectItem>
                     {data.categories.map(category => (
                       <SelectItem key={category.id} value={category.id}>
                         <div className="flex items-center gap-2">
                           <div
-                            className="h-2 w-2 rounded-full"
+                            className="h-2.5 w-2.5 rounded-full"
                             style={{ backgroundColor: category.color }}
                           />
                           {category.name}
@@ -614,17 +615,17 @@ export default function Expenses() {
                 </Select>
               </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="filter-subcategory" className="text-xs">Subcategoria</Label>
+              <div className="space-y-1 lg:col-span-4">
+                <Label htmlFor="filter-subcategory" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Subcategoria</Label>
                 <Select
                   value={filterSubcategoryId}
                   onValueChange={setFilterSubcategoryId}
                   disabled={filterCategoryId === 'all'}
                 >
-                  <SelectTrigger className="h-8 text-sm">
+                  <SelectTrigger className="h-[42px] w-full liquid-glass border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-xl transition-colors text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm disabled:opacity-45 disabled:cursor-not-allowed">
                     <SelectValue placeholder="Todas" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg backdrop-blur-md p-1">
                     <SelectItem value="all">Todas</SelectItem>
                     {availableSubcategories.map(sub => (
                       <SelectItem key={sub.id} value={sub.id}>
@@ -635,14 +636,15 @@ export default function Expenses() {
                 </Select>
               </div>
 
-              <div className="sm:col-span-2 lg:col-span-4 flex items-center justify-between mt-2 pt-2 border-t border-border/40">
-                <div className="flex items-center space-x-2">
+              <div className="sm:col-span-2 lg:col-span-12 flex items-center justify-between mt-2 pt-2 border-t border-slate-200/50 dark:border-slate-800/50 px-1.5">
+                <div className="flex items-center space-x-2.5">
                   <Checkbox
                     id="showIgnored"
                     checked={showIgnored}
                     onCheckedChange={(checked) => setShowIgnored(!!checked)}
+                    className="h-5 w-5 pointer-events-auto rounded-md border-slate-300 dark:border-slate-800 data-[state=checked]:bg-brand-500 data-[state=checked]:border-brand-500"
                   />
-                  <Label htmlFor="showIgnored" className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
+                  <Label htmlFor="showIgnored" className="cursor-pointer text-xs font-semibold text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
                     Mostrar despesas desconsideradas (pontes de cartão)
                   </Label>
                 </div>
@@ -651,9 +653,9 @@ export default function Expenses() {
                     variant="ghost"
                     size="sm"
                     onClick={clearFilters}
-                    className="h-8 text-muted-foreground hover:text-foreground"
+                    className="h-8 px-2.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-950/20 transition-colors"
                   >
-                    <X className="mr-2 h-3 w-3" />
+                    <X className="mr-1.5 h-3.5 w-3.5" />
                     Limpar Filtros
                   </Button>
                 )}
@@ -662,26 +664,26 @@ export default function Expenses() {
           </CardHeader>
           <CardContent>
             {displayedExpenses.length === 0 ? (
-              <div className="py-12 text-center text-muted-foreground">
+              <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-xs font-medium">
                 {hasActiveFilters ? 'Nenhuma despesa encontrada com os filtros selecionados' : 'Nenhuma despesa registrada neste período'}
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto rounded-xl border border-slate-200/50 dark:border-slate-800/50 bg-white/20 dark:bg-black/10 backdrop-blur-sm shadow-sm">
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}
                 >
                   <Table>
-                    <TableHeader>
-                      <TableRow>
+                    <TableHeader className="bg-slate-100/50 dark:bg-slate-900/50">
+                      <TableRow className="border-b border-slate-200/50 dark:border-slate-800/50">
                         <TableHead className="w-8"></TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Descrição</TableHead>
-                        <TableHead>Banco</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Categoria</TableHead>
-                        <TableHead className="text-right">Valor</TableHead>
+                        <TableHead className="text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope">Data</TableHead>
+                        <TableHead className="text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope">Descrição</TableHead>
+                        <TableHead className="text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope">Banco</TableHead>
+                        <TableHead className="text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope">Tipo</TableHead>
+                        <TableHead className="text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope">Categoria</TableHead>
+                        <TableHead className="text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope text-right">Valor</TableHead>
                         <TableHead className="w-20"></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -721,70 +723,71 @@ export default function Expenses() {
 
       {/* Edit Modal */}
       <Dialog open={!!editingExpense} onOpenChange={(open) => !open && setEditingExpense(null)}>
-        <DialogContent className="max-w-sm max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-sm max-h-[85vh] overflow-y-auto custom-scrollbar bg-white/95 dark:bg-slate-900/90 border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md">
           <DialogHeader>
-            <DialogTitle>Editar Despesa</DialogTitle>
+            <DialogTitle className="text-slate-800 dark:text-slate-100 font-manrope font-bold">Editar Despesa</DialogTitle>
           </DialogHeader>
-          <form onSubmit={(e) => handleUpdateExpense(e, editScope)} className="space-y-3">
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Descrição</Label>
+          <form onSubmit={(e) => handleUpdateExpense(e, editScope)} className="space-y-3.5 mt-2">
+            <div className="space-y-1">
+              <Label htmlFor="edit-description" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Descrição</Label>
               <Input
                 id="edit-description"
                 value={editFormData.description}
                 onChange={e => setEditFormData({ ...editFormData, description: e.target.value })}
+                className="h-9 liquid-glass border-slate-200 dark:border-slate-800 focus-visible:ring-brand-500 rounded-xl text-xs font-semibold"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-amount">Valor (R$)</Label>
+            <div className="space-y-1">
+              <Label htmlFor="edit-amount" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Valor (R$)</Label>
               <CurrencyInput
                 value={editFormData.amount}
                 onChange={value => setEditFormData({ ...editFormData, amount: value })}
                 placeholder="0,00"
+                className="h-9 liquid-glass border-slate-200 dark:border-slate-800 focus-visible:ring-brand-500 rounded-xl text-xs font-semibold"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-purchaseDate">Data da Compra</Label>
-              <Input
-                id="edit-purchaseDate"
-                type="date"
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Data da Compra</Label>
+              <DatePickerInput
                 value={editFormData.purchaseDate}
-                onChange={e => setEditFormData({ ...editFormData, purchaseDate: e.target.value })}
+                onChange={(val) => setEditFormData({ ...editFormData, purchaseDate: val })}
+                placeholder="Selecionar data"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-type">Tipo</Label>
+            <div className="space-y-1">
+              <Label htmlFor="edit-type" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tipo</Label>
               <Select
                 value={editFormData.type}
                 onValueChange={(value: ExpenseType) => setEditFormData({ ...editFormData, type: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-[42px] w-full liquid-glass border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-xl transition-colors text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg backdrop-blur-md p-1">
                   <SelectItem value="fixed">Fixa</SelectItem>
                   <SelectItem value="variable">Variável</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-category">Categoria</Label>
+            <div className="space-y-1">
+              <Label htmlFor="edit-category" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Categoria</Label>
               <Select
                 value={editFormData.categoryId}
                 onValueChange={value => setEditFormData({ ...editFormData, categoryId: value, subcategoryId: '' })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-[42px] w-full liquid-glass border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-xl transition-colors text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg backdrop-blur-md p-1">
                   {data.categories.map(category => (
                     <SelectItem key={category.id} value={category.id}>
                       <div className="flex items-center gap-2">
                         <div
-                          className="h-3 w-3 rounded-full"
+                          className="h-2.5 w-2.5 rounded-full"
                           style={{ backgroundColor: category.color }}
                         />
                         {category.name}
@@ -795,17 +798,17 @@ export default function Expenses() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-subcategory">Subcategoria</Label>
+            <div className="space-y-1">
+              <Label htmlFor="edit-subcategory" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Subcategoria</Label>
               <Select
                 value={editFormData.subcategoryId}
                 onValueChange={value => setEditFormData({ ...editFormData, subcategoryId: value })}
                 disabled={!editFormData.categoryId}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-[42px] w-full liquid-glass border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-xl transition-colors text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm disabled:opacity-45 disabled:cursor-not-allowed">
                   <SelectValue placeholder="Selecione uma subcategoria" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg backdrop-blur-md p-1">
                   {editSelectedCategory?.subcategories.map(sub => (
                     <SelectItem key={sub.id} value={sub.id}>
                       {sub.name}
@@ -815,16 +818,16 @@ export default function Expenses() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-bankOrigin">Banco</Label>
+            <div className="space-y-1">
+              <Label htmlFor="edit-bankOrigin" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Banco</Label>
               <Select
                 value={editFormData.bankOrigin}
                 onValueChange={(value: 'Nubank' | 'Inter' | 'None') => setEditFormData({ ...editFormData, bankOrigin: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-[42px] w-full liquid-glass border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-xl transition-colors text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
                   <SelectValue placeholder="Selecione um banco" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl shadow-lg backdrop-blur-md p-1">
                   <SelectItem value="None">Nenhum</SelectItem>
                   <SelectItem value="Nubank">Nubank</SelectItem>
                   <SelectItem value="Inter">Inter</SelectItem>
@@ -832,51 +835,53 @@ export default function Expenses() {
               </Select>
             </div>
 
-            <div className="flex items-center space-x-2 border rounded-md p-3 bg-muted/20">
-                <Checkbox
-                  id="edit-isReserve"
-                  checked={editFormData.isReserve}
-                  onCheckedChange={(checked) => {
-                    setEditFormData({
-                      ...editFormData,
-                      isReserve: !!checked,
-                      bankOrigin: checked ? 'None' : editFormData.bankOrigin,
-                    });
-                  }}
-                />
-                <div className="flex-1">
-                  <Label htmlFor="edit-isReserve" className="cursor-pointer flex items-center gap-1.5 text-sm font-medium">
-                    <Landmark className="h-3.5 w-3.5" />
-                    Reserva de crédito
-                  </Label>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Investimento, caixa ou verba reservada (não é fatura)
-                  </p>
-                </div>
+            <div className="flex items-start space-x-2.5 border border-slate-200/50 dark:border-slate-800/50 rounded-xl p-3 bg-slate-100/20 dark:bg-slate-900/20 transition-all duration-200">
+              <Checkbox
+                id="edit-isReserve"
+                checked={editFormData.isReserve}
+                onCheckedChange={(checked) => {
+                  setEditFormData({
+                    ...editFormData,
+                    isReserve: !!checked,
+                    bankOrigin: checked ? 'None' : editFormData.bankOrigin,
+                  });
+                }}
+                className="h-5 w-5 pointer-events-auto rounded-md border-slate-300 dark:border-slate-800 data-[state=checked]:bg-brand-500 data-[state=checked]:border-brand-500 mt-0.5"
+              />
+              <div className="flex-1">
+                <Label htmlFor="edit-isReserve" className="cursor-pointer flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  <Landmark className="h-3.5 w-3.5 text-brand-500" />
+                  Reserva de crédito
+                </Label>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 leading-relaxed">
+                  Investimento, caixa ou verba reservada (não é fatura)
+                </p>
               </div>
+            </div>
 
-              <div className="flex items-center space-x-2 border rounded-md p-3 bg-muted/20">
-                <Checkbox
-                  id="edit-isIgnored"
-                  checked={editFormData.isIgnored}
-                  onCheckedChange={(checked) => {
-                    setEditFormData({
-                      ...editFormData,
-                      isIgnored: !!checked,
-                    });
-                  }}
-                />
-                <div className="flex-1">
-                  <Label htmlFor="edit-isIgnored" className="cursor-pointer flex items-center gap-1.5 text-sm font-medium">
-                    Desconsiderar despesa (Ponte)
-                  </Label>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Exclui do total de despesas e dos gráficos do Dashboard
-                  </p>
-                </div>
+            <div className="flex items-start space-x-2.5 border border-slate-200/50 dark:border-slate-800/50 rounded-xl p-3 bg-slate-100/20 dark:bg-slate-900/20 transition-all duration-200">
+              <Checkbox
+                id="edit-isIgnored"
+                checked={editFormData.isIgnored}
+                onCheckedChange={(checked) => {
+                  setEditFormData({
+                    ...editFormData,
+                    isIgnored: !!checked,
+                  });
+                }}
+                className="h-5 w-5 pointer-events-auto rounded-md border-slate-300 dark:border-slate-800 data-[state=checked]:bg-brand-500 data-[state=checked]:border-brand-500 mt-0.5"
+              />
+              <div className="flex-1">
+                <Label htmlFor="edit-isIgnored" className="cursor-pointer flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Desconsiderar despesa (Ponte)
+                </Label>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 leading-relaxed">
+                  Exclui do total de despesas e dos gráficos do Dashboard
+                </p>
               </div>
+            </div>
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full rounded-xl h-[42px] text-xs font-semibold uppercase tracking-wider bg-brand-500 hover:bg-brand-600 text-white dark:bg-brand-500 dark:hover:bg-brand-600 dark:text-white transition-colors shadow-md shadow-brand-500/10 mt-2">
               Salvar Alterações
             </Button>
           </form>
