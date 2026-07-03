@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect, useRef } from 'react';
-import { LayoutDashboard, Receipt, Settings, LogOut, Sun, Moon, Zap, ZapOff, PiggyBank } from 'lucide-react';
+import { LayoutDashboard, Receipt, Settings, LogOut, Sun, Moon, Zap, ZapOff, PiggyBank, User } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const navRef = useRef<HTMLElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 });
@@ -148,6 +148,13 @@ export function AppLayout({ children }: AppLayoutProps) {
             >
               Configurações
             </NavLink>
+            <NavLink
+              to="/perfil"
+              className="relative z-10 px-5 py-2 rounded-full transition-all duration-300 hover:text-slate-800 dark:hover:text-slate-200"
+              activeClassName="text-brand-700 dark:text-brand-400 font-bold"
+            >
+              Perfil
+            </NavLink>
           </nav>
 
           {/* Controles do Usuário & Tema */}
@@ -181,9 +188,13 @@ export function AppLayout({ children }: AppLayoutProps) {
 
             {/* Info do Usuário & Logout (Desktop) */}
             <div className="hidden md:flex items-center gap-3 border-l border-slate-200 dark:border-slate-800 pl-3">
-              <span className="text-xs text-slate-500 dark:text-slate-400 max-w-[150px] truncate" title={user?.email || ''}>
-                {user?.email}
-              </span>
+              <NavLink 
+                to="/perfil"
+                className="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-brand-500 dark:hover:text-brand-400 max-w-[150px] truncate transition-colors duration-200"
+                title={user?.email || ''}
+              >
+                Olá, {profile?.first_name ? profile.first_name : 'Usuário'}!
+              </NavLink>
               <Button
                 variant="ghost"
                 size="sm"
@@ -241,6 +252,15 @@ export function AppLayout({ children }: AppLayoutProps) {
           >
             <Settings className="h-5 w-5" />
             <span className="text-[9px] uppercase tracking-wider">Ajustes</span>
+          </NavLink>
+
+          <NavLink
+            to="/perfil"
+            className="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 transition-all hover:text-brand-500"
+            activeClassName="text-brand-500 dark:text-brand-400 font-semibold"
+          >
+            <User className="h-5 w-5" />
+            <span className="text-[9px] uppercase tracking-wider">Perfil</span>
           </NavLink>
         </div>
       </div>

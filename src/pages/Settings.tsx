@@ -789,7 +789,7 @@ export default function Settings() {
                             size="sm"
                             type="button"
                             onClick={() => handleAddExtraDetail(period.id)}
-                            className="h-8 px-3 text-xs font-semibold rounded-lg text-brand-600 dark:text-brand-400 border-slate-250 dark:border-slate-800 hover:bg-slate-100/50 dark:hover:bg-slate-900/50"
+                            className="h-8 px-3.5 text-xs font-semibold rounded-lg text-brand-600 dark:text-brand-400 border-slate-250 dark:border-slate-800 hover:bg-brand-500/10 dark:hover:bg-brand-500/15 hover:border-brand-500/30 dark:hover:border-brand-500/30 hover:-translate-y-[0.5px] transition-all duration-200"
                           >
                             <Plus className="h-3.5 w-3.5 mr-1 text-brand-500" />
                             Adicionar
@@ -817,8 +817,14 @@ export default function Settings() {
                                     className="h-9 liquid-glass border-slate-200 dark:border-slate-805 focus-visible:ring-brand-500 rounded-lg text-xs font-semibold"
                                   />
                                 </div>
-                                <Button size="icon" variant="ghost" className="h-9 w-9 hover:bg-rose-500/10 rounded-lg" type="button" onClick={() => handleRemoveExtraDetail(period.id, detail.id)}>
-                                  <Trash2 className="h-3.5 w-3.5 text-slate-400 hover:text-rose-500 transition-colors" />
+                                <Button 
+                                  size="icon" 
+                                  variant="ghost" 
+                                  className="h-9 w-9 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 rounded-full hover:bg-rose-50/50 dark:hover:bg-rose-950/20" 
+                                  type="button" 
+                                  onClick={() => handleRemoveExtraDetail(period.id, detail.id)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
                               </div>
                             ))}
@@ -1032,7 +1038,7 @@ export default function Settings() {
 
                 return (
                   <div className="space-y-6">
-                    <div className="bg-slate-100/30 dark:bg-slate-900/30 border border-slate-200/50 dark:border-slate-800/50 p-4.5 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-center pb-5 border-b border-slate-200/50 dark:border-slate-800/50 gap-4">
                       <div className="w-full sm:w-auto text-center sm:text-left">
                         <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider font-manrope">Receita do Período</p>
                         <p className="text-lg font-extrabold text-slate-800 dark:text-slate-100 font-manrope mt-0.5">{formatCurrency(periodIncome)}</p>
@@ -1331,20 +1337,20 @@ export default function Settings() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-lg"
+                                className="h-8 w-8 text-slate-400 dark:text-slate-500 hover:text-brand-500 dark:hover:text-brand-400 rounded-full hover:bg-slate-100/50 dark:hover:bg-slate-900/50"
                                 onClick={e => { e.stopPropagation(); handleStartEditCategory(category); }}
                               >
-                                <Pencil className="h-3.5 w-3.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors" />
+                                <Pencil className="h-3.5 w-3.5" />
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 hover:bg-rose-500/10 rounded-lg"
+                                    className="h-8 w-8 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 rounded-full hover:bg-rose-50/50 dark:hover:bg-rose-950/20"
                                     onClick={e => e.stopPropagation()}
                                   >
-                                    <Trash2 className="h-3.5 w-3.5 text-slate-400 hover:text-rose-500 transition-colors" />
+                                    <Trash2 className="h-3.5 w-3.5" />
                                   </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md max-w-sm">
@@ -1387,11 +1393,13 @@ export default function Settings() {
                               className="h-8.5 liquid-glass border-slate-200 dark:border-slate-800 focus-visible:ring-brand-500 rounded-lg text-xs font-semibold"
                             />
                             <Button
-                              size="icon"
+                              variant="outline"
+                              size="sm"
                               onClick={() => handleAddSubcategory(category.id)}
-                              className="h-8.5 w-8.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 transition-colors"
+                              className="h-8.5 px-3.5 text-xs font-semibold rounded-lg text-brand-600 dark:text-brand-400 border-slate-250 dark:border-slate-800 hover:bg-brand-500/10 dark:hover:bg-brand-500/15 hover:border-brand-500/30 dark:hover:border-brand-500/30 hover:-translate-y-[0.5px] transition-all duration-200"
                             >
-                              <Plus className="h-4 w-4" />
+                              <Plus className="h-3.5 w-3.5 mr-1 text-brand-500" />
+                              Adicionar
                             </Button>
                           </div>
                           {category.subcategories.length === 0 ? (
@@ -1438,15 +1446,19 @@ export default function Settings() {
                                         <Button
                                           variant="ghost"
                                           size="icon"
-                                          className="h-7 w-7 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 rounded-md"
+                                          className="h-7 w-7 text-slate-400 dark:text-slate-500 hover:text-brand-500 dark:hover:text-brand-400 rounded-full hover:bg-slate-100/50 dark:hover:bg-slate-900/50"
                                           onClick={() => handleStartEditSubcategory(sub)}
                                         >
-                                          <Pencil className="h-3 w-3 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors" />
+                                          <Pencil className="h-3 w-3" />
                                         </Button>
                                         <AlertDialog>
                                           <AlertDialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-rose-500/10 rounded-md">
-                                              <Trash2 className="h-3 w-3 text-slate-400 hover:text-rose-500 transition-colors" />
+                                            <Button 
+                                              variant="ghost" 
+                                              size="icon" 
+                                              className="h-7 w-7 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 rounded-full hover:bg-rose-50/50 dark:hover:bg-rose-950/20"
+                                            >
+                                              <Trash2 className="h-3 w-3" />
                                             </Button>
                                           </AlertDialogTrigger>
                                           <AlertDialogContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md max-w-sm">

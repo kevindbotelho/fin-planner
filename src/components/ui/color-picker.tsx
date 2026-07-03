@@ -18,6 +18,7 @@ const PRESET_COLORS = [
 const DEFAULT_COLOR = PRESET_COLORS[0]; // Red as default
 
 export function ColorPicker({ value, onChange }: ColorPickerProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const [hexInput, setHexInput] = useState(value || DEFAULT_COLOR);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hueRef = useRef<HTMLCanvasElement>(null);
@@ -47,12 +48,20 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
   }, [value]);
 
   useEffect(() => {
-    drawColorCanvas();
-  }, [hue]);
+    if (isOpen) {
+      const animFrame = requestAnimationFrame(() => {
+        drawHueSlider();
+        drawColorCanvas();
+      });
+      return () => cancelAnimationFrame(animFrame);
+    }
+  }, [isOpen, hue, value]);
 
-  useEffect(() => {
-    drawHueSlider();
-  }, []);
+  const handleRandomColor = () => {
+    const randomHex = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+    onChange(randomHex);
+    setHexInput(randomHex);
+  };
 
   const hexToRgb = (hex: string) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -167,7 +176,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
   };
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -236,6 +245,17 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
             />
           </div>
         </div>
+
+        {/* Random Color Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          type="button"
+          className="w-full h-8 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          onClick={handleRandomColor}
+        >
+          Cor Aleatória 🎲
+        </Button>
       </PopoverContent>
     </Popover>
   );

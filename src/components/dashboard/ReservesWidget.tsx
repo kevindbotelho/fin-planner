@@ -69,8 +69,8 @@ export function ReservesWidget() {
                                 className={cn(
                                     "flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 cursor-pointer",
                                     reserve.isFulfilled 
-                                        ? "bg-emerald-500/5 border-emerald-500/20 dark:bg-emerald-500/10 dark:border-emerald-500/10 hover:bg-emerald-500/10" 
-                                        : "bg-slate-100/30 dark:bg-slate-900/30 border-transparent hover:bg-slate-100/50 dark:hover:bg-slate-900/50 hover:border-slate-200/30 dark:hover:border-white/5"
+                                        ? "bg-emerald-500/5 border-emerald-500/35 dark:bg-emerald-500/10 dark:border-emerald-500/25 hover:bg-emerald-500/10" 
+                                        : "bg-slate-100/70 border-slate-200/80 hover:bg-white hover:border-slate-300 hover:shadow-sm dark:bg-slate-900/60 dark:border-slate-800/80 dark:hover:bg-slate-900/90 dark:hover:border-slate-700 hover:-translate-y-[0.5px]"
                                 )}
                             >
                                 <Checkbox

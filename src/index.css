@@ -155,12 +155,12 @@
      ========================================== */
 
   .liquid-glass {
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(20px) saturate(190%);
     -webkit-backdrop-filter: blur(20px) saturate(190%);
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.03),
-                inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.08),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
     transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
                 border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
                 box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -168,8 +168,8 @@
 
   .dark .liquid-glass {
     background: rgba(10, 10, 15, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4),
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5),
                 inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
   }
 
@@ -184,7 +184,7 @@
     inset: 0;
     border-radius: inherit;
     padding: 1.2px;
-    background: conic-gradient(from var(--border-angle), rgba(255, 255, 255, 0.65) 0deg, rgba(255, 255, 255, 0.1) 90deg, rgba(16, 185, 129, 0.15) 180deg, rgba(16, 185, 129, 0.7) 270deg, rgba(255, 255, 255, 0.65) 360deg) border-box;
+    background: conic-gradient(from var(--border-angle), rgba(255, 255, 255, 0.65) 0deg, rgba(148, 163, 184, 0.22) 90deg, rgba(16, 185, 129, 0.2) 180deg, rgba(16, 185, 129, 0.75) 270deg, rgba(255, 255, 255, 0.65) 360deg) border-box;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -209,7 +209,7 @@
   }
 
   .dark .liquid-glass-bevel::before {
-    background: conic-gradient(from var(--border-angle), rgba(255, 255, 255, 0.18) 0deg, rgba(255, 255, 255, 0.02) 90deg, rgba(59, 130, 246, 0.15) 180deg, rgba(59, 130, 246, 0.7) 270deg, rgba(255, 255, 255, 0.18) 360deg) border-box;
+    background: conic-gradient(from var(--border-angle), rgba(255, 255, 255, 0.18) 0deg, rgba(255, 255, 255, 0.08) 90deg, rgba(59, 130, 246, 0.2) 180deg, rgba(59, 130, 246, 0.75) 270deg, rgba(255, 255, 255, 0.18) 360deg) border-box;
   }
 
   /* Dessincronização de animações para aleatoriedade de tempo e atraso nas bordas */
@@ -406,14 +406,14 @@
   }
 }
 
-/* Classe para desativar as animações (Remove a cor verde/azul, mantendo apenas vidro neutro) */
+/* Classe para desativar as animações (Garante uma borda verde no modo claro e azul no modo escuro, mas estática) */
 .disable-border-animations .liquid-glass-bevel::before {
   animation: none !important;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.45)) border-box !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.45), rgba(148, 163, 184, 0.2) 50%, rgba(16, 185, 129, 0.25)) border-box !important;
 }
 
-.disable-border-animations .dark .liquid-glass-bevel::before {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.1)) border-box !important;
+.dark.disable-border-animations .liquid-glass-bevel::before {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.42), rgba(255, 255, 255, 0.08) 50%, rgba(59, 130, 246, 0.2)) border-box !important;
 }
 
 /* Custom Scrollbar moderna e discreta (visual Apple/macOS) */
