@@ -454,3 +454,28 @@
   background-color: rgba(255, 255, 255, 0.3);
 }
 
+@keyframes pulse-brand-subtle {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+  }
+}
+
+@keyframes pulse-red-subtle {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+  }
+}
+
+.animate-pulse-brand-subtle {
+  animation: pulse-brand-subtle 2s infinite ease-in-out;
+}
+
+.animate-pulse-red-subtle {
+  animation: pulse-red-subtle 2s infinite ease-in-out;
+}

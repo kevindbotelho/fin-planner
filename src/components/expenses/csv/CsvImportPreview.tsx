@@ -185,13 +185,13 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-[98vw] md:max-w-[95vw] xl:max-w-[1350px] h-[90vh] md:h-[85vh] flex flex-col p-0 gap-0 liquid-glass border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md">
+            <DialogContent className="max-w-[98vw] md:max-w-[95vw] xl:max-w-[1350px] h-[90vh] md:h-[85vh] flex flex-col p-0 gap-0 bg-white/95 dark:bg-slate-900/95 border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md">
                 <DialogHeader className="p-6 pb-3 border-b border-slate-200/50 dark:border-slate-800/50">
-                    <DialogTitle className="flex items-center gap-2 text-base font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100">
+                    <DialogTitle className="flex items-center gap-2 text-base font-bold font-manrope tracking-tight text-slate-900 dark:text-white">
                         <FilePlus2 className="h-4.5 w-4.5 text-brand-500" />
                         Revisão de Importação CSV
                     </DialogTitle>
-                    <DialogDescription className="text-xs text-slate-400 mt-1 font-medium">
+                    <DialogDescription className="text-xs text-slate-650 dark:text-slate-200 mt-1 font-semibold">
                         Encontramos {parsedData.length} transações no arquivo. Revise as categorias e deduplicações.
                     </DialogDescription>
                 </DialogHeader>
@@ -206,33 +206,33 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
 
                     <ScrollArea className="flex-1">
                         <div className="p-4 md:p-6 min-w-[max-content]">
-                            <div className="rounded-xl border border-slate-200/50 dark:border-slate-800/50 overflow-hidden bg-white/20 dark:bg-black/10 backdrop-blur-sm shadow-sm">
+                            <div className="rounded-xl border border-slate-200/50 dark:border-slate-800/50 overflow-hidden bg-white/70 dark:bg-slate-900/60 shadow-sm">
                                 <table className="w-full text-sm">
-                                    <thead className="bg-slate-100/50 dark:bg-slate-900/50 sticky top-0 z-10">
+                                    <thead className="bg-slate-100/80 dark:bg-slate-900/80 sticky top-0 z-10">
                                         <tr className="border-b border-slate-200/50 dark:border-slate-800/50">
-                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[50px]">Imp.</th>
-                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[100px]">Data</th>
-                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[80px]">Banco</th>
-                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope max-w-[200px]">Descrição (Banco)</th>
-                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[120px]">Valor</th>
-                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[160px]">
+                                            <th className="h-10 px-4 text-left text-[10px] font-extrabold tracking-wider uppercase text-slate-700 dark:text-slate-200 font-manrope w-[50px]">Imp.</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-extrabold tracking-wider uppercase text-slate-700 dark:text-slate-200 font-manrope w-[100px]">Data</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-extrabold tracking-wider uppercase text-slate-700 dark:text-slate-200 font-manrope w-[80px]">Banco</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-extrabold tracking-wider uppercase text-slate-700 dark:text-slate-200 font-manrope max-w-[200px]">Descrição (Banco)</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-extrabold tracking-wider uppercase text-slate-700 dark:text-slate-200 font-manrope w-[120px]">Valor</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-extrabold tracking-wider uppercase text-slate-700 dark:text-slate-200 font-manrope w-[160px]">
                                                 <div className="flex items-center gap-1">
                                                     Ação
                                                     <TooltipProvider>
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
-                                                                <HelpCircle className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 cursor-help" />
+                                                                <HelpCircle className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300 cursor-help" />
                                                             </TooltipTrigger>
-                                                            <TooltipContent side="top" className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl text-[10px] font-semibold text-slate-600 dark:text-slate-300 max-w-[220px]">
+                                                            <TooltipContent side="top" className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl text-[10px] font-semibold text-slate-650 dark:text-slate-200 max-w-[220px]">
                                                                 <p>"Vincular" serve para despesas fixas já projetadas. Associa o lançamento do banco à despesa que o sistema gerou pro mês.</p>
                                                             </TooltipContent>
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 </div>
                                             </th>
-                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[110px]">Tipo</th>
-                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[200px]">Categoria / Vínculo</th>
-                                            <th className="h-10 px-4 text-left text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 font-manrope w-[180px]">Subcategoria</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-extrabold tracking-wider uppercase text-slate-700 dark:text-slate-200 font-manrope w-[110px]">Tipo</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-extrabold tracking-wider uppercase text-slate-700 dark:text-slate-200 font-manrope w-[200px]">Categoria / Vínculo</th>
+                                            <th className="h-10 px-4 text-left text-[10px] font-extrabold tracking-wider uppercase text-slate-700 dark:text-slate-200 font-manrope w-[180px]">Subcategoria</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -269,7 +269,7 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                 className="h-5 w-5 pointer-events-auto rounded-md border-slate-300 dark:border-slate-800 data-[state=checked]:bg-brand-500 data-[state=checked]:border-brand-500"
                                                             />
                                                         </td>
-                                                        <td className="p-4 align-middle text-[10px] font-mono text-slate-400 dark:text-slate-500">
+                                                        <td className="p-4 align-middle text-[10px] font-mono text-slate-600 dark:text-slate-350 font-bold">
                                                           {format(new Date(`${row.date}T12:00:00`), "dd/MM", { locale: ptBR })}
                                                         </td>
                                                         <td className="p-4 align-middle">
@@ -283,15 +283,15 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                     {row.bankOrigin}
                                                                 </Badge>
                                                             ) : (
-                                                                <span className="text-slate-400 dark:text-slate-600 text-xs font-mono">—</span>
+                                                                <span className="text-slate-400 dark:text-slate-650 text-xs font-mono">—</span>
                                                             )}
                                                         </td>
-                                                        <td className="p-4 align-middle text-xs font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[200px]" title={row.title}>
+                                                        <td className="p-4 align-middle text-xs font-semibold text-slate-850 dark:text-slate-50 truncate max-w-[200px]" title={row.title}>
                                                           {beautifyTransactionTitle(row.title)}
                                                         </td>
                                                         <td className={cn(
                                                           "p-4 align-middle text-xs font-mono font-bold whitespace-nowrap",
-                                                          row.amount < 0 ? 'text-emerald-500' : 'text-rose-500'
+                                                          row.amount < 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                                                         )}>
                                                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(row.amount)}
                                                         </td>
@@ -305,7 +305,7 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                         onValueChange={(val: 'new' | 'link') => handleActionTypeChange(index, val)}
                                                                         disabled={isIgnored}
                                                                     >
-                                                                        <SelectTrigger className="h-8 liquid-glass border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors disabled:opacity-40">
+                                                                        <SelectTrigger className="h-8 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-100 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-850 transition-colors disabled:opacity-40 shadow-sm">
                                                                             <SelectValue />
                                                                         </SelectTrigger>
                                                                         <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl backdrop-blur-md shadow-lg">
@@ -314,7 +314,7 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                         </SelectContent>
                                                                     </Select>
                                                                     {row.isNegative && (
-                                                                        <span className="text-[9px] text-slate-400 font-medium px-1">Entrada/Estorno</span>
+                                                                        <span className="text-[9px] text-slate-500 dark:text-slate-400 font-semibold px-1">Entrada/Estorno</span>
                                                                     )}
                                                                 </div>
                                                             )}
@@ -325,7 +325,7 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                     value={row.expenseType}
                                                                     onValueChange={(val: 'variable' | 'fixed') => handleExpenseTypeChange(index, val)}
                                                                 >
-                                                                    <SelectTrigger className="h-8 liquid-glass border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors">
+                                                                    <SelectTrigger className="h-8 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-100 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-850 transition-colors shadow-sm">
                                                                         <SelectValue />
                                                                     </SelectTrigger>
                                                                     <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl backdrop-blur-md shadow-lg">
@@ -344,7 +344,7 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                     onValueChange={(val) => handleCategoryChange(index, val)}
                                                                 >
                                                                     <SelectTrigger className={cn(
-                                                                      "h-8 w-full liquid-glass text-xs font-semibold rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors",
+                                                                      "h-8 w-full bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-850 transition-colors shadow-sm",
                                                                       !row.categoryId ? 'border-rose-500 ring-rose-500 dark:border-rose-500' : 'border-slate-200 dark:border-slate-800'
                                                                     )}>
                                                                         <SelectValue placeholder="Categoria..." />
@@ -362,7 +362,7 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                     onValueChange={(val) => handleLinkedExpenseChange(index, val)}
                                                                 >
                                                                     <SelectTrigger className={cn(
-                                                                      "h-8 w-full liquid-glass text-xs font-semibold rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors",
+                                                                      "h-8 w-full bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-850 transition-colors shadow-sm",
                                                                       !row.linkedExpenseId ? 'border-rose-500 ring-rose-500' : 'border-slate-200 dark:border-slate-800'
                                                                     )}>
                                                                         <SelectValue placeholder="Selecione..." />
@@ -394,7 +394,7 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                                     value={row.subcategoryId || "none"}
                                                                     onValueChange={(val) => handleSubcategoryChange(index, val === "none" ? "" : val)}
                                                                 >
-                                                                    <SelectTrigger className="h-8 w-full liquid-glass border-slate-200 dark:border-slate-800 text-xs font-semibold rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors [&>span]:text-left">
+                                                                    <SelectTrigger className="h-8 w-full bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-850 transition-colors [&>span]:text-left shadow-sm">
                                                                         <SelectValue placeholder="Nenhuma subcategoria..." />
                                                                     </SelectTrigger>
                                                                     <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl backdrop-blur-md shadow-lg">
@@ -417,9 +417,9 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                         <ScrollBar orientation="horizontal" />
                     </ScrollArea>
                 </div>
-
+ 
                 <DialogFooter className="p-6 border-t border-slate-200/50 dark:border-slate-800/50 bg-slate-100/20 dark:bg-slate-900/20 flex sm:justify-between items-center w-full">
-                    <div className="text-xs text-slate-400 dark:text-slate-500 font-semibold flex-1">
+                    <div className="text-xs text-slate-800 dark:text-white font-bold flex-1">
                         <strong>{validToImportCount}</strong> transações prontas{ignoredExpensesToImportCount > 0 && <span> (e <strong>{ignoredExpensesToImportCount}</strong> desconsideradas)</span>} para processar
                     </div>
                     <div className="flex gap-2">
