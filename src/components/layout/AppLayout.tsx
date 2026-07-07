@@ -101,13 +101,13 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="sticky top-0 z-50 w-full px-4 md:px-6 py-4 flex justify-center">
         <header className="w-full max-w-7xl liquid-glass liquid-glass-bevel rounded-2xl md:rounded-full px-6 py-3 md:py-3.5 flex items-center justify-between shadow-lg backdrop-blur-md">
           {/* Branding e Logo */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
-                <PiggyBank className="h-4.5 w-4.5" />
-              </div>
-              <span className="text-lg font-extrabold tracking-tight font-manrope bg-gradient-to-r from-brand-600 to-brand-500 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">Meu Fin Planner</span>
-            </div>
+          <div className="flex items-center">
+            <img 
+              src="/logo-cropped.png" 
+              alt="MeuFin Planner" 
+              className="h-8 w-auto object-contain brightness-0 dark:brightness-0 dark:invert opacity-85 transition-all duration-300"
+              style={{ userSelect: 'none', pointerEvents: 'none' }}
+            />
           </div>
 
           {/* Navegação Desktop com Indicador Deslizante */}
