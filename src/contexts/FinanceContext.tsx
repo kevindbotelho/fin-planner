@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
-import { addDays, addMonths, format, lastDayOfMonth, parseISO } from 'date-fns';
+import { addMonths, format, lastDayOfMonth, parseISO } from 'date-fns';
 import { Category, Subcategory, Expense, BillingPeriod, MonthlyIncome, FinanceData, ExpenseType, FixedExpenseTemplate, FixedExpenseExclusion, CategoryGoal, CategoryGoalOverride } from '@/types/finance';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +19,16 @@ const sortExpenses = (expenses: Expense[]) => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 };
+
+const normalizeBillingPeriodName = (name: string) => name.trim().toLocaleLowerCase('pt-BR');
+
+const isDateInBillingPeriod = (date: string, period: BillingPeriod) =>
+  date >= period.startDate && date <= period.endDate;
+
+const billingPeriodsOverlap = (
+  first: Pick<BillingPeriod, 'startDate' | 'endDate'>,
+  second: Pick<BillingPeriod, 'startDate' | 'endDate'>,
+) => first.startDate <= second.endDate && first.endDate >= second.startDate;
 
 interface FinanceContextType {
   data: FinanceData;
@@ -387,12 +397,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const currentSelectionExists = selectedPeriodId && data.billingPeriods.some(p => p.id === selectedPeriodId);
 
     if (data.billingPeriods.length > 0 && !currentSelectionExists) {
-      const now = new Date();
-      const currentPeriod = data.billingPeriods.find(p => {
-        const start = new Date(p.startDate);
-        const end = new Date(p.endDate);
-        return now >= start && now < end;
-      });
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const currentPeriod = data.billingPeriods.find(p => isDateInBillingPeriod(today, p));
 
       setSelectedPeriodId(currentPeriod ? currentPeriod.id : data.billingPeriods[0].id);
     }
@@ -513,12 +519,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   // Helper to get period for an expense
   const getPeriodForExpense = (expense: Expense): BillingPeriod | undefined => {
-    const expenseDate = new Date(expense.purchaseDate);
-    return data.billingPeriods.find(period => {
-      const startDate = new Date(period.startDate);
-      const endDate = new Date(period.endDate);
-      return expenseDate >= startDate && expenseDate < endDate;
-    });
+    return data.billingPeriods.find(period => isDateInBillingPeriod(expense.purchaseDate, period));
   };
 
   const getDayOfMonthFromISODate = (isoDate: string): number => {
@@ -543,9 +544,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       candidate = buildCandidateInMonth(addMonths(periodStart, 1));
     }
 
-    // Safety: if still outside the period, clamp to the last day inside the period.
-    if (candidate >= periodEnd) {
-      candidate = addDays(periodEnd, -1);
+    // Safety: if still outside the period, clamp to the inclusive end date.
+    if (candidate > periodEnd) {
+      candidate = periodEnd;
     }
 
     return format(candidate, 'yyyy-MM-dd');
@@ -565,7 +566,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         const pDate = new Date(expense.purchaseDate);
         const sDate = new Date(period.startDate);
         const eDate = new Date(period.endDate);
-        return pDate >= sDate && pDate < eDate;
+        return pDate >= sDate && pDate <= eDate;
       });
 
       // Check if manual ordering is active (any item has displayOrder != 0)
@@ -727,7 +728,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         const pDate = new Date(expense.purchaseDate);
         const sDate = new Date(period.startDate);
         const eDate = new Date(period.endDate);
-        return pDate >= sDate && pDate < eDate;
+        return pDate >= sDate && pDate <= eDate;
       });
 
       const hasManualOrder = periodExpenses.some(e => e.displayOrder !== 0);
@@ -937,7 +938,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           const expenseInPeriod = data.expenses.find(
             e => e.fixedTemplateId === currentExpense.fixedTemplateId &&
               new Date(e.purchaseDate) >= new Date(period.startDate) &&
-              new Date(e.purchaseDate) < new Date(period.endDate)
+              new Date(e.purchaseDate) <= new Date(period.endDate)
           );
 
           if (expenseInPeriod) {
@@ -1103,7 +1104,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             const expenseInPeriod = data.expenses.find(
               e => e.fixedTemplateId === currentExpense.fixedTemplateId &&
                 new Date(e.purchaseDate) >= new Date(period.startDate) &&
-                new Date(e.purchaseDate) < new Date(period.endDate)
+                new Date(e.purchaseDate) <= new Date(period.endDate)
             );
 
             if (expenseInPeriod) {
@@ -1149,8 +1150,39 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   // Billing Periods
+  const validateBillingPeriod = (
+    period: Pick<BillingPeriod, 'name' | 'startDate' | 'endDate'>,
+    currentPeriodId?: string,
+  ) => {
+    if (period.startDate > period.endDate) {
+      throw new Error('A data inicial não pode ser posterior à data final.');
+    }
+
+    const otherPeriods = data.billingPeriods.filter(existing => existing.id !== currentPeriodId);
+    const duplicateReference = otherPeriods.find(
+      existing => normalizeBillingPeriodName(existing.name) === normalizeBillingPeriodName(period.name),
+    );
+
+    if (duplicateReference) {
+      throw new Error(`Já existe uma fatura para ${period.name}.`);
+    }
+
+    const overlappingPeriod = otherPeriods.find(existing => billingPeriodsOverlap(period, existing));
+    if (overlappingPeriod) {
+      throw new Error(`O intervalo informado se sobrepõe à fatura ${overlappingPeriod.name}.`);
+    }
+  };
+
   const addBillingPeriod = async (period: Omit<BillingPeriod, 'id'>) => {
     if (!user) return;
+
+    try {
+      validateBillingPeriod(period);
+    } catch (validationError) {
+      const message = validationError instanceof Error ? validationError.message : 'Período de fatura inválido.';
+      toast.error(message);
+      throw validationError;
+    }
 
     const { data: newPeriod, error } = await supabase
       .from('billing_periods')
@@ -1164,7 +1196,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       .single();
 
     if (error) {
-      toast.error('Erro ao criar período de fatura');
+      toast.error(error.code === '23505' ? `Já existe uma fatura para ${period.name}.` : 'Erro ao criar período de fatura');
       throw error;
     }
 
@@ -1237,6 +1269,20 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   const updateBillingPeriod = async (id: string, updates: Partial<BillingPeriod>) => {
+    if (!user) return;
+
+    const currentPeriod = data.billingPeriods.find(period => period.id === id);
+    if (!currentPeriod) throw new Error('Período de fatura não encontrado.');
+
+    const updatedPeriod = { ...currentPeriod, ...updates };
+    try {
+      validateBillingPeriod(updatedPeriod, id);
+    } catch (validationError) {
+      const message = validationError instanceof Error ? validationError.message : 'Período de fatura inválido.';
+      toast.error(message);
+      throw validationError;
+    }
+
     const updateData: Record<string, unknown> = {};
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.startDate !== undefined) updateData.start_date = updates.startDate;
@@ -1245,9 +1291,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase
       .from('billing_periods')
       .update(updateData)
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id);
 
-    if (error) throw error;
+    if (error) {
+      toast.error(error.code === '23505' ? `Já existe uma fatura para ${updatedPeriod.name}.` : 'Erro ao atualizar período de fatura');
+      throw error;
+    }
     await fetchData();
   };
 
@@ -1261,7 +1311,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         .from('expenses')
         .delete()
         .gte('purchase_date', period.startDate)
-        .lt('purchase_date', period.endDate)
+        .lte('purchase_date', period.endDate)
         .eq('user_id', user.id);
     }
 
@@ -1324,10 +1374,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     if (!period) return [];
 
     return data.expenses.filter(expense => {
-      const purchaseDate = new Date(expense.purchaseDate);
-      const startDate = new Date(period.startDate);
-      const endDate = new Date(period.endDate);
-      return purchaseDate >= startDate && purchaseDate < endDate;
+      return isDateInBillingPeriod(expense.purchaseDate, period);
     });
   };
 
@@ -1345,12 +1392,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   const getBillingPeriodForDate = (date: string) => {
-    const targetDate = new Date(date);
-    return data.billingPeriods.find(period => {
-      const startDate = new Date(period.startDate);
-      const endDate = new Date(period.endDate);
-      return targetDate >= startDate && targetDate < endDate;
-    });
+    return data.billingPeriods.find(period => isDateInBillingPeriod(date, period));
   };
 
   const getBillingPeriodById = (id: string) => {

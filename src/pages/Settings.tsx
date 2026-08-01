@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useSearchParams } from 'react-router-dom';
-import { format, parseISO, isValid } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Plus, Trash2, ChevronDown, ChevronRight, Pencil, Check, X, Save, DollarSign, Target, ArrowRight, TrendingUp, Copy } from 'lucide-react';
 import { useFinance } from '@/contexts/FinanceContext';
@@ -245,22 +245,6 @@ export default function Settings() {
     return map;
   }, [data.billingPeriods]);
 
-  // Efeito para preencher o Mês e o Ano de referência automaticamente com base na Data de Início no modal (para novos cadastros)
-  useEffect(() => {
-    if (modalForm.startDate && modalForm.id === null) {
-      const date = parseISO(modalForm.startDate);
-      if (isValid(date)) {
-        const monthValue = (date.getMonth() + 1).toString().padStart(2, '0');
-        const yearValue = date.getFullYear().toString();
-        setModalForm(prev => ({
-          ...prev,
-          referenceMonth: monthValue,
-          referenceYear: yearsOptions.includes(yearValue) ? yearValue : prev.referenceYear,
-        }));
-      }
-    }
-  }, [modalForm.startDate, modalForm.id, yearsOptions]);
-
   // Income Form
   const [incomeForm, setIncomeForm] = useState<{ [key: string]: { salary: string; extraDetails: { id: string; name: string; amount: string }[] } }>({});
 
@@ -368,30 +352,32 @@ export default function Settings() {
     setIsPeriodModalOpen(true);
   };
 
-  const handleSavePeriod = (e: React.FormEvent) => {
+  const handleSavePeriod = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!modalForm.referenceMonth || !modalForm.referenceYear || !modalForm.startDate || !modalForm.endDate) return;
 
     const monthName = MONTHS.find(m => m.value === modalForm.referenceMonth)?.label || '';
     const name = `${monthName} ${modalForm.referenceYear}`;
 
-    if (modalForm.id === null) {
-      // Cadastro
-      addBillingPeriod({
-        name,
-        startDate: modalForm.startDate,
-        endDate: modalForm.endDate,
-      });
-    } else {
-      // Edição
-      updateBillingPeriod(modalForm.id, {
-        name,
-        startDate: modalForm.startDate,
-        endDate: modalForm.endDate,
-      });
-    }
+    try {
+      if (modalForm.id === null) {
+        await addBillingPeriod({
+          name,
+          startDate: modalForm.startDate,
+          endDate: modalForm.endDate,
+        });
+      } else {
+        await updateBillingPeriod(modalForm.id, {
+          name,
+          startDate: modalForm.startDate,
+          endDate: modalForm.endDate,
+        });
+      }
 
-    setIsPeriodModalOpen(false);
+      setIsPeriodModalOpen(false);
+    } catch {
+      // O contexto exibe a mensagem específica e o modal permanece aberto para correção.
+    }
   };
 
   // Navegação conectada: fecha modal e vai para aba específica com período pré-selecionado
