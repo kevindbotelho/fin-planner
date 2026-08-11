@@ -36,7 +36,7 @@ export function ReservesWidget() {
     const getCategoryById = (id: string) => data.categories.find(c => c.id === id);
 
     return (
-        <Card className="liquid-glass liquid-glass-bevel border-0 shadow-sm flex flex-col h-full rounded-2xl">
+        <Card className="liquid-glass liquid-glass-bevel border-0 shadow-sm flex flex-col rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-base font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-2">
                     <Landmark className="h-4.5 w-4.5 text-brand-500" />

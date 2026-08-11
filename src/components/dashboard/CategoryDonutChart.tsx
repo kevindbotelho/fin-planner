@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Sector } from 'recharts';
 import { ChevronLeft } from 'lucide-react';
@@ -37,39 +37,47 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     return format(new Date(dateString), 'dd/MM/yyyy');
   };
 
-  const totalExpenses = expenses.reduce((acc, exp) => acc + exp.amount, 0);
+  const categoryTotals = useMemo<CategoryTotal[]>(() => {
+    const totalExpenses = expenses.reduce((acc, exp) => acc + exp.amount, 0);
 
-  const categoryTotals: CategoryTotal[] = categories
-    .map(category => {
-      const categoryExpenses = expenses.filter(e => e.categoryId === category.id);
-      const total = categoryExpenses.reduce((acc, exp) => acc + exp.amount, 0);
+    return categories
+      .map(category => {
+        const categoryExpenses = expenses.filter(e => e.categoryId === category.id);
+        const total = categoryExpenses.reduce((acc, exp) => acc + exp.amount, 0);
 
-      const subcategoryTotals = category.subcategories.map(sub => {
-        const subExpenses = categoryExpenses.filter(e => e.subcategoryId === sub.id);
-        const subTotal = subExpenses.reduce((acc, exp) => acc + exp.amount, 0);
+        const subcategoryTotals = category.subcategories.map(sub => {
+          const subExpenses = categoryExpenses.filter(e => e.subcategoryId === sub.id);
+          const subTotal = subExpenses.reduce((acc, exp) => acc + exp.amount, 0);
+          return {
+            id: sub.id,
+            name: sub.name,
+            value: subTotal,
+            percentage: total > 0 ? (subTotal / total) * 100 : 0,
+          };
+        }).filter(s => s.value > 0);
+
         return {
-          id: sub.id,
-          name: sub.name,
-          value: subTotal,
-          percentage: total > 0 ? (subTotal / total) * 100 : 0,
+          id: category.id,
+          name: category.name,
+          value: total,
+          color: category.color,
+          percentage: totalExpenses > 0 ? (total / totalExpenses) * 100 : 0,
+          subcategories: subcategoryTotals,
         };
-      }).filter(s => s.value > 0);
-
-      return {
-        id: category.id,
-        name: category.name,
-        value: total,
-        color: category.color,
-        percentage: totalExpenses > 0 ? (total / totalExpenses) * 100 : 0,
-        subcategories: subcategoryTotals,
-      };
-    })
-    .filter(c => c.value > 0)
-    .sort((a, b) => b.value - a.value);
+      })
+      .filter(c => c.value > 0)
+      .sort((a, b) => b.value - a.value);
+  }, [categories, expenses]);
 
   // Calculate Subcategory Expenses (Level 3)
-  const subcategoryExpensesData = selectedCategory && selectedSubcategory
-    ? expenses
+  const subcategoryExpensesData = useMemo(() => {
+    if (!selectedCategory || !selectedSubcategory) return [];
+
+    const subcategoryTotal = categoryTotals
+      .find(c => c.id === selectedCategory.id)
+      ?.subcategories?.find(s => s.id === selectedSubcategory.id)?.value || 1;
+
+    return expenses
       .filter(e => e.categoryId === selectedCategory.id && e.subcategoryId === selectedSubcategory.id)
       .sort((a, b) => {
         // Sort by Date Descending (Newest first)
@@ -83,9 +91,9 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
         value: exp.amount,
         date: exp.purchaseDate,
         color: `hsl(${(index * 30) + 200}, 70%, 50%)`,
-        percentage: (exp.amount / (categoryTotals.find(c => c.id === selectedCategory.id)?.subcategories?.find(s => s.id === selectedSubcategory.id)?.value || 1)) * 100,
-      }))
-    : [];
+        percentage: (exp.amount / subcategoryTotal) * 100,
+      }));
+  }, [categoryTotals, expenses, selectedCategory, selectedSubcategory]);
 
   // Determine current chart data based on hierarchy level
   const chartData = useMemo(() => {
@@ -107,14 +115,13 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
   // Animation Lock Logic
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // Helper to trigger animation lock
-  const triggerAnimationLock = () => {
+  const beginChartTransition = () => {
     setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 1500);
+    setHoveredItem(null);
   };
 
   const handlePieClick = (data: any) => {
-    if (selectedSubcategory) {
+    if (isAnimating || selectedSubcategory) {
       return;
     }
 
@@ -122,14 +129,14 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
       // Currently displaying Subcategories, click drills down to Expenses
       const subcategory = selectedCategory.subcategories?.find(s => s.name === data.name);
       if (subcategory) {
-        triggerAnimationLock(); // Lock BEFORE state update
+        beginChartTransition();
         setSelectedSubcategory({ id: subcategory.id, name: subcategory.name });
       }
     } else {
       // Currently displaying Categories, click drills down to Subcategories
       const category = categoryTotals.find(c => c.name === data.name);
       if (category && category.subcategories && category.subcategories.length > 0) {
-        triggerAnimationLock(); // Lock BEFORE state update
+        beginChartTransition();
         setSelectedCategory(category);
       }
     }
@@ -137,7 +144,9 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
   };
 
   const handleBack = () => {
-    triggerAnimationLock(); // Lock BEFORE state update
+    if (isAnimating) return;
+
+    beginChartTransition();
     if (selectedSubcategory) {
       setSelectedSubcategory(null);
     } else if (selectedCategory) {
@@ -145,11 +154,6 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
     }
     setHoveredItem(null);
   };
-
-  // Trigger animation on mount/initial load
-  useEffect(() => {
-    triggerAnimationLock();
-  }, []);
 
   // Center Info Logic
   const chartTotal = chartData.reduce((acc: number, item: any) => acc + item.value, 0);
@@ -228,7 +232,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
   };
 
   return (
-    <Card className="liquid-glass liquid-glass-bevel border-0 shadow-sm rounded-2xl">
+    <Card className="liquid-glass liquid-glass-bevel flex min-h-0 flex-1 flex-col border-0 shadow-sm rounded-2xl">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-base font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100">
           {(selectedCategory || selectedSubcategory) ? (
@@ -237,6 +241,8 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                 variant="ghost"
                 size="sm"
                 onClick={handleBack}
+                disabled={isAnimating}
+                aria-label="Voltar ao nível anterior"
                 className="h-8 w-8 p-0 rounded-full border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -258,8 +264,8 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-col gap-6">
+      <CardContent className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 flex-1 flex-col gap-6">
           {/* Global style override for chart focus outlines */}
           <style>{`
             .recharts-sector:focus,
@@ -280,7 +286,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
             </div>
 
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
+              <PieChart data={chartData}>
                 <Pie
                   data={chartData}
                   cx="50%"
@@ -296,6 +302,11 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
                   labelLine={false}
                   animationBegin={0}
                   animationDuration={1000}
+                  onAnimationStart={() => {
+                    setIsAnimating(true);
+                    setHoveredItem(null);
+                  }}
+                  onAnimationEnd={() => setIsAnimating(false)}
                   activeIndex={activeIndex}
                   activeShape={renderActiveShape}
                   style={{ cursor: selectedSubcategory ? 'default' : 'pointer', outline: 'none' }}
@@ -316,7 +327,7 @@ export function CategoryDonutChart({ expenses, categories }: CategoryDonutChartP
             </ResponsiveContainer>
           </div>
 
-          <div className="space-y-2 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-2 custom-scrollbar">
             {chartData.map((item: any, index) => (
               <div
                 key={`${item.name}-${index}`}

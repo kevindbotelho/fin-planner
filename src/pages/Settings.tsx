@@ -972,24 +972,24 @@ export default function Settings() {
                       Salvar
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md max-w-md">
+                  <AlertDialogContent className="w-[calc(100%-2rem)] rounded-lg sm:max-w-md">
                     <AlertDialogHeader>
-                      <AlertDialogTitle className="text-slate-800 dark:text-slate-100 font-manrope font-bold text-sm">Salvar Metas</AlertDialogTitle>
-                      <AlertDialogDescription className="text-xs text-slate-405 font-medium">
+                      <AlertDialogTitle>Salvar Metas</AlertDialogTitle>
+                      <AlertDialogDescription>
                         Você deseja aplicar estas metas apenas para o mês selecionado ou para este mês e todos os seguintes?
-                        <span className="text-[11px] text-amber-500 font-semibold mt-2 block">
+                        <span className="mt-2 block text-xs font-medium text-amber-600 dark:text-amber-400">
                           * Alterar todos os seguintes não afetará meses passados.
                         </span>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter className="flex-col sm:flex-row gap-2 mt-2">
-                      <Button variant="outline" className="rounded-xl h-[38px] text-xs font-semibold uppercase tracking-wider border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors" onClick={() => setShowSaveGoalsDialog(false)}>
+                    <AlertDialogFooter className="flex-col gap-2 sm:flex-col sm:space-x-0">
+                      <Button variant="outline" className="w-full" onClick={() => setShowSaveGoalsDialog(false)}>
                         Cancelar
                       </Button>
-                      <Button variant="secondary" className="rounded-xl h-[38px] text-xs font-semibold uppercase tracking-wider bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors" onClick={() => handleSaveAllGoals('period')}>
+                      <Button variant="outline" className="w-full" onClick={() => handleSaveAllGoals('period')}>
                         Apenas este mês
                       </Button>
-                      <Button className="rounded-xl h-[38px] text-xs font-semibold uppercase tracking-wider bg-brand-500 hover:bg-brand-600 text-white dark:bg-brand-500 dark:hover:bg-brand-600 dark:text-white transition-colors shadow-md shadow-brand-500/10 border-0" onClick={() => handleSaveAllGoals('all')}>
+                      <Button className="w-full" onClick={() => handleSaveAllGoals('all')}>
                         Este mês e seguintes
                       </Button>
                     </AlertDialogFooter>
@@ -1339,16 +1339,16 @@ export default function Settings() {
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md max-w-sm">
+                                <AlertDialogContent className="w-[calc(100%-2rem)] rounded-lg sm:max-w-md">
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle className="text-slate-800 dark:text-slate-100 font-manrope font-bold text-sm">Excluir categoria?</AlertDialogTitle>
-                                    <AlertDialogDescription className="text-xs text-slate-400 font-medium">
+                                    <AlertDialogTitle>Excluir categoria?</AlertDialogTitle>
+                                    <AlertDialogDescription>
                                       Isso excluirá todas as subcategorias e despesas relacionadas.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
-                                  <AlertDialogFooter className="mt-2">
-                                    <AlertDialogCancel className="rounded-xl h-[38px] text-xs font-semibold uppercase tracking-wider border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors">Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction className="rounded-xl h-[38px] text-xs font-semibold uppercase tracking-wider bg-rose-500 hover:bg-rose-600 text-white dark:bg-rose-500 dark:hover:bg-rose-600 dark:text-white transition-colors shadow-md shadow-rose-500/10 border-0" onClick={() => deleteCategory(category.id)}>
+                                  <AlertDialogFooter className="flex-col gap-2 sm:flex-col sm:space-x-0">
+                                    <AlertDialogCancel className="mt-0 w-full">Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteCategory(category.id)}>
                                       Excluir
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
@@ -1447,17 +1447,17 @@ export default function Settings() {
                                               <Trash2 className="h-3 w-3" />
                                             </Button>
                                           </AlertDialogTrigger>
-                                          <AlertDialogContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md max-w-sm">
+                                          <AlertDialogContent className="w-[calc(100%-2rem)] rounded-lg sm:max-w-md">
                                             <AlertDialogHeader>
-                                              <AlertDialogTitle className="text-slate-800 dark:text-slate-100 font-manrope font-bold text-sm">Excluir subcategoria?</AlertDialogTitle>
-                                              <AlertDialogDescription className="text-xs text-slate-400 font-medium">
+                                              <AlertDialogTitle>Excluir subcategoria?</AlertDialogTitle>
+                                              <AlertDialogDescription>
                                                 As despesas desta subcategoria também serão excluídas.
                                               </AlertDialogDescription>
                                             </AlertDialogHeader>
-                                            <AlertDialogFooter className="mt-2">
-                                              <AlertDialogCancel className="rounded-xl h-[38px] text-xs font-semibold uppercase tracking-wider border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors">Cancelar</AlertDialogCancel>
+                                            <AlertDialogFooter className="flex-col gap-2 sm:flex-col sm:space-x-0">
+                                              <AlertDialogCancel className="mt-0 w-full">Cancelar</AlertDialogCancel>
                                               <AlertDialogAction
-                                                className="rounded-xl h-[38px] text-xs font-semibold uppercase tracking-wider bg-rose-500 hover:bg-rose-600 text-white dark:bg-rose-500 dark:hover:bg-rose-600 dark:text-white transition-colors shadow-md shadow-rose-500/10 border-0"
+                                                className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                                 onClick={() => deleteSubcategory(category.id, sub.id)}
                                               >
                                                 Excluir

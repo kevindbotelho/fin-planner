@@ -110,7 +110,7 @@ export function FinancialGoalsWidget() {
     const categoryForDialog = data.categories.find(c => c.id === selectedCategory);
 
     return (
-        <Card className="liquid-glass liquid-glass-bevel border-0 shadow-sm flex flex-col h-full rounded-2xl">
+        <Card className="liquid-glass liquid-glass-bevel border-0 shadow-sm flex flex-col rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-base font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100">Metas Financeiras</CardTitle>
                 <Button
@@ -179,10 +179,10 @@ export function FinancialGoalsWidget() {
             </CardContent>
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="sm:max-w-md liquid-glass border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md">
+                <DialogContent className="w-[calc(100%-2rem)] rounded-lg sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="text-slate-800 dark:text-slate-100 font-manrope font-bold">Definir Meta - {categoryForDialog?.name}</DialogTitle>
-                        <DialogDescription className="text-slate-400 text-xs">
+                        <DialogTitle>Definir Meta - {categoryForDialog?.name}</DialogTitle>
+                        <DialogDescription>
                             Defina o valor limite (R$ ou %) para esta categoria.
                         </DialogDescription>
                     </DialogHeader>

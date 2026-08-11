@@ -101,14 +101,19 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="sticky top-0 z-50 w-full px-4 md:px-6 py-4 flex justify-center">
         <header className="w-full max-w-7xl liquid-glass liquid-glass-bevel rounded-2xl md:rounded-full px-6 py-3 md:py-3.5 flex items-center justify-between shadow-lg backdrop-blur-md">
           {/* Branding e Logo */}
-          <div className="flex items-center">
+          <NavLink
+            to="/"
+            end
+            aria-label="Ir para o Dashboard"
+            className="flex items-center rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
             <img 
               src="/logo-cropped.png" 
               alt="MeuFin Planner" 
               className="h-8 w-auto object-contain brightness-0 dark:brightness-0 dark:invert opacity-85 transition-all duration-300"
               style={{ userSelect: 'none', pointerEvents: 'none' }}
             />
-          </div>
+          </NavLink>
 
           {/* Navegação Desktop com Indicador Deslizante */}
           <nav 

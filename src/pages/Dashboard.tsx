@@ -77,17 +77,17 @@ export default function Dashboard() {
                 periodExpenses={periodExpenses}
                 selectedPeriod={selectedPeriod}
               />
-              <div className="flex-1 min-h-[300px] h-full flex flex-col">
-                <FinancialGoalsWidget />
-              </div>
+              <FinancialGoalsWidget />
               <ReservesWidget />
             </div>
-            <div className="flex flex-col space-y-6">
-              <CategoryDonutChart
-                expenses={periodExpenses}
-                categories={data.categories}
-              />
-              <BankSummaryWidget expenses={periodExpenses} />
+            <div className="min-h-0 lg:relative">
+              <div className="flex min-h-0 flex-col gap-6 lg:absolute lg:inset-0">
+                <CategoryDonutChart
+                  expenses={periodExpenses}
+                  categories={data.categories}
+                />
+                <BankSummaryWidget expenses={periodExpenses} />
+              </div>
             </div>
           </div>
 
