@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { Plus, X, Landmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -51,8 +51,10 @@ import { DraggableExpenseRow } from '@/components/expenses/DraggableExpenseRow';
 import { CategoryManagerDialog } from '@/components/expenses/CategoryManagerDialog';
 import { ImportCsvButton } from '@/components/expenses/csv/ImportCsvButton';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useSearchParams } from 'react-router-dom';
 
 export default function Expenses() {
+  const [searchParams] = useSearchParams();
   const {
     data,
     addExpense,
@@ -100,6 +102,34 @@ export default function Expenses() {
   const [filterSubcategoryId, setFilterSubcategoryId] = useState<string>('all');
   const [showIgnored, setShowIgnored] = useState(false);
 
+  const deepLinkKey = searchParams.toString();
+
+  useEffect(() => {
+    const requestedPeriodId = searchParams.get('period');
+    const requestedCategoryId = searchParams.get('category');
+    const requestedSubcategoryId = searchParams.get('subcategory');
+    const requestedType = searchParams.get('type');
+
+    if (requestedPeriodId && data.billingPeriods.some(period => period.id === requestedPeriodId)) {
+      setSelectedPeriodId(requestedPeriodId);
+    }
+
+    if (requestedCategoryId) {
+      const category = data.categories.find(item => item.id === requestedCategoryId);
+      setFilterCategoryId(category ? category.id : 'all');
+
+      if (requestedSubcategoryId && category?.subcategories.some(item => item.id === requestedSubcategoryId)) {
+        setFilterSubcategoryId(requestedSubcategoryId);
+      } else {
+        setFilterSubcategoryId('all');
+      }
+    }
+
+    if (requestedType) {
+      setFilterType(requestedType === 'fixed' || requestedType === 'variable' ? requestedType : 'all');
+    }
+  }, [data.billingPeriods, data.categories, deepLinkKey, searchParams, setSelectedPeriodId]);
+
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [editFormData, setEditFormData] = useState({
     description: '',
@@ -130,10 +160,9 @@ export default function Expenses() {
   const editSelectedCategory = data.categories.find(c => c.id === editFormData.categoryId);
   
   const rawPeriodExpenses = selectedPeriodId ? getExpensesForPeriod(selectedPeriodId) : [];
-  const periodExpenses = useMemo(() => {
-    if (showIgnored) return rawPeriodExpenses;
-    return rawPeriodExpenses.filter(e => !e.isIgnored);
-  }, [rawPeriodExpenses, showIgnored]);
+  const periodExpenses = showIgnored
+    ? rawPeriodExpenses
+    : rawPeriodExpenses.filter(expense => !expense.isIgnored);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

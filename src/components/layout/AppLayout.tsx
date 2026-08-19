@@ -13,6 +13,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
+  const dashboardPath = location.pathname === '/dashboard-2' ? '/dashboard-2' : '/';
   const navRef = useRef<HTMLElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 });
   
@@ -132,7 +133,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             />
 
             <NavLink
-              to="/"
+              to={dashboardPath}
               end
               className="relative z-10 px-5 py-2 rounded-full transition-all duration-300 hover:text-slate-800 dark:hover:text-slate-200"
               activeClassName="text-brand-700 dark:text-brand-400 font-bold"
@@ -232,7 +233,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="fixed bottom-6 left-4 right-4 md:hidden z-50">
         <div className="liquid-glass liquid-glass-bevel rounded-full py-2.5 px-6 shadow-xl flex items-center justify-around max-w-md mx-auto">
           <NavLink
-            to="/"
+            to={dashboardPath}
             end
             className="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 transition-all hover:text-brand-500"
             activeClassName="text-brand-500 dark:text-brand-400 font-semibold"

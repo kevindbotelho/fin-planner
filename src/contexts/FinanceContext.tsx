@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ParsedCsvRow, ExtendedReconciledCsvRow, reconcileExpenses, mapBankCategoryToSystem } from '@/utils/csvImport';
+import { buildClassificationSuggestions } from '@/features/classification';
 
 // Helper to sort expenses (matches logic in Expenses.tsx)
 const sortExpenses = (expenses: Expense[]) => {
@@ -810,6 +811,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           display_order: startingIndex + idx,
           original_title: expense.originalTitle || null,
           bank_origin: expense.bankOrigin || null,
+          is_reserve: expense.isReserve || false,
+          is_fulfilled: expense.isReserve ? expense.isFulfilled || false : false,
+          fulfilled_at: expense.isReserve ? expense.fulfilledAt || null : null,
           is_ignored: expense.isIgnored || false,
         });
       });
@@ -828,6 +832,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         display_order: 0,
         original_title: expense.originalTitle || null,
         bank_origin: expense.bankOrigin || null,
+        is_reserve: expense.isReserve || false,
+        is_fulfilled: expense.isReserve ? expense.isFulfilled || false : false,
+        fulfilled_at: expense.isReserve ? expense.fulfilledAt || null : null,
         is_ignored: expense.isIgnored || false,
       });
     });
@@ -1662,13 +1669,23 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const extended = reconciled.map(r => {
       let categoryId = r.categoryId;
       let subcategoryId = r.subcategoryId;
+      const classification = buildClassificationSuggestions({
+        transaction: {
+          title: r.title,
+          bankOrigin: r.bankOrigin,
+          bankCategory: r.bankCategory,
+        },
+        history: data.expenses,
+        categories: data.categories,
+      }).primary;
 
-      if (!categoryId && r.bankCategory) {
+      if (!categoryId && classification) {
+        categoryId = classification.categoryId;
+        subcategoryId = classification.subcategoryId;
+      } else if (!categoryId && r.bankCategory) {
         const mapped = mapBankCategoryToSystem(r.bankCategory, r.title, data.categories);
-        if (mapped) {
-          categoryId = mapped.categoryId;
-          subcategoryId = mapped.subcategoryId;
-        }
+        categoryId = mapped?.categoryId;
+        subcategoryId = mapped?.subcategoryId;
       }
 
       return {
@@ -1677,6 +1694,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         subcategoryId,
         actionType: 'new' as const,
         expenseType: 'variable' as const,
+        classificationConfidence: classification?.confidence,
+        classificationSource: classification?.source,
+        classificationExplanation: classification?.explanation,
+        classificationReviewRequired: classification?.reviewRequired,
       };
     });
     setCsvReconciledData(extended);

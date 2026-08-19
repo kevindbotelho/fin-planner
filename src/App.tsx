@@ -12,6 +12,10 @@ import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+import { DashboardV2ErrorBoundary } from "@/components/DashboardV2ErrorBoundary";
+
+const DashboardV2 = lazy(() => import("./pages/DashboardV2"));
 
 const queryClient = new QueryClient();
 
@@ -53,6 +57,20 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <Expenses />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard-2"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <DashboardV2ErrorBoundary>
+                <Suspense fallback={<div className="animate-pulse py-16 text-center text-sm text-muted-foreground">Preparando Dashboard 2.0...</div>}>
+                  <DashboardV2 />
+                </Suspense>
+              </DashboardV2ErrorBoundary>
             </AppLayout>
           </ProtectedRoute>
         }

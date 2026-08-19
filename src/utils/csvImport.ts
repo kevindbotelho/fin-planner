@@ -25,6 +25,10 @@ export interface ExtendedReconciledCsvRow extends ReconciledCsvRow {
     linkedExpenseId?: string;
     linkedTemplateId?: string;
     isMatchedPair?: boolean;
+    classificationConfidence?: 'high' | 'medium' | 'low';
+    classificationSource?: 'exact_history' | 'bank_taxonomy' | 'fuzzy_history';
+    classificationExplanation?: string;
+    classificationReviewRequired?: boolean;
 }
 
 /**

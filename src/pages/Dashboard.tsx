@@ -8,6 +8,9 @@ import { DashboardExpenseTable } from '@/components/dashboard/DashboardExpenseTa
 import { FinancialGoalsWidget } from '@/components/dashboard/FinancialGoalsWidget';
 import { BankSummaryWidget } from '@/components/dashboard/BankSummaryWidget';
 import { ReservesWidget } from '@/components/dashboard/ReservesWidget';
+import { Button } from '@/components/ui/button';
+import { ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
   const { data, getExpensesForPeriod, getIncomeForPeriod, selectedPeriodId, setSelectedPeriodId } = useFinance();
@@ -48,11 +51,19 @@ export default function Dashboard() {
           <h1 className="text-xl font-bold font-manrope tracking-tight text-slate-800 dark:text-slate-100">Dashboard</h1>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Visão geral das suas finanças</p>
         </div>
-        <BillingPeriodSelector
-          periods={data.billingPeriods}
-          selectedPeriodId={selectedPeriodId}
-          onSelect={setSelectedPeriodId}
-        />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Button asChild variant="outline" className="h-[42px] rounded-xl border-brand-500/30 text-xs font-semibold text-brand-700 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-500/10">
+            <Link to="/dashboard-2">
+              Experimentar Dashboard 2.0
+              <ArrowUpRight className="ml-1.5 h-4 w-4" aria-hidden="true" />
+            </Link>
+          </Button>
+          <BillingPeriodSelector
+            periods={data.billingPeriods}
+            selectedPeriodId={selectedPeriodId}
+            onSelect={setSelectedPeriodId}
+          />
+        </div>
       </div>
 
       {data.billingPeriods.length === 0 ? (

@@ -19,6 +19,18 @@ interface CsvImportPreviewProps {
     onClose: () => void;
 }
 
+const classificationLabels = {
+    exact_history: 'Histórico exato',
+    bank_taxonomy: 'Categoria do banco',
+    fuzzy_history: 'Histórico semelhante',
+} as const;
+
+const confidenceLabels = {
+    high: 'alta',
+    medium: 'média',
+    low: 'baixa',
+} as const;
+
 export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
     const { 
         data: financeData, 
@@ -40,7 +52,15 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
     const handleCategoryChange = (index: number, categoryId: string) => {
         setReconciledData(prev => {
             const newData = [...prev];
-            newData[index] = { ...newData[index], categoryId, subcategoryId: undefined };
+            newData[index] = {
+                ...newData[index],
+                categoryId,
+                subcategoryId: undefined,
+                classificationConfidence: undefined,
+                classificationSource: undefined,
+                classificationExplanation: undefined,
+                classificationReviewRequired: undefined,
+            };
             return newData;
         });
     };
@@ -339,22 +359,40 @@ export function CsvImportPreview({ isOpen, onClose }: CsvImportPreviewProps) {
                                                         </td>
                                                         <td className="p-4 align-middle">
                                                             {!isIgnored && !isDuplicate && row.actionType === 'new' && (
-                                                                <Select
-                                                                    value={row.categoryId || ""}
-                                                                    onValueChange={(val) => handleCategoryChange(index, val)}
-                                                                >
-                                                                    <SelectTrigger className={cn(
-                                                                      "h-8 w-full bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-850 transition-colors shadow-sm",
-                                                                      !row.categoryId ? 'border-rose-500 ring-rose-500 dark:border-rose-500' : 'border-slate-200 dark:border-slate-800'
-                                                                    )}>
-                                                                        <SelectValue placeholder="Categoria..." />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl backdrop-blur-md shadow-lg">
-                                                                        {financeData.categories.map(cat => (
-                                                                            <SelectItem key={cat.id} value={cat.id} className="focus:bg-slate-100/50 dark:focus:bg-slate-900/50 rounded-lg text-xs font-medium">{cat.name}</SelectItem>
-                                                                        ))}
-                                                                    </SelectContent>
-                                                                </Select>
+                                                                <div className="space-y-1.5">
+                                                                    <Select
+                                                                        value={row.categoryId || ""}
+                                                                        onValueChange={(val) => handleCategoryChange(index, val)}
+                                                                    >
+                                                                        <SelectTrigger className={cn(
+                                                                          "h-8 w-full bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-850 transition-colors shadow-sm",
+                                                                          !row.categoryId ? 'border-rose-500 ring-rose-500 dark:border-rose-500' : 'border-slate-200 dark:border-slate-800'
+                                                                        )}>
+                                                                            <SelectValue placeholder="Categoria..." />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent className="liquid-glass border-slate-200 dark:border-slate-800/80 rounded-xl backdrop-blur-md shadow-lg">
+                                                                            {financeData.categories.map(cat => (
+                                                                                <SelectItem key={cat.id} value={cat.id} className="focus:bg-slate-100/50 dark:focus:bg-slate-900/50 rounded-lg text-xs font-medium">{cat.name}</SelectItem>
+                                                                            ))}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    {row.classificationConfidence && row.classificationSource && (
+                                                                        <TooltipProvider delayDuration={200}>
+                                                                            <Tooltip>
+                                                                                <TooltipTrigger asChild>
+                                                                                    <Badge variant="outline" className="cursor-help border-brand-500/25 bg-brand-500/[0.06] text-[9px] font-semibold text-brand-700 dark:text-brand-400">
+                                                                                        Sugestão · confiança {confidenceLabels[row.classificationConfidence]}
+                                                                                    </Badge>
+                                                                                </TooltipTrigger>
+                                                                                <TooltipContent className="max-w-72 text-xs">
+                                                                                    <p className="font-semibold">{classificationLabels[row.classificationSource]}</p>
+                                                                                    <p className="mt-1 text-muted-foreground">{row.classificationExplanation}</p>
+                                                                                    <p className="mt-1">Revise a categoria antes de importar.</p>
+                                                                                </TooltipContent>
+                                                                            </Tooltip>
+                                                                        </TooltipProvider>
+                                                                    )}
+                                                                </div>
                                                             )}
                                                             {!isIgnored && !isDuplicate && row.actionType === 'link' && (
                                                                 <Select
